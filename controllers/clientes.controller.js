@@ -433,3 +433,90 @@ exports.listarContribuyentes = async (req, res) => {
     });
   }
 };
+
+// Reemplaza la implementación existente de exports.buscarPorDni por esta versión
+exports.buscarPorDni = async (req, res) => {
+  try {
+    const rawDni = String(req.body?.dni || '').trim();
+    const dniValido = /^\d{7,10}$/.test(rawDni);
+
+    if (!dniValido) {
+      return res.render('index', {
+        title: 'Portal de Pagos',
+        dni: rawDni,
+        cliente: null,
+        deudas: [],
+        totalGeneral: 0,
+        clienteNoEncontrado: false,
+        mensaje: 'El DNI debe tener entre 7 y 10 números.'
+      });
+    }
+
+    const cliente = await Cliente.findOne({
+      where: { DOCUMENTO: rawDni },
+      attributes: ['Codigo', 'Nombre', 'Apellido']
+    });
+
+    if (!cliente) {
+      return res.render('index', {
+        title: 'Portal de Pagos',
+        dni: rawDni,
+        cliente: null,
+        deudas: [],
+        totalGeneral: 0,
+        clienteNoEncontrado: true,
+        mensaje: null
+      });
+    }
+
+    const codigoCliente = cliente.Codigo.trim();
+    const deudasRaw = await ClientesCtaCte.findAll({
+      where: {
+        Codigo: codigoCliente,
+        Saldo: { [Op.ne]: 0 }
+      },
+      order: [['Fecha', 'DESC']],
+      raw: true
+    });
+
+    const deudas = deudasRaw.map(d => {
+      const importe = Number(d.Importe) || 0;
+      const descuento = Number((importe * 0.01).toFixed(2));
+      const total = Number((importe - descuento).toFixed(2));
+      const fecha = d.Fecha ? new Date(d.Fecha).toISOString().split('T')[0] : '';
+
+      return {
+        Fecha: fecha,
+        Detalle: d.Detalle || '',
+        Cuota: d.NRO_CUOTA && d.ANO_CUOTA ? `${d.NRO_CUOTA}/${d.ANO_CUOTA}` : '',
+        Importe: importe,
+        Descuento: descuento,
+        Total: total
+      };
+    });
+
+    const totalGeneral = deudas.reduce((acc, item) => acc + item.Total, 0);
+
+    return res.render('index', {
+      title: 'Portal de Pagos',
+      dni: rawDni,
+      cliente,
+      deudas,
+      totalGeneral,
+      clienteNoEncontrado: false,
+      mensaje: null
+    });
+
+  } catch (error) {
+    console.error('Error en buscarPorDni:', error);
+    return res.render('index', {
+      title: 'Portal de Pagos',
+      dni: req.body?.dni,
+      cliente: null,
+      deudas: [],
+      totalGeneral: 0,
+      clienteNoEncontrado: false,
+      mensaje: 'Error interno al buscar los datos.'
+    });
+  }
+};
