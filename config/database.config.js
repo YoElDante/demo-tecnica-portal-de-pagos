@@ -17,6 +17,12 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
+const required = ['DB_HOST', 'DB_NAME', 'DB_USER', 'DB_PASS', 'DB_DIALECT'];
+const missing = required.filter(k => !process.env[k]);
+if (missing.length) {
+  throw new Error(`Faltan variables de entorno: ${missing.join(', ')}`);
+}
+
 const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASS, {
   host: process.env.DB_HOST,
   port: process.env.DB_PORT || 1433,
