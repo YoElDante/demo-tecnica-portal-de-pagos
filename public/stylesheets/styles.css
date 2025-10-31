@@ -63,7 +63,7 @@ input[type="text"] {
     font-size: 1rem;
 }
 
-/* ✅ Estilos para campo cuando no se encuentra el cliente */
+/* Estilos para campo cuando no se encuentra el cliente */
 input[type="text"].cliente-no-encontrado {
     background-color: #d4d4d4;
     color: darkred;
@@ -132,6 +132,11 @@ td[colspan="7"] {
     font-size: 1rem;
     cursor: pointer;
     transition: background-color 0.3s ease;
+}
+
+.btn.buscar {
+    background-color: #19a8b6;
+    color: white;
 }
 
 .btn.qr {
