@@ -5,6 +5,13 @@ Descripción
 Portal de Pago Municipal (demo) — complemento del programa principal **Alcald+IA**. Permite que contribuyentes consulten deudas y generen datos para pago. Proyecto de ejemplo construido con Express + Sequelize y conexión a Azure SQL.
 
 Repositorio: https://github.com/YoElDante/demo-tecnica-portal-de-pagos
+Deploy en Render: https://demo-tecnica-portal-de-pagos.onrender.com
+
+Algunos DNI para probar el servicio:
+17081206
+29717814
+10901809
+23765820
 
 Características
 ---------
