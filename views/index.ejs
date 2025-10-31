@@ -29,11 +29,14 @@
 
       <form action="/buscar" method="POST">
         <div class="form-group">
-          <label for="dni">DNI</label>
+          <label for="dni">DNI (7-10 dígitos)</label>
           <div style="display: flex; gap: 8px;">
-            <input type="text" id="dni" name="dni" placeholder="Ingrese su número de DNI" value="<%= typeof dni !== 'undefined' ? dni : '' %>" required>
+            <input type="text" id="dni" name="dni" pattern="\d{7,10}" minlength="7" maxlength="10" title="El DNI debe tener entre 7 y 10 números" placeholder="Ingrese su número de DNI" value="<%= typeof dni !== 'undefined' ? dni : '' %>" required oninput="this.value = this.value.replace(/[^0-9]/g, '')">
             <button type="submit" class="btn buscar">Buscar</button>
           </div>
+          <% if (typeof mensaje !== 'undefined' && mensaje) { %>
+          <span class="error-message"><%= mensaje %></span>
+          <% } %>
         </div>
 
         <div class="form-group">
