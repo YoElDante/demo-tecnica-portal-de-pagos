@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/stylesheets/styles.css">
+  <title><%-title%></title>
+</head>
+
+<body>
+  <header>
+    <div class="logo">
+      <img src="/images/TINOCO.png" alt="Icono Header">
+    </div>
+    <div class="titulo-header">
+      <h2>Municipalidad Distrital de Tinoco</h2>
+    </div>
+    <div class="header-icon">
+      <img src="/images/alcaldia logo cuadrado.jpg" alt="Logo Alcald+IA">
+    </div>
+  </header>
+
+  <main>
+    <section class="form-section">
+      <h1>Sistema de Pago Online</h1>
+      <br>
+      <h2>Datos del Contribuyente</h2>
+
+      <form action="/buscar" method="POST">
+        <div class="form-group">
+          <label for="dni">DNI</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="dni" name="dni" placeholder="Ingrese su número de DNI" value="<%= typeof dni !== 'undefined' ? dni : '' %>" required>
+            <button type="submit" class="btn buscar">Buscar</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="nombre">Nombre Completo</label>
+          <input type="text" id="nombre" name="nombre" value="<%= clienteNoEncontrado ? 'Contribuyente no encontrado' : (cliente ? (cliente.Nombre + ' ' + cliente.Apellido) : '') %>" placeholder="Nombre del contribuyente" class="<%= clienteNoEncontrado ? 'cliente-no-encontrado' : '' %>" readonly>
+        </div>
+      </form>
+    </section>
+
+    <% if (deudas && deudas.length > 0) { %>
+    <section class="tabla-section">
+      <h2>Detalle de Boletas</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Detalle</th>
+            <th>Cuota</th>
+            <th>Importe</th>
+            <th>Descuento</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% deudas.forEach(deuda => { %>
+          <tr>
+            <td><%= deuda.Fecha %></td>
+            <td><%= deuda.Detalle %></td>
+            <td><%= deuda.Cuota %></td>
+            <td>$ <%= deuda.Importe.toFixed(2) %></td>
+            <td>$ <%= deuda.Descuento.toFixed(2) %></td>
+            <td>$ <%= deuda.Total.toFixed(2) %></td>
+          </tr>
+          <% }) %>
+        </tbody>
+        <tfoot>
+          <tr class="total-row">
+            <td colspan="5" style="text-align: right;"><strong>Total a Pagar:</strong></td>
+            <td><strong>$ <%= totalGeneral ? totalGeneral.toFixed(2) : '0.00' %></strong></td>
+          </tr>
+        </tfoot>
+
+      </table>
+    </section>
+    <% } %>
+
+    <section class="botones">
+      <button class="btn qr">Generar QR</button>
+      <button class="btn pagar">Ir a Pagar</button>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; Power by Alcald+IA. Todos los derechos reservados.</p>
+  </footer>
+
+</body>
+
+</html>
