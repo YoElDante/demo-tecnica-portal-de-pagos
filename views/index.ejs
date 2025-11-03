@@ -4,7 +4,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="icon" type="image/svg" href="/images/favicon.svg">
+
   <link rel="stylesheet" href="/stylesheets/styles.css">
+  <script src="/javascripts/deudas.js" defer></script>
   <title><%-title%></title>
 </head>
 
@@ -49,9 +53,11 @@
     <% if (deudas && deudas.length > 0) { %>
     <section class="tabla-section">
       <h2>Detalle de Boletas</h2>
+      <p style="margin: 10px 0; color: #555; font-weight: 500;">Seleccione los conceptos a abonar:</p>
       <table>
         <thead>
           <tr>
+            <th style="width: 50px;">Elija</th>
             <th>Fecha</th>
             <th>Detalle</th>
             <th>Cuota</th>
@@ -61,8 +67,11 @@
           </tr>
         </thead>
         <tbody>
-          <% deudas.forEach(deuda => { %>
+          <% deudas.forEach((deuda, index) => { %>
           <tr>
+            <td style="text-align: center;">
+              <input type="checkbox" class="checkbox-deuda" data-total="<%= deuda.Total %>" checked>
+            </td>
             <td><%= deuda.Fecha %></td>
             <td><%= deuda.Detalle %></td>
             <td><%= deuda.Cuota %></td>
@@ -74,11 +83,10 @@
         </tbody>
         <tfoot>
           <tr class="total-row">
-            <td colspan="5" style="text-align: right;"><strong>Total a Pagar:</strong></td>
-            <td><strong>$ <%= totalGeneral ? totalGeneral.toFixed(2) : '0.00' %></strong></td>
+            <td colspan="6" style="text-align: right;"><strong>Total a Pagar:</strong></td>
+            <td><strong id="total-final">$ <%= totalGeneral ? totalGeneral.toFixed(2) : '0.00' %></strong></td>
           </tr>
         </tfoot>
-
       </table>
     </section>
     <% } %>

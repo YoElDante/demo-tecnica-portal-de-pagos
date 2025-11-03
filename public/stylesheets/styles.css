@@ -118,6 +118,47 @@ td[colspan="7"] {
     padding-right: 2.5rem;
 }
 
+/* Estilos para checkboxes de selección de deudas */
+.checkbox-deuda {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #19a8b6;
+}
+
+.checkbox-deuda:hover {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+/* Mejorar visibilidad de la fila de total */
+.total-row {
+    font-weight: bold;
+    background-color: #e0f7fa;
+    border-top: 2px solid #19a8b6;
+}
+
+.total-row td {
+    padding: 1rem 0.75rem;
+}
+
+/* Ancho fijo para la columna de Total para evitar saltos visuales */
+table th:last-child,
+table td:last-child {
+    width: 120px;
+    min-width: 120px;
+    max-width: 120px;
+    text-align: center;
+}
+
+/* Ajustar tamaño de fuente si el número es muy grande */
+#total-final {
+    display: inline-block;
+    width: 100%;
+    font-size: clamp(0.9rem, 1vw, 1rem);
+    white-space: nowrap;
+}
+
 .botones {
     display: flex;
     justify-content: flex-end;
