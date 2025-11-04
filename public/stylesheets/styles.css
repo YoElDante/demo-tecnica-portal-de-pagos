@@ -1,45 +1,90 @@
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #ffffff;
-    margin: 0;
-    padding: 0;
-    color: #005e75;
+/**
+ * Estilos del Portal de Pagos Municipal
+ * @author Dante Marcos Delprato
+ * @version 2.0
+ * @date 2025-11-04
+ */
+
+/* ============================================
+   VARIABLES DE COLORES
+   ============================================ */
+:root {
+    /* Colores principales */
+    --color-primary: #19a8b6;
+    --color-primary-dark: #005e75;
+    --color-white: #ffffff;
+    --color-background: #f9f9f9;
+    --color-border: #ddd;
+
+    /* Colores de estado */
+    --color-success: #28a745;
+    --color-error: #dc3545;
+    --color-text-dark: #333;
+    --color-text-muted: #555;
+    --color-text-light: #999;
+
+    /* Colores de tabla */
+    --color-table-header: #19a8b6;
+    --color-table-footer: #e0f7fa;
+    --color-table-row-alt: #f0f0f0;
+
+    /* Colores de cliente no encontrado */
+    --color-not-found-bg: #d4d4d4;
+    --color-not-found-text: darkred;
 }
 
+/* ============================================
+   ESTILOS GENERALES
+   ============================================ */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--color-white);
+    margin: 0;
+    padding: 0;
+    color: var(--color-primary-dark);
+}
+
+h1,
+h2 {
+    color: var(--color-primary-dark);
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
 header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 1rem 2rem;
-    background-color: #19a8b6;
+    background-color: var(--color-primary);
 }
 
 header img {
     height: 60px;
 }
 
-main {
-    padding: 2rem;
-}
-
-h1,
-h2 {
-    color: #005e75;
-}
-
 .titulo-header {
     font-size: clamp(0.75rem, 2.5vw + 0.25rem, 2rem);
     flex: 1 1 auto;
     min-width: 160px;
-
     text-align: center;
     padding: clamp(0.5rem, 2vw, 2rem);
     box-sizing: border-box;
-
 }
 
+/* ============================================
+   MAIN CONTENT
+   ============================================ */
+main {
+    padding: 2rem;
+}
+
+/* ============================================
+   SECCIÓN DE FORMULARIO
+   ============================================ */
 .form-section {
-    background-color: #f9f9f9;
+    background-color: var(--color-background);
     padding: 1.5rem;
     border-radius: 12px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
@@ -58,20 +103,43 @@ label {
 input[type="text"] {
     width: 95%;
     padding: 0.6rem;
-    border: 1px solid #19a8b6;
+    border: 1px solid var(--color-primary);
     border-radius: 8px;
     font-size: 1rem;
 }
 
-/* Estilos para campo cuando no se encuentra el cliente */
 input[type="text"].cliente-no-encontrado {
-    background-color: #d4d4d4;
-    color: darkred;
+    background-color: var(--color-not-found-bg);
+    color: var(--color-not-found-text);
     font-weight: 500;
 }
 
+.error-message {
+    color: var(--color-error);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+/* ============================================
+   SECCIÓN DE TABLA
+   ============================================ */
 .tabla-section {
     margin-top: 2rem;
+}
+
+.tabla-wrapper {
+    position: relative;
+    width: 100%;
+    max-height: 60vh;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 8px;
+}
+
+.tabla-wrapper table {
+    min-width: 100%;
+    margin-top: 0;
 }
 
 table {
@@ -84,65 +152,31 @@ th,
 td {
     padding: 0.75rem;
     text-align: center;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid var(--color-border);
 }
 
 th {
-    background-color: #19a8b6;
-    color: #ffffff;
+    background-color: var(--color-table-header);
+    color: var(--color-white);
 }
 
-.placeholder {
-    text-align: center;
-    color: #999;
+/* Header fijo en scroll */
+.tabla-wrapper thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: var(--color-table-header);
 }
 
-.error-message {
-    color: #dc3545;
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
-    display: block;
+/* Footer fijo en scroll */
+.tabla-wrapper tfoot {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    background-color: var(--color-table-footer);
 }
 
-.form-group {
-    margin-bottom: 1rem;
-}
-
-.total-row {
-    font-weight: bold;
-    background-color: #e0f7fa;
-}
-
-td[colspan="7"] {
-    text-align: right;
-    padding-right: 2.5rem;
-}
-
-/* Estilos para checkboxes de selección de deudas */
-.checkbox-deuda {
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-    accent-color: #19a8b6;
-}
-
-.checkbox-deuda:hover {
-    transform: scale(1.1);
-    transition: transform 0.2s ease;
-}
-
-/* Mejorar visibilidad de la fila de total */
-.total-row {
-    font-weight: bold;
-    background-color: #e0f7fa;
-    border-top: 2px solid #19a8b6;
-}
-
-.total-row td {
-    padding: 1rem 0.75rem;
-}
-
-/* Ancho fijo para la columna de Total para evitar saltos visuales */
+/* Ancho fijo para columna Total */
 table th:last-child,
 table td:last-child {
     width: 120px;
@@ -151,7 +185,6 @@ table td:last-child {
     text-align: center;
 }
 
-/* Ajustar tamaño de fuente si el número es muy grande */
 #total-final {
     display: inline-block;
     width: 100%;
@@ -159,6 +192,68 @@ table td:last-child {
     white-space: nowrap;
 }
 
+/* ============================================
+   CHECKBOXES
+   ============================================ */
+.checkbox-deuda,
+#checkbox-todos {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--color-primary);
+}
+
+.checkbox-deuda:hover {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+/* ============================================
+   FILAS ESPECIALES DE LA TABLA
+   ============================================ */
+.seleccionar-todos-row {
+    background-color: var(--color-table-row-alt);
+    border-bottom: 2px solid var(--color-primary);
+}
+
+.seleccionar-todos-row td,
+.seleccionar-todos-row th {
+    padding: 0.75rem;
+    background-color: var(--color-table-row-alt);
+}
+
+.seleccionar-todos-row label {
+    font-weight: 500;
+    color: var(--color-primary-dark);
+    margin: 0;
+}
+
+.total-row {
+    font-weight: bold;
+    background-color: var(--color-table-footer);
+    border-top: 2px solid var(--color-primary);
+}
+
+.total-row td {
+    padding: 1rem 0.75rem;
+}
+
+/* ============================================
+   DESCUENTOS E INTERESES
+   ============================================ */
+.descuento-positivo {
+    color: var(--color-success);
+    font-weight: 500;
+}
+
+.interes-negativo {
+    color: var(--color-text-dark);
+    font-weight: 500;
+}
+
+/* ============================================
+   BOTONES
+   ============================================ */
 .botones {
     display: flex;
     justify-content: flex-end;
@@ -176,29 +271,56 @@ table td:last-child {
 }
 
 .btn.buscar {
-    background-color: #19a8b6;
-    color: white;
+    background-color: var(--color-primary);
+    color: var(--color-white);
 }
 
 .btn.qr {
-    background-color: #005e75;
-    color: white;
+    background-color: var(--color-primary-dark);
+    color: var(--color-white);
 }
 
 .btn.pagar {
-    background-color: #19a8b6;
-    color: white;
+    background-color: var(--color-primary);
+    color: var(--color-white);
 }
 
 .btn:hover {
     opacity: 0.9;
 }
 
+/* ============================================
+   FOOTER
+   ============================================ */
 footer {
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 1rem 2rem;
-    color: white;
-    background-color: #19a8b6;
+    color: var(--color-white);
+    background-color: var(--color-primary);
+}
+
+/* ============================================
+   RESPONSIVE - MOBILE
+   ============================================ */
+@media screen and (max-width: 768px) {
+    main {
+        padding: 1rem;
+    }
+
+    header {
+        padding: 0.75rem 1rem;
+    }
+
+    th,
+    td {
+        padding: 0.5rem 0.3rem;
+        font-size: 0.85rem;
+    }
+
+    .btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+    }
 }
