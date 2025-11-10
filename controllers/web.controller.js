@@ -1,0 +1,95 @@
+/**
+ * Web Controller
+ * Controlador para renderizar vistas EJS (interfaz web)
+ * Solo maneja renderizado, la lógica está en services
+ * 
+ * @author Dante Marcos Delprato
+ * @version 1.0
+ * @date 2025-11-08
+ */
+
+const ClientesService = require('../services/clientes.service');
+const DeudasService = require('../services/deudas.service');
+
+/**
+ * Renderiza la página principal
+ * GET /
+ */
+exports.renderIndex = (req, res) => {
+  res.render('index', {
+    title: 'Portal de Pagos',
+    cliente: null,
+    deudas: [],
+    totalGeneral: 0,
+    clienteNoEncontrado: false,
+    dni: '',
+    mensaje: null
+  });
+};
+
+/**
+ * Busca cliente por DNI y muestra sus deudas
+ * POST /buscar
+ */
+exports.buscarPorDni = async (req, res) => {
+  try {
+    const dni = String(req.body?.dni || '').trim();
+
+    // Validar DNI
+    if (!ClientesService.validarDni(dni)) {
+      return res.render('index', {
+        title: 'Portal de Pagos',
+        dni,
+        cliente: null,
+        deudas: [],
+        totalGeneral: 0,
+        clienteNoEncontrado: false,
+        mensaje: 'El DNI debe tener entre 7 y 10 números.'
+      });
+    }
+
+    // Buscar cliente
+    const cliente = await ClientesService.buscarPorDni(dni);
+
+    if (!cliente) {
+      return res.render('index', {
+        title: 'Portal de Pagos',
+        dni,
+        cliente: null,
+        deudas: [],
+        totalGeneral: 0,
+        clienteNoEncontrado: true,
+        mensaje: null
+      });
+    }
+
+    // Obtener deudas del cliente
+    const deudas = await DeudasService.obtenerDeudasPorCodigo(cliente.Codigo);
+
+    // Calcular total
+    const totalGeneral = DeudasService.calcularTotal(deudas);
+
+    // Renderizar con datos
+    return res.render('index', {
+      title: 'Portal de Pagos',
+      dni,
+      cliente,
+      deudas,
+      totalGeneral,
+      clienteNoEncontrado: false,
+      mensaje: null
+    });
+
+  } catch (error) {
+    console.error('Error en buscarPorDni (web):', error);
+    return res.render('index', {
+      title: 'Portal de Pagos',
+      dni: req.body?.dni || '',
+      cliente: null,
+      deudas: [],
+      totalGeneral: 0,
+      clienteNoEncontrado: false,
+      mensaje: 'Error interno al buscar los datos.'
+    });
+  }
+};
