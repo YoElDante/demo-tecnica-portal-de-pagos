@@ -1,19 +1,20 @@
+/**
+ * Rutas Web (Views)
+ * Rutas que renderizan vistas EJS
+ * 
+ * @author Dante Marcos Delprato
+ * @version 2.0
+ * @date 2025-11-08
+ */
+
 const express = require('express');
 const router = express.Router();
-const clienteController = require('../controllers/clientes.controller');
+const webController = require('../controllers/web.controller');
 
-router.get('/', (req, res) => {
-  res.render('index', {
-    title: 'Portal de Pagos',
-    cliente: null,
-    deudas: [],
-    totalGeneral: 0,
-    clienteNoEncontrado: false,
-    dni: '',
-    mensaje: null
-  });
-});
+// Página principal
+router.get('/', webController.renderIndex);
 
-router.post('/buscar', clienteController.buscarPorDni);
+// Búsqueda de cliente por DNI
+router.post('/buscar', webController.buscarPorDni);
 
 module.exports = router;
