@@ -1,40 +1,26 @@
 /**
- * Configuración de la conexión a la base de datos Azure SQL usando Sequelize.
- *
- * Utiliza variables de entorno para la configuración sensible.
- * Requiere las siguientes variables en el archivo .env:
- * - DB_HOST: Host de la base de datos
- * - DB_NAME: Nombre de la base de datos
- * - DB_USER: Usuario de la base de datos
- * - DB_PASS: Contraseña de la base de datos
- * - DB_DIALECT: Dialecto de la base de datos (ej. 'mssql')
+ * Configuración de la conexión a la base de datos Azure SQL - San José de las Salinas
  * 
  * @author Dante Marcos Delprato
  * @version 1.0
- * @date 2025-09-20
+ * @date 2025-11-11
  */
 
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
-const required = ['DB_HOST', 'DB_NAME', 'DB_USER', 'DB_PASS', 'DB_DIALECT'];
-const missing = required.filter(k => !process.env[k]);
-if (missing.length) {
-  throw new Error(`Faltan variables de entorno: ${missing.join(', ')}`);
-}
-
-const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASS, {
-  host: process.env.DB_HOST,
+const sequelize = new Sequelize('s586W5bxyqU7VDu', process.env.DB_USER, process.env.DB_PASS, {
+  host: 'alcaldiasmlqdsprueba.database.windows.net',
   port: process.env.DB_PORT || 1433,
   dialect: process.env.DB_DIALECT || 'mssql',
   dialectOptions: {
     options: {
-      encrypt: true, // obligatorio para Azure
-      trustServerCertificate: false, // true si no se usa SSL
-      hostNameInCertificate: '*.database.windows.net' // verificar si con esto funciona bien
+      encrypt: true,
+      trustServerCertificate: false,
+      hostNameInCertificate: '*.database.windows.net'
     }
   },
-  logging: true // opcional, false para no mostrar logs de SQL
+  logging: false // Desactivar logs para presentación
 });
 
 module.exports = sequelize;

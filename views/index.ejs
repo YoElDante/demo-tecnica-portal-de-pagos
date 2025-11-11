@@ -16,10 +16,10 @@
        ============================================ -->
   <header>
     <div class="logo">
-      <img src="/images/TINOCO.png" alt="Icono Header">
+      <img src="/images/sanjosedelassalinas.webp" alt="Icono Header">
     </div>
     <div class="titulo-header">
-      <h2>Municipalidad de Tinoco</h2>
+      <h2>Municipalidad de<br>San José de las Salinas</h2>
     </div>
     <div class="header-icon">
       <img src="/images/alcaldia logo cuadrado.jpg" alt="Logo Alcald+IA">
@@ -114,12 +114,23 @@
     </section>
     <% } %>
 
+    <!-- Contenedor del código QR -->
+    <div class="qr-container">
+      <img class="imgqr" id="qr-image" src="/images/qr_mercado.webp" alt="QR Code" style="display:none;" />
+    </div>
     <!-- Botones de acción -->
     <section class="botones">
-      <button class="btn qr">Generar QR</button>
-      <button class="btn pagar">Ir a Pagar</button>
+      <button class="btn qr" id="generate-qr" onclick="mostrarQR()">Generar QR</button>
+      <button class="btn pagar" onclick="window.location.href='https://mercadopago.com.ar';">Ir a Pagar</button>
     </section>
   </main>
+
+  <script>
+    function mostrarQR() {
+      document.getElementById('qr-image').style.display = 'block';
+    }
+  </script>
+
 
   <!-- ============================================
        FOOTER

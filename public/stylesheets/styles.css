@@ -289,6 +289,22 @@ table td:last-child {
 }
 
 /* ============================================
+   QR
+   ============================================ */
+.qr-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 2rem;
+}
+
+.imgqr {
+
+    height: 50vh;
+    width: auto;
+}
+
+/* ============================================
    BOTONES
    ============================================ */
 .botones {
