@@ -13,6 +13,9 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+const { apiLimiter } = require('./middlewares/rateLimiter');
+const { requestLogger, responseLogger, errorLogger } = require('./middlewares/logger');
+
 
 // Importar rutas
 const indexRouter = require('./routes/index');
@@ -30,11 +33,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(requestLogger);
+app.use(responseLogger);
 
 // Rutas
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+
+// Rutas API con limitador de tasa
+app.use('/api', apiLimiter);
 app.use('/api', apiRouter);
+
+// Error logger
+app.use(errorLogger);
 
 // Importar error handlers al inicio del archivo
 const { notFoundHandler, errorHandler } = require('./middlewares/errorHandles');

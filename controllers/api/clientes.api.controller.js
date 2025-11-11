@@ -18,9 +18,8 @@ const { ERROR_CODES, ERROR_MESSAGES, HTTP_STATUS } = require('../../utils/consta
  */
 exports.listarClientes = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 50;
-    const offset = (page - 1) * limit;
+    // Usar datos preparados por el middleware de paginación
+    const { page, limit, offset } = req.pagination || { page: 1, limit: 50, offset: 0 };
 
     const resultado = await ClientesService.listarClientes(limit, offset);
 
@@ -32,7 +31,6 @@ exports.listarClientes = async (req, res) => {
       resultado.total,
       '/api/clientes'
     );
-
   } catch (err) {
     console.error('Error en listarClientes:', err);
     return error(
@@ -188,9 +186,7 @@ exports.obtenerClientePorDni = async (req, res) => {
  */
 exports.listarContribuyentes = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 50;
-    const offset = (page - 1) * limit;
+    const { page, limit, offset } = req.pagination || { page: 1, limit: 50, offset: 0 };
 
     const resultado = await ClientesService.listarContribuyentes(limit, offset);
 
@@ -202,7 +198,6 @@ exports.listarContribuyentes = async (req, res) => {
       resultado.total,
       '/api/clientes/contribuyentes'
     );
-
   } catch (err) {
     console.error('Error en listarContribuyentes:', err);
     return error(
