@@ -14,7 +14,7 @@ function actualizarTotal() {
 
   const totalElement = document.getElementById('total-final');
   if (totalElement) {
-    totalElement.textContent = '$ ' + total.toFixed(2);
+    totalElement.textContent = '$ ' + total.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
   // Actualizar estado del checkbox "Seleccionar Todo"

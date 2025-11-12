@@ -96,11 +96,11 @@
               <td><%= deuda.Detalle %></td>
               <td><%= deuda.Cuota %></td>
               <td><%= deuda.FechaVto ? new Date(deuda.FechaVto).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '-' %></td>
-              <td>$ <%= deuda.Importe.toFixed(2) %></td>
+              <td>$ <%= deuda.Importe.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
               <td class="<%= deuda.Interes >= 0 ? 'interes-negativo' : 'descuento-positivo' %>">
-                $ <%= Math.abs(deuda.Interes).toFixed(2) %>
+                $ <%= Math.abs(deuda.Interes).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
               </td>
-              <td>$ <%= deuda.Total.toFixed(2) %></td>
+              <td>$ <%= deuda.Total.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
             </tr>
             <% }) %>
           </tbody>
@@ -108,7 +108,7 @@
           <tfoot>
             <tr class="total-row">
               <td colspan="7" style="text-align: right;"><strong>Total a Pagar:</strong></td>
-              <td><strong id="total-final">$ <%= totalGeneral ? totalGeneral.toFixed(2) : '0.00' %></strong></td>
+              <td><strong id="total-final">$ <%= totalGeneral ? totalGeneral.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00' %></strong></td>
             </tr>
           </tfoot>
         </table>
