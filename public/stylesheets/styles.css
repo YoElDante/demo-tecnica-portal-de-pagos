@@ -190,11 +190,22 @@ td {
     padding: 0.75rem;
     text-align: center;
     border-bottom: 1px solid var(--color-border);
+    white-space: nowrap;
 }
 
 th {
     background-color: var(--color-table-header);
     color: var(--color-white);
+}
+
+/* Ancho mínimo para columnas de montos */
+table th:nth-child(6),
+table td:nth-child(6),
+table th:nth-child(7),
+table td:nth-child(7),
+table th:nth-child(8),
+table td:nth-child(8) {
+    min-width: 100px;
 }
 
 /* Header fijo en scroll */
