@@ -68,7 +68,7 @@
               <th style="text-align: center;">
                 <input type="checkbox" id="checkbox-todos" checked>
               </th>
-              <th colspan="7" style="text-align: left; padding-left: 1rem;">
+              <th colspan="6" style="text-align: left; padding-left: 1rem;">
                 <label for="checkbox-todos" style="cursor: pointer; user-select: none; font-weight: 500;">
                   Seleccionar/Deseleccionar Todo
                 </label>
@@ -79,7 +79,6 @@
               <th>Fecha</th>
               <th>Detalle</th>
               <th>Cuota</th>
-              <th>Fecha Vto</th>
               <th>Importe</th>
               <th>Desc/Int</th>
               <th>Total</th>
@@ -92,13 +91,12 @@
               <td style="text-align: center;">
                 <input type="checkbox" class="checkbox-deuda" data-total="<%= deuda.Total %>" checked>
               </td>
-              <td><%= deuda.Fecha ? new Date(deuda.Fecha).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '-' %></td>
+              <td><%= deuda.Fecha %></td>
               <td><%= deuda.Detalle %></td>
               <td><%= deuda.Cuota %></td>
-              <td><%= deuda.FechaVto ? new Date(deuda.FechaVto).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '-' %></td>
               <td>$ <%= deuda.Importe.toFixed(2) %></td>
-              <td class="<%= deuda.Interes >= 0 ? 'interes-negativo' : 'descuento-positivo' %>">
-                $ <%= Math.abs(deuda.Interes).toFixed(2) %>
+              <td class="<%= deuda.Descuento >= 0 ? 'descuento-positivo' : 'interes-negativo' %>">
+                $ <%= Math.abs(deuda.Descuento).toFixed(2) %>
               </td>
               <td>$ <%= deuda.Total.toFixed(2) %></td>
             </tr>
@@ -107,7 +105,7 @@
 
           <tfoot>
             <tr class="total-row">
-              <td colspan="7" style="text-align: right;"><strong>Total a Pagar:</strong></td>
+              <td colspan="6" style="text-align: right;"><strong>Total a Pagar:</strong></td>
               <td><strong id="total-final">$ <%= totalGeneral ? totalGeneral.toFixed(2) : '0.00' %></strong></td>
             </tr>
           </tfoot>
@@ -119,28 +117,17 @@
     <!-- Contenedor del código QR -->
     <div class="qr-container">
       <img class="imgqr" id="qr-image" src="/images/qr_mercado.webp" alt="QR Code" style="display:none;" />
-      <a id="pay-button" href="https://mercadopago.com.ar" style="display:none;" class="btn pagar">Ir a Pagar</a>
     </div>
-
     <!-- Botones de acción -->
     <section class="botones">
       <button class="btn qr" id="generate-qr" onclick="mostrarQR()">Generar QR</button>
+      <button class="btn pagar" onclick="window.location.href='https://mercadopago.com.ar';">Ir a Pagar</button>
     </section>
   </main>
 
   <script>
     function mostrarQR() {
-      const qrImage = document.getElementById('qr-image');
-      const payButton = document.getElementById('pay-button');
-      const generateButton = document.getElementById('generate-qr');
-      const botonesSection = document.querySelector('.botones');
-
-      // Mostrar imagen QR y botón de pagar
-      qrImage.style.display = 'block';
-      payButton.style.display = 'block';
-
-      // Ocultar botón de generar QR y toda la sección de botones
-      botonesSection.style.display = 'none';
+      document.getElementById('qr-image').style.display = 'block';
     }
   </script>
 

@@ -168,7 +168,7 @@ input[type="text"].cliente-no-encontrado {
 .tabla-wrapper {
     position: relative;
     width: 100%;
-    max-height: 60vh;
+    max-height: 80vh;
     overflow: auto;
     -webkit-overflow-scrolling: touch;
     border-radius: 8px;
@@ -299,9 +299,13 @@ table td:last-child {
 }
 
 .imgqr {
-
     height: 50vh;
     width: auto;
+    margin-bottom: 1.5rem;
+}
+
+.qr-container .btn.pagar {
+    text-decoration: none;
 }
 
 /* ============================================
