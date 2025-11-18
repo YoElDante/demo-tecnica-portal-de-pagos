@@ -180,10 +180,11 @@ exports.formatearDeuda = (deuda) => {
     Fecha: deuda.Fecha || '',
     FechaVto: deuda.FechaVto || '',
     Detalle: `${deuda.Detalle || ''} ${deuda.Dominio || ''}`.trim(),
-    Cuota: deuda.NRO_CUOTA && deuda.ANO_CUOTA ? `${deuda.NRO_CUOTA}/${deuda.ANO_CUOTA}` : '',
+    Cuota: deuda.NRO_CUOTA || '',
+    Anio: deuda.ANO_CUOTA || '',
     Importe: importe,
     DiasMora: diasMora,
-    Interes: interes, // Ahora es interés, no descuento
+    Interes: interes,
     Total: total
   };
 };

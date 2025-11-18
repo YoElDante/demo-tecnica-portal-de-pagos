@@ -56,12 +56,29 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 2rem;
+    padding: 0rem 2rem;
     background-color: var(--color-primary);
 }
 
 header img {
-    height: 60px;
+    height: clamp(80px, 18vh, 150px);
+    width: auto;
+    object-fit: contain;
+}
+
+/* Ajuste adicional para pantallas muy grandes */
+@media (min-width: 1200px) {
+    header img {
+        height: clamp(80px, 12vh, 180px);
+    }
+}
+
+/* Mobile (ya estaba correcto, se fuerza por claridad) */
+
+@media (max-width: 600px) {
+    header img {
+        height: clamp(60px, 8vh, 100px);
+    }
 }
 
 .titulo-header {
