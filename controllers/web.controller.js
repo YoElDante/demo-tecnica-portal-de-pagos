@@ -62,6 +62,7 @@ exports.buscarPorDni = async (req, res) => {
         title: 'Portal de Pagos',
         dni,
         cliente: null,
+        deudas: [],  // ← AGREGAR ESTA LÍNEA
         tiposDeuda: [],
         tipoDescripciones: DeudasService.TIPO_DESCRIPCIONES,
         tipoIconos: DeudasService.TIPO_ICONOS,

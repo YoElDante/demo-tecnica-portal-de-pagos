@@ -4,7 +4,7 @@
  * 
  * @author Dante Marcos Delprato
  * @version 1.0
- * @date 2025-11-08
+ * @date 2025-11-19
  */
 
 const { Cliente } = require('../models/model.index');
@@ -17,7 +17,8 @@ const { Op } = require('sequelize');
  */
 exports.buscarPorDni = async (dni) => {
   if (!dni || dni.length < 6) {
-    throw new Error('DNI inválido: debe tener al menos 6 caracteres');
+    return null;
+    //throw new Error('DNI inválido: debe tener al menos 6 caracteres');
   }
 
   const cliente = await Cliente.findOne({
@@ -73,7 +74,8 @@ exports.listarClientes = async (limit = 50, offset = 0) => {
 exports.listarContribuyentes = async (limit = 50, offset = 0) => {
   const { sequelize } = require('../models/model.index');
 
-  const contribuyentes = await Cliente.findAll({
+  // Cambiar findAll por findAndCountAll
+  const { count, rows: contribuyentes } = await Cliente.findAndCountAll({
     attributes: [
       'Codigo',
       'Nombre',
@@ -104,7 +106,7 @@ exports.listarContribuyentes = async (limit = 50, offset = 0) => {
 
   return {
     contribuyentes: contribuyentesFormateados,
-    total: contribuyentesFormateados.length,
+    total: count,  // Usar el count real de la base de datos
     limit,
     offset
   };
