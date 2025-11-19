@@ -7,7 +7,7 @@
  * @date 2025-10-30
  */
 
-const sequelize = require('../config/database.config');
+const sequelize = require('../config/database.config.sanjosedelassalinasjs');
 const ClienteModel = require('./Cliente');
 const ClientesCtaCteModel = require('./ClientesCtasCtes');
 

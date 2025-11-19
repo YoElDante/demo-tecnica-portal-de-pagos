@@ -69,7 +69,7 @@ header img {
 /* Ajuste adicional para pantallas muy grandes */
 @media (min-width: 1200px) {
     header img {
-        height: clamp(80px, 12vh, 180px);
+        height: clamp(160px, 15vh, 250px);
     }
 }
 
@@ -255,6 +255,18 @@ table td:last-child {
     width: 100%;
     font-size: clamp(0.9rem, 1vw, 1rem);
     white-space: nowrap;
+}
+
+.tipo-icono {
+    display: inline-block;
+    width: 1.4em;
+    text-align: center;
+    font-size: 1.1rem;
+    margin-right: 4px;
+}
+
+.filtro-tipo {
+    font-size: 0.95rem;
 }
 
 /* ============================================

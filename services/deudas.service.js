@@ -4,7 +4,7 @@
  * 
  * @author Dante Marcos Delprato
  * @version 1.1
- * @date 2025-11-12
+ * @date 2025-11-19
  */
 
 const { ClientesCtaCte, sequelize } = require('../models/model.index');
@@ -17,6 +17,48 @@ const { Op } = require('sequelize');
 const TASA_INTERES_ANUAL = 40; // Porcentaje anual (ejemplo: 40 = 40%)
 const DIAS_POR_ANIO = 365;
 const TASA_DIARIA = TASA_INTERES_ANUAL / 100 / DIAS_POR_ANIO; // 0.0010958904...
+
+
+// ============================================
+// DICCIONARIO TIPOS DE DEUDA
+// ============================================
+const TIPO_DESCRIPCIONES = {
+  AUAU: 'Automotores',
+  ININ: 'Serv. Propiedad',
+  CICI: 'Comercio e Industria',
+  CACA: 'Catastro',
+  OBSA: 'Servicio de Agua',
+  CEM1: 'Cementerio',
+  PEPE: 'Licencias / Tasas',
+  NDND: 'Nota Débito',
+  NCNC: 'Nota Crédito',
+  RRPP: 'Plan de Pagos',
+  RREF: 'Efectivo',
+  RRTC: 'Tarjeta Crédito',
+  RRTD: 'Tarjeta Débito',
+  RRCH: 'Cheque',
+  RRTR: 'Transferencia',
+  FAPP: 'Cuota Plan'
+};
+
+const TIPO_ICONOS = {
+  AUAU: '🚗',
+  ININ: '🏠',
+  CICI: '🏬',
+  CACA: '🗺️',
+  OBSA: '💧',
+  CEM1: '⚰️',
+  PEPE: '🪪',
+  NDND: '📄➕',
+  NCNC: '📄➖',
+  RRPP: '📑',
+  RREF: '💵',
+  RRTC: '💳',
+  RRTD: '💳',
+  RRCH: '🧾',
+  RRTR: '🔁',
+  FAPP: '🧮'
+};
 
 /**
  * Calcula los días de mora entre dos fechas
@@ -72,6 +114,7 @@ exports.obtenerDeudasPorCodigo = async (codigo) => {
       'Dominio',
       'NRO_CUOTA',
       'ANO_CUOTA',
+      'TIPO_BIEN',
       'ID_BIEN',
       'Importe',
       'Saldo'
@@ -145,8 +188,10 @@ exports.obtenerDeudasPorCodigoODni = async (codigo) => {
       'Dominio',
       'NRO_CUOTA',
       'ANO_CUOTA',
+      'TIPO_BIEN',
       'ID_BIEN',
-      'Importe'
+      'Importe',
+      'Saldo'
     ],
     order: [['Fecha', 'DESC']],
     raw: true
@@ -182,6 +227,9 @@ exports.formatearDeuda = (deuda) => {
     Detalle: `${deuda.Detalle || ''} ${deuda.Dominio || ''}`.trim(),
     Cuota: deuda.NRO_CUOTA || '',
     Anio: deuda.ANO_CUOTA || '',
+    Tipo: deuda.TIPO_BIEN || '',
+    TipoDescripcion: TIPO_DESCRIPCIONES[deuda.TIPO_BIEN] || deuda.TIPO_BIEN || '',
+    TipoIcono: TIPO_ICONOS[deuda.TIPO_BIEN] || '❓',
     Importe: importe,
     DiasMora: diasMora,
     Interes: interes,
@@ -213,14 +261,17 @@ exports.obtenerDeudasPorIds = async (ids) => {
       IdTrans: { [Op.in]: ids }
     },
     attributes: [
+      'IdTrans',
       [sequelize.fn('CONVERT', sequelize.literal('VARCHAR(10)'), sequelize.col('Fecha'), 120), 'Fecha'],
       'FechaVto',
       'Detalle',
       'Dominio',
       'NRO_CUOTA',
       'ANO_CUOTA',
+      'TIPO_BIEN',
       'ID_BIEN',
-      'Importe'
+      'Importe',
+      'Saldo'
     ],
     raw: true
   });
@@ -232,3 +283,7 @@ exports.obtenerDeudasPorIds = async (ids) => {
 exports.calcularDiasMora = calcularDiasMora;
 exports.calcularInteres = calcularInteres;
 exports.TASA_DIARIA = TASA_DIARIA;
+
+// Exportar diccionarios
+exports.TIPO_DESCRIPCIONES = TIPO_DESCRIPCIONES;
+exports.TIPO_ICONOS = TIPO_ICONOS;
