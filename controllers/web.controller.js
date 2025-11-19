@@ -20,6 +20,9 @@ exports.renderIndex = (req, res) => {
     title: 'Portal de Pagos',
     cliente: null,
     deudas: [],
+    tiposDeuda: [],
+    tipoDescripciones: DeudasService.TIPO_DESCRIPCIONES,
+    tipoIconos: DeudasService.TIPO_ICONOS,
     totalGeneral: 0,
     clienteNoEncontrado: false,
     dni: '',
@@ -42,6 +45,9 @@ exports.buscarPorDni = async (req, res) => {
         dni,
         cliente: null,
         deudas: [],
+        tiposDeuda: [],
+        tipoDescripciones: DeudasService.TIPO_DESCRIPCIONES,
+        tipoIconos: DeudasService.TIPO_ICONOS,
         totalGeneral: 0,
         clienteNoEncontrado: false,
         mensaje: 'El DNI debe tener entre 7 y 10 números.'
@@ -56,7 +62,9 @@ exports.buscarPorDni = async (req, res) => {
         title: 'Portal de Pagos',
         dni,
         cliente: null,
-        deudas: [],
+        tiposDeuda: [],
+        tipoDescripciones: DeudasService.TIPO_DESCRIPCIONES,
+        tipoIconos: DeudasService.TIPO_ICONOS,
         totalGeneral: 0,
         clienteNoEncontrado: true,
         mensaje: null
@@ -66,15 +74,25 @@ exports.buscarPorDni = async (req, res) => {
     // Obtener deudas del cliente
     const deudas = await DeudasService.obtenerDeudasPorCodigo(cliente.Codigo);
 
+    // Lista de tipos presentes
+    const tiposDeuda = [...new Set(deudas.map(d => d.Tipo).filter(Boolean))];
+
+    // Pasar diccionarios (una sola vez)
+    const tipoDescripciones = DeudasService.TIPO_DESCRIPCIONES;
+    const tipoIconos = DeudasService.TIPO_ICONOS;
+
     // Calcular total
     const totalGeneral = DeudasService.calcularTotal(deudas);
 
-    // Renderizar con datos
+    // Render
     return res.render('index', {
       title: 'Portal de Pagos',
       dni,
       cliente,
       deudas,
+      tiposDeuda,
+      tipoDescripciones,
+      tipoIconos,
       totalGeneral,
       clienteNoEncontrado: false,
       mensaje: null
@@ -87,6 +105,9 @@ exports.buscarPorDni = async (req, res) => {
       dni: req.body?.dni || '',
       cliente: null,
       deudas: [],
+      tiposDeuda: [],
+      tipoDescripciones: DeudasService.TIPO_DESCRIPCIONES,
+      tipoIconos: DeudasService.TIPO_ICONOS,
       totalGeneral: 0,
       clienteNoEncontrado: false,
       mensaje: 'Error interno al buscar los datos.'
