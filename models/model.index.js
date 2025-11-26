@@ -7,7 +7,7 @@
  * @date 2025-10-30
  */
 
-const sequelize = require('../config/database.config.js');
+const sequelize = require('../config/database.config.tinoco.js');
 const ClienteModel = require('./Cliente');
 const ClientesCtaCteModel = require('./ClientesCtasCtes');
 
