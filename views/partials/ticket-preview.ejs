@@ -68,8 +68,9 @@
     <!-- TABLA DE CONCEPTOS -->
     <div class="ticket-body">
       <% if (pagina === 0 || esUltimaPagina) { %>
-      <div class="ticket-resumen" style="font-size: x-small; margin: 0.25rem 0; color:#000;">
-        Conceptos en ticket: <strong><%= conceptos.length %></strong>
+      <div class="ticket-resumen" style="font-size: x-small; margin: 0.25rem 0; color:#000; display: flex; justify-content: space-between;">
+        <span>Conceptos en ticket: <strong><%= conceptos.length %></strong></span>
+        <span>Ticket N°: <strong>XXXX-XXXXXX</strong></span>
       </div>
       <% } %>
       <table class="ticket-table">
