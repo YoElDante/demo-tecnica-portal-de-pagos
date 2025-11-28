@@ -324,7 +324,7 @@ table td:last-child {
 }
 
 .interes-negativo {
-    color: var(--color-text-dark);
+    color: #000;
     font-weight: 500;
 }
 
@@ -346,6 +346,20 @@ table td:last-child {
 
 .qr-container .btn.pagar {
     text-decoration: none;
+}
+
+/* Botón Ir a Pagar (estilo consistente con otros botones) */
+.btn-pagar {
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    text-align: center;
+}
+
+.btn-pagar:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* ============================================
@@ -392,10 +406,10 @@ table td:last-child {
 footer {
     display: flex;
     justify-content: center;
-    align-items: center;
-    padding: 1rem 2rem;
+    padding: 0.25rem 0.75rem;
     color: var(--color-white);
     background-color: var(--color-primary);
+    align-items: center;
 }
 
 /* ============================================
@@ -423,11 +437,687 @@ footer {
     th,
     td {
         padding: 0.5rem 0.3rem;
-        font-size: 0.85rem;
+        font-size: smaller;
     }
 
     .btn {
         padding: 0.6rem 1rem;
         font-size: 0.9rem;
+    }
+}
+
+/* ============================================
+   ESTILOS DEL TICKET DE PAGO
+   Mobile-first, formato A4 para impresión
+   ============================================ */
+
+/* Contenedor principal del ticket */
+.ticket-container {
+    max-width: 100%;
+    margin: 2rem auto;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Página individual del ticket (formato A4) */
+.ticket-page {
+    background: #ffffff;
+    padding: 1rem;
+    page-break-after: always;
+    position: relative;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* Header del ticket */
+.ticket-header {
+    flex-wrap: wrap;
+    border-bottom: 2px solid #000;
+    margin-bottom: 0.75rem;
+    /* Header más cerca del cuerpo */
+    background-color: #fff;
+}
+
+/* Primera línea: Logo - Nombre - Fecha */
+.ticket-header-top {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 1rem;
+    align-items: center;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #000;
+    width: 100%;
+}
+
+.ticket-logo {
+    width: 60px;
+    height: 60px;
+}
+
+.ticket-logo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.ticket-title {
+    text-align: center;
+    flex: 1;
+}
+
+.ticket-title h1 {
+    margin: 0;
+    font-size: 1.3rem;
+    color: #000;
+    font-weight: 700;
+}
+
+.ticket-subtitle {
+    margin: 0.2rem 0 0;
+    font-size: 0.9rem;
+    color: #000;
+}
+
+.ticket-fecha {
+    text-align: right;
+    font-size: small;
+    white-space: nowrap;
+}
+
+.ticket-fecha-label {
+    margin: 0;
+    font-weight: 600;
+    color: #000;
+}
+
+.ticket-fecha-valor {
+    margin: 0.2rem 0 0;
+    font-weight: 400;
+    color: #000;
+    font-size: smaller;
+}
+
+/* Segunda línea: Dirección del Municipio */
+.ticket-header-info {
+    background-color: #fff;
+    padding: 0.75rem 0;
+    margin-bottom: 0.75rem;
+    border-bottom: 1px solid #000;
+    width: 100%;
+}
+
+.ticket-direccion {
+    display: flex;
+    justify-content: space-between;
+    /* Dirección | CP | Tel distribuidos */
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+}
+
+.ticket-direccion p {
+    margin: 0;
+    font-size: clamp(0.75rem, 2vw, 0.875rem);
+    color: #000;
+    white-space: nowrap;
+    /* Evita saltos en desktop */
+    flex: 0 1 auto;
+}
+
+@media (max-width: 600px) {
+    .ticket-direccion {
+        flex-wrap: wrap;
+        /* Permite acomodarse si no entra */
+        justify-content: center;
+        /* Centra cuando hace wrap */
+        gap: 0.5rem 1rem;
+    }
+
+    .ticket-direccion p {
+        font-size: x-small;
+        /* Más pequeño en móvil estrecho */
+        white-space: normal;
+        /* Permite cortar si es necesario */
+    }
+}
+
+/* Tercera línea: Datos del Contribuyente */
+.ticket-contribuyente {
+    background-color: #fff;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2rem;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    padding-bottom: clamp(0rem, (100vw - 768px) * 100, 1rem);
+}
+
+.ticket-contribuyente p {
+    margin: 0;
+    /* Tamaño base: nunca superior a x-small en cualquier resolución */
+    font-size: x-small;
+    color: #000;
+}
+
+.ticket-contribuyente p:first-child {
+    text-align: left;
+}
+
+.ticket-contribuyente p:last-child {
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* Tabla del ticket */
+.ticket-body {
+    margin: 0.75rem 0;
+    /* Reduce separación para acercar tabla al header */
+}
+
+.ticket-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: smaller;
+    /* Más compacto para que entren más columnas y filas */
+    color: #000;
+    table-layout: fixed;
+    /* Evita que se expanda más allá del contenedor */
+}
+
+.ticket-table thead {
+    background-color: #fff;
+    color: #000;
+    border-bottom: 2px solid #000;
+}
+
+.ticket-table th {
+    padding: 0.35rem 0.35rem;
+    /* Reducir padding para mayor densidad */
+    text-align: left;
+    font-weight: 600;
+    border: none;
+}
+
+.ticket-table td {
+    padding: 0.35rem 0.35rem;
+    /* Reducir padding para más filas por página */
+    border: none;
+    border-bottom: none;
+}
+
+/* Alineaciones específicas de columnas */
+/* 1) Fecha Vto. (col 1) siempre a la izquierda */
+.ticket-table th:nth-child(1),
+.ticket-table td:nth-child(1) {
+    text-align: left !important;
+    /* Reducir ancho ~45% para ceder espacio a Detalle */
+    width: 54px;
+    min-width: 50px;
+    max-width: 60px;
+    white-space: nowrap;
+}
+
+/* 2) Cuota (col 3) siempre a la derecha */
+.ticket-table th:nth-child(3),
+.ticket-table td:nth-child(3) {
+    text-align: right !important;
+}
+
+.ticket-table tbody tr:nth-child(even) {
+    background-color: #fff;
+}
+
+.ticket-table tbody tr:hover {
+    background-color: #fff;
+}
+
+.ticket-col-right {
+    text-align: right !important;
+}
+
+.ticket-detalle {
+    max-width: 280px;
+    /* Más espacio para leer el detalle */
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+}
+
+/* Columnas numéricas compactas: Importe, Int/Dto, Total (5,6,7) */
+.ticket-table th:nth-child(5),
+.ticket-table td:nth-child(5),
+.ticket-table th:nth-child(6),
+.ticket-table td:nth-child(6),
+.ticket-table th:nth-child(7),
+.ticket-table td:nth-child(7) {
+    width: 72px;
+    /* Suficiente para "$ 123.456" y margen */
+    min-width: 70px;
+    max-width: 80px;
+    white-space: nowrap;
+}
+
+/* 3) Reducir ancho de Cuota (col 3) ~60% respecto actual */
+.ticket-table th:nth-child(3),
+.ticket-table td:nth-child(3) {
+    width: 40px;
+    min-width: 36px;
+    max-width: 46px;
+    white-space: nowrap;
+}
+
+/* 4) Dar más espacio a Detalle (col 2) aprovechando el ahorro de Cuota */
+.ticket-table th:nth-child(2),
+.ticket-table td:nth-child(2) {
+    /* Permitir ocupar más espacio dentro del table-layout: fixed */
+    width: auto;
+    /* Ayuda a que la columna detalle absorba el espacio liberado */
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+/* Columna Año (4ta) más angosta: solo 4 dígitos */
+.ticket-table th:nth-child(4),
+.ticket-table td:nth-child(4) {
+    width: 42px;
+    min-width: 38px;
+    max-width: 48px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+@media (min-width: 1024px) {
+    .ticket-detalle {
+        max-width: 340px;
+    }
+
+    .ticket-table th:nth-child(5),
+    .ticket-table td:nth-child(5),
+    .ticket-table th:nth-child(6),
+    .ticket-table td:nth-child(6),
+    .ticket-table th:nth-child(7),
+    .ticket-table td:nth-child(7) {
+        width: 78px;
+    }
+
+    .ticket-contribuyente p {
+        margin: 0;
+        font-size: x-small;
+        color: #000;
+    }
+}
+
+/* Estilos para intereses/descuentos en el ticket */
+.ticket-table .interes-negativo {
+    color: #000;
+}
+
+.ticket-table .descuento-positivo {
+    color: #28a745;
+}
+
+/* Footer de la tabla */
+.ticket-table tfoot {
+    background-color: #fff;
+    font-weight: 600;
+}
+
+.ticket-subtotal-row td {
+    padding: 0.75rem 0.5rem;
+    border-top: 2px solid #000;
+    border-bottom: none;
+}
+
+.ticket-total-row {
+    background-color: #fff !important;
+}
+
+.ticket-total-row td {
+    padding: 0.9rem 0.5rem;
+    font-size: 1rem;
+    border-top: 3px double #000;
+    border-bottom: none;
+    text-align: center;
+}
+
+/* Footer del ticket */
+.ticket-footer {
+    padding-top: 1rem;
+    border-top: 2px solid #000;
+    padding-bottom: 1rem;
+}
+
+.ticket-validez {
+    background-color: #fff;
+    border: 1px solid #000;
+    padding: 0.75rem;
+}
+
+.ticket-validez p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #000;
+    font-weight: 600;
+}
+
+.ticket-nota {
+    text-align: center;
+    margin: 0.75rem 0;
+    padding: 0.5rem;
+}
+
+.ticket-nota p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #000;
+}
+
+.ticket-paginacion {
+    text-align: center;
+    color: #000;
+    font-size: smaller;
+    margin-top: 0.5rem;
+}
+
+.ticket-paginacion p {
+    margin: 0;
+    padding: 0.5rem;
+}
+
+/* Salto de página para impresión */
+.ticket-page-break {
+    page-break-after: always;
+    height: 2rem;
+    background: repeating-linear-gradient(45deg,
+            #f0f0f0,
+            #f0f0f0 10px,
+            #e0e0e0 10px,
+            #e0e0e0 20px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    font-size: 0.8rem;
+}
+
+.ticket-page-break::before {
+    content: '--- Separación de páginas ---';
+}
+
+/* Botones de acción del ticket */
+.ticket-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin: 1.5rem 0;
+    flex-wrap: wrap;
+}
+
+.btn-ticket {
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-generar-ticket {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.btn-generar-ticket:hover {
+    background-color: var(--color-primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-descargar-pdf {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-descargar-pdf:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-descargar-pdf:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.btn-volver-arriba {
+    background-color: #6c757d;
+    color: #fff;
+}
+
+.btn-volver-arriba:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Botones inferiores del ticket */
+.ticket-actions-bottom {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px dashed #ccc;
+}
+
+/* Estado de carga */
+.ticket-loading {
+    text-align: center;
+    padding: 2rem;
+    color: var(--color-text-muted);
+}
+
+.ticket-loading::before {
+    content: '⏳ ';
+    font-size: 1.5rem;
+}
+
+/* ============================================
+   RESPONSIVE TICKET < 680px: SCROLL + SOMBRAS
+   ============================================ */
+@media (max-width: 680px) {
+
+    /* El cuerpo del ticket maneja el scroll horizontal */
+    .ticket-body {
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        position: relative;
+    }
+
+    /* La tabla conserva un ancho mínimo útil para evitar pisado */
+    .ticket-table {
+        min-width: 680px;
+    }
+
+    /* Sombras laterales para indicar que hay desplazamiento horizontal */
+    .ticket-body::before,
+    .ticket-body::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 16px;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .ticket-body::before {
+        left: 0;
+        background: linear-gradient(to right, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0));
+    }
+
+    .ticket-body::after {
+        position: sticky;
+        /* fija al borde visible derecho mientras se desplaza */
+        right: 0;
+        top: 0;
+        bottom: 0;
+        background: linear-gradient(to left, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0));
+    }
+
+    /* Scrollbar visible y delgado */
+    .ticket-body {
+        scrollbar-width: thin;
+        /* Firefox */
+    }
+
+    .ticket-body::-webkit-scrollbar {
+        height: 10px;
+        /* un poco más grande para mejor agarre */
+    }
+
+    .ticket-body::-webkit-scrollbar-track {
+        background: #f0f0f0;
+    }
+
+    .ticket-body::-webkit-scrollbar-thumb {
+        background: #c2c2c2;
+        border-radius: 8px;
+    }
+
+    .ticket-body::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+}
+
+/* Modo PDF: asegurar tipografía pequeña y límites de ancho */
+.pdf-mode .ticket-page {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.pdf-mode .ticket-table {
+    width: 100% !important;
+    table-layout: fixed;
+    font-size: smaller;
+}
+
+/* Responsive - Tablet */
+@media (min-width: 768px) {
+    .ticket-container {
+        max-width: 800px;
+    }
+
+    .ticket-page {
+        padding: 2rem;
+    }
+
+    .ticket-logo {
+        width: 80px;
+        height: 80px;
+    }
+
+    .ticket-title h1 {
+        font-size: 1.6rem;
+    }
+
+    .ticket-subtitle {
+        font-size: 1rem;
+    }
+
+    .ticket-table {
+        font-size: 0.9rem;
+        font-size: x-small;
+    }
+
+    .ticket-detalle {
+        max-width: 300px;
+    }
+}
+
+/* Responsive - Desktop y formato A4 */
+@media (min-width: 1024px) {
+    .ticket-container {
+        max-width: 21cm;
+        /* A4 width */
+    }
+
+    .ticket-page {
+        min-height: 29.7cm;
+        /* A4 height */
+        padding: 2.5cm 2cm;
+        max-width: 100%;
+    }
+
+    .ticket-logo {
+        width: 100px;
+        height: 100px;
+    }
+
+    .ticket-title h1 {
+        font-size: 1.8rem;
+    }
+
+    .ticket-table {
+        font-size: x-small;
+    }
+
+    /* Mantener siempre tamaño pequeño también en desktop (cap en small) */
+    .ticket-contribuyente p {
+        margin: 0;
+        font-size: x-small;
+        color: #000;
+    }
+}
+
+/* Estilos para impresión */
+@media print {
+    body {
+        background: white;
+    }
+
+    .ticket-container {
+        box-shadow: none;
+        border: none;
+        max-width: 100%;
+    }
+
+    .ticket-page {
+        page-break-after: always;
+        box-shadow: none;
+        border: none;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    .ticket-page-break {
+        display: none;
+    }
+
+    .ticket-actions,
+    .botones,
+    header,
+    footer,
+    .form-section {
+        display: none !important;
+    }
+
+    /* Asegurar que no se corten elementos */
+    .ticket-table {
+        page-break-inside: avoid;
+        width: 100% !important;
+        table-layout: fixed;
+        font-size: smaller;
+        /* Letra pequeña en PDF */
+    }
+
+    .ticket-header,
+    .ticket-footer {
+        page-break-inside: avoid;
     }
 }

@@ -7,6 +7,11 @@
   <!-- <link rel="icon" type="image/ico" href="/images/tinoco.ico"> -->
   <link rel="icon" type="image/ico" href="/images/sanjosedelassalinas.ico">
   <link rel="stylesheet" href="/stylesheets/styles.css">
+
+  <!-- Librerías para generación de PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
   <script src="/javascripts/deudas.js" defer></script>
   <title><%= title %></title>
 </head>
@@ -19,13 +24,12 @@
     <div class="logo">
       <img src="/images/sanjosedelassalinas.webp" alt="Icono Header">
       <!-- <img src="/images/ISOLOGOTIPO-EL_MANZANO.webp" alt="Icono Header"> -->
-      <!-- <img src="/images/TINOCO.webp" alt="Icono Header"> -->
     </div>
     <div class="titulo-header">
       <h2>Municipalidad de<br>San José de las Salinas</h2>
     </div>
     <div class="header-icon">
-      <img src="/images/alcaldia logo cuadrado.jpg" alt="Logo Alcald+IA">
+      <img src="/images/alcaldiaLogo.webp" alt="Logo Alcald+IA">
     </div>
   </header>
 
@@ -59,7 +63,7 @@
     </section>
 
     <!-- Tabla de deudas -->
-    <% if (deudas && deudas.length > 0) { %>
+    <% if (typeof deudas !== 'undefined') { %>
     <section class="tabla-section">
       <h2>Detalle de Boletas</h2>
       <p style="margin: 10px 0; color: #555; font-weight: 500;">Seleccione los conceptos a abonar:</p>
@@ -78,6 +82,11 @@
           <option value="<%= t %>"><%= TIPO_ICONOS[t] %> <%= TIPO_DESCRIPCIONES[t] || t %></option>
           <% }) %>
         </select>
+      </div>
+
+      <div id="resumen-deudas" style="margin: 0 0 1rem 0; color:#333; font-weight:600;">
+        Deudas: <span id="contador-deudas-total"><%= (deudas || []).length %></span> |
+        Seleccionadas: <span id="contador-deudas-seleccionadas"><%= (deudas || []).length %></span>
       </div>
 
       <div class="tabla-wrapper">
@@ -106,7 +115,12 @@
           </thead>
 
           <tbody>
-            <% deudas.forEach((deuda, index) => { %>
+            <% if ((deudas || []).length === 0) { %>
+            <tr>
+              <td colspan="8" style="text-align:center; color:#555; padding:1rem 0;">No tiene deudas pendientes.</td>
+            </tr>
+            <% } %>
+            <% (deudas || []).forEach((deuda, index) => { %>
             <tr data-tipo="<%= deuda.Tipo %>">
               <td style="text-align: center;">
                 <input type="checkbox" class="checkbox-deuda" data-total="<%= deuda.Total %>" checked>
@@ -135,31 +149,78 @@
     </section>
     <% } %>
 
+    <!-- Botones de acción -->
+    <% if (deudas && deudas.length > 0) { %>
+    <section class="ticket-actions">
+      <button class="btn-ticket btn-generar-ticket" id="btn-generar-ticket">
+        📄 Generar Ticket
+      </button>
+      <button class="btn-ticket btn-descargar-pdf" id="btn-descargar-pdf" disabled>
+        💾 Descargar PDF
+      </button>
+      <button class="btn qr" id="generate-qr" onclick="mostrarQR()">
+        📱 Generar QR
+      </button>
+    </section>
+
+    <!-- Contenedor para preview del ticket -->
+    <div id="ticket-preview-container" style="display: none;">
+      <!-- El ticket se cargará aquí dinámicamente -->
+    </div>
+
+    <!-- Botones de acción POST-TICKET (aparecen después de generar el ticket) -->
+    <section class="ticket-actions ticket-actions-bottom" id="ticket-actions-bottom" style="display: none;">
+      <button class="btn-ticket btn-descargar-pdf" id="btn-descargar-pdf-bottom">
+        💾 Descargar PDF
+      </button>
+      <button class="btn qr" id="generate-qr-bottom" onclick="mostrarQR()">
+        📱 Generar QR
+      </button>
+      <button class="btn-ticket btn-volver-arriba" id="btn-volver-arriba" onclick="volverArriba()">
+        ⬆️ Volver Arriba
+      </button>
+    </section>
+    <% } %>
+
     <!-- Contenedor del código QR -->
     <div class="qr-container">
       <img class="imgqr" id="qr-image" src="/images/qr_mercado.webp" alt="QR Code" style="display:none;" />
-      <a id="pay-button" href="https://mercadopago.com.ar" style="display:none;" class="btn pagar">Ir a Pagar</a>
+      <a id="pay-button" href="https://mercadopago.com.ar" style="display:none;" class="btn-ticket btn-pagar" target="_blank">
+        💳 Ir a Pagar
+      </a>
     </div>
 
-    <!-- Botones de acción -->
+    <!-- Botón Generar QR (se oculta después de generarlo) -->
+    <% if (deudas && deudas.length > 0 && false) { %>
     <section class="botones">
-      <button class="btn qr" id="generate-qr" onclick="mostrarQR()">Generar QR</button>
+      <button class="btn qr" id="generate-qr-old" onclick="mostrarQR()">Generar QR</button>
     </section>
+    <% } %>
   </main>
 
   <script>
     function mostrarQR() {
       const qrImage = document.getElementById('qr-image');
       const payButton = document.getElementById('pay-button');
-      const generateButton = document.getElementById('generate-qr');
-      const botonesSection = document.querySelector('.botones');
 
       // Mostrar imagen QR y botón de pagar
       qrImage.style.display = 'block';
       payButton.style.display = 'block';
 
-      // Ocultar botón de generar QR y toda la sección de botones
-      botonesSection.style.display = 'none';
+      // Scroll suave al QR
+      setTimeout(() => {
+        qrImage.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+      }, 100);
+    }
+
+    function volverArriba() {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
     }
   </script>
 
