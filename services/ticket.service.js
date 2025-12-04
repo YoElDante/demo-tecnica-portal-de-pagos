@@ -6,7 +6,8 @@
  * @version 1.0
  */
 
-const municipalidadConfig = require('../config/municipalidad.config');
+// const municipalidadConfig = require('../config/municipalidad.config.sanjosedelassalinas.js');
+const municipalidadConfig = require('../config/municipalidad.config.manzano.js');
 
 /**
  * Formatea un número como moneda argentina
