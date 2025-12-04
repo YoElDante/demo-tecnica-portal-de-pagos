@@ -335,6 +335,22 @@ async function descargarPDF() {
       }
     }
 
+    // Intentar cargar el logo de Alcald+IA para el recuadro IMPORTANTE
+    let logoAlcaldiaData = null;
+    const logoAlcaldiaImg = document.querySelector('.header-icon img');
+    if (logoAlcaldiaImg) {
+      try {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = logoAlcaldiaImg.naturalWidth || 80;
+        canvas.height = logoAlcaldiaImg.naturalHeight || 80;
+        ctx.drawImage(logoAlcaldiaImg, 0, 0);
+        logoAlcaldiaData = canvas.toDataURL('image/png');
+      } catch (e) {
+        console.warn('No se pudo cargar el logo de Alcaldía para el PDF:', e);
+      }
+    }
+
     // Obtener todas las páginas del ticket
     const paginas = container.querySelectorAll('.ticket-page');
 
@@ -544,12 +560,17 @@ async function descargarPDF() {
           notaTexto = nota.textContent.trim();
         }
 
+        // Configuración del logo de Alcaldía dentro del rectángulo
+        const logoSize = 18; // Tamaño del logo en mm
+        const logoMargin = 2; // Margen interno del logo
+        const textAreaWidth = logoAlcaldiaData ? contentWidth - logoSize - logoMargin * 3 : contentWidth - 8;
+
         // Calcular tamaño del contenido con padding reducido
         const padding = 4;
         pdf.setFontSize(8); // Texto más pequeño
-        const validezLines = pdf.splitTextToSize(validezTexto, contentWidth - (padding * 2) - 4);
+        const validezLines = pdf.splitTextToSize(validezTexto, textAreaWidth - (padding * 2));
         pdf.setFontSize(7); // Nota más pequeña
-        const notaLines = notaTexto ? pdf.splitTextToSize(notaTexto, contentWidth - (padding * 2) - 4) : [];
+        const notaLines = notaTexto ? pdf.splitTextToSize(notaTexto, textAreaWidth - (padding * 2)) : [];
 
         // Altura total más compacta: título + validez + nota
         const validezHeight = 8 + (validezLines.length * 3.5) + (notaLines.length > 0 ? notaLines.length * 3 + 2 : 0) + padding * 2;
@@ -558,6 +579,13 @@ async function descargarPDF() {
         pdf.setDrawColor(0);
         pdf.setLineWidth(0.5);
         pdf.rect(margin, y, contentWidth, validezHeight);
+
+        // Logo de Alcald+IA a la derecha dentro del rectángulo
+        if (logoAlcaldiaData) {
+          const logoX = pageWidth - margin - logoSize - logoMargin;
+          const logoY = y + (validezHeight - logoSize) / 2; // Centrado verticalmente
+          pdf.addImage(logoAlcaldiaData, 'PNG', logoX, logoY, logoSize, logoSize);
+        }
 
         // Título "IMPORTANTE:" en negrita
         pdf.setFontSize(9);
