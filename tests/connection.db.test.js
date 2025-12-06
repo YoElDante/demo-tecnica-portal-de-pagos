@@ -1,4 +1,5 @@
-const sequelize = require('../config/database.config.js');
+// const sequelize = require('../config/database.config.manzano.js');
+const sequelize = require('../config/database.config.sanjosedelassalinas.js');
 
 (async () => {
   try {
