@@ -21,6 +21,7 @@ const { requestLogger, responseLogger, errorLogger } = require('./middlewares/lo
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const apiRouter = require('./routes/api/index'); // API
+const paymentRouter = require('./routes/payment.routes'); // Pagos MercadoPago
 const app = express();
 
 // view engine setup
@@ -39,6 +40,7 @@ app.use(responseLogger);
 // Rutas
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/pago', paymentRouter); // Rutas de pago MercadoPago
 
 // Rutas API con limitador de tasa
 app.use('/api', apiLimiter);
