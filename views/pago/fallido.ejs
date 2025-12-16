@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/jpg" href="/images/logo_El_Manzano.jpg">
+  <link rel="stylesheet" href="/stylesheets/styles.css">
+  <title><%= title %> - Portal de Pagos</title>
+  <style>
+    .resultado-pago {
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .resultado-pago.fallido {
+      border-top: 5px solid #dc3545;
+    }
+
+    .icono-resultado {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+
+    .titulo-resultado {
+      font-size: 1.8rem;
+      color: #dc3545;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitulo-resultado {
+      color: #666;
+      margin-bottom: 2rem;
+    }
+
+    .info-pago {
+      background: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin: 1.5rem 0;
+      text-align: left;
+    }
+
+    .info-pago p {
+      margin: 0.5rem 0;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .info-pago strong {
+      color: #333;
+    }
+
+    .info-pago span {
+      color: #666;
+      font-family: monospace;
+    }
+
+    .motivos-rechazo {
+      background: #fff3cd;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin: 1.5rem 0;
+      text-align: left;
+      border-left: 4px solid #ffc107;
+    }
+
+    .motivos-rechazo h3 {
+      color: #856404;
+      margin-bottom: 1rem;
+    }
+
+    .motivos-rechazo ul {
+      margin: 0;
+      padding-left: 1.5rem;
+      color: #856404;
+    }
+
+    .motivos-rechazo li {
+      margin: 0.5rem 0;
+    }
+
+    .botones-accion {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-reintentar {
+      background: #dc3545;
+      color: white;
+      text-decoration: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 6px;
+      transition: background 0.3s;
+    }
+
+    .btn-reintentar:hover {
+      background: #c82333;
+    }
+
+    .btn-volver {
+      background: #19a8b6;
+      color: white;
+      text-decoration: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 6px;
+      transition: background 0.3s;
+    }
+
+    .btn-volver:hover {
+      background: #148a96;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      <img src="/images/ISOLOGOTIPO-EL_MANZANO.webp" alt="Logo Municipio">
+    </div>
+    <div class="titulo-header">
+      <h2>Portal de Pago<br>Comuna de El Manzano</h2>
+    </div>
+    <div class="header-icon">
+      <img src="/images/alcaldiaLogo.webp" alt="Logo Alcald+IA">
+    </div>
+  </header>
+
+  <!-- Contenido Principal -->
+  <main>
+    <section class="resultado-pago fallido">
+      <div class="icono-resultado">❌</div>
+      <h1 class="titulo-resultado">Pago Rechazado</h1>
+      <p class="subtitulo-resultado">No se pudo procesar tu pago</p>
+
+      <div class="info-pago">
+        <p>
+          <strong>Número de operación:</strong>
+          <span><%= external_reference %></span>
+        </p>
+        <p>
+          <strong>Estado:</strong>
+          <span style="color: #dc3545; font-weight: bold;">Rechazado</span>
+        </p>
+      </div>
+
+      <div class="motivos-rechazo">
+        <h3>⚠️ Posibles motivos del rechazo:</h3>
+        <ul>
+          <li>Fondos insuficientes en la tarjeta</li>
+          <li>Datos de la tarjeta incorrectos</li>
+          <li>La tarjeta está vencida</li>
+          <li>El banco rechazó la operación</li>
+          <li>Se superó el límite de compra</li>
+        </ul>
+      </div>
+
+      <div class="botones-accion">
+        <a href="/" class="btn-reintentar">🔄 Reintentar pago</a>
+        <a href="/" class="btn-volver">🏠 Volver al inicio</a>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; Power by Alcald+IA. Todos los derechos reservados.</p>
+  </footer>
+</body>
+
+</html>

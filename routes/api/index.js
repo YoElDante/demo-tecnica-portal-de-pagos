@@ -12,6 +12,7 @@ const router = express.Router();
 
 // Importar rutas específicas
 const clientesRoutes = require('./clientes.routes');
+const paymentController = require('../../controllers/payment.controller');
 
 // Documentación de la API
 router.get('/', (req, res) => {
@@ -24,7 +25,8 @@ router.get('/', (req, res) => {
       contribuyentes: '/api/clientes/contribuyentes',
       buscarPorDni: '/api/clientes/buscar/dni/:dni',
       deudas: '/api/clientes/:codigo/deudas',
-      generarPago: '/api/clientes/generar-pago'
+      generarPago: '/api/clientes/generar-pago',
+      confirmacionPago: '/api/pagos/confirmacion'
     },
     documentation: 'Próximamente: Swagger UI'
   });
@@ -32,5 +34,8 @@ router.get('/', (req, res) => {
 
 // Montar rutas
 router.use('/clientes', clientesRoutes);
+
+// Ruta para recibir confirmaciones de pago del API Gateway
+router.post('/pagos/confirmacion', paymentController.confirmacion);
 
 module.exports = router;
