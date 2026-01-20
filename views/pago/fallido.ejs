@@ -8,7 +8,11 @@
   <link rel="stylesheet" href="/stylesheets/styles.css">
   <title><%= title %> - Portal de Pagos</title>
   <style>
-    .resultado-pago {
+    /* ============================================
+       BLOQUE: .result
+       Resultado de operación de pago
+       ============================================ */
+    .result {
       max-width: 600px;
       margin: 2rem auto;
       padding: 2rem;
@@ -18,27 +22,29 @@
       text-align: center;
     }
 
-    .resultado-pago.fallido {
+    /* Modificador: Resultado fallido */
+    .result--failed {
       border-top: 5px solid #dc3545;
     }
 
-    .icono-resultado {
+    .result__icon {
       font-size: 4rem;
       margin-bottom: 1rem;
     }
 
-    .titulo-resultado {
+    .result__title {
       font-size: 1.8rem;
       color: #dc3545;
       margin-bottom: 0.5rem;
     }
 
-    .subtitulo-resultado {
+    .result__subtitle {
       color: #666;
       margin-bottom: 2rem;
     }
 
-    .info-pago {
+    /* Elemento: Información del pago */
+    .result__info {
       background: #f8f9fa;
       padding: 1.5rem;
       border-radius: 8px;
@@ -46,22 +52,29 @@
       text-align: left;
     }
 
-    .info-pago p {
+    .result__info-row {
       margin: 0.5rem 0;
       display: flex;
       justify-content: space-between;
     }
 
-    .info-pago strong {
+    .result__info-label {
       color: #333;
+      font-weight: bold;
     }
 
-    .info-pago span {
+    .result__info-value {
       color: #666;
       font-family: monospace;
     }
 
-    .motivos-rechazo {
+    .result__info-value--failed {
+      color: #dc3545;
+      font-weight: bold;
+    }
+
+    /* Elemento: Motivos de rechazo */
+    .result__reasons {
       background: #fff3cd;
       padding: 1.5rem;
       border-radius: 8px;
@@ -70,22 +83,23 @@
       border-left: 4px solid #ffc107;
     }
 
-    .motivos-rechazo h3 {
+    .result__reasons-title {
       color: #856404;
       margin-bottom: 1rem;
     }
 
-    .motivos-rechazo ul {
+    .result__reasons-list {
       margin: 0;
       padding-left: 1.5rem;
       color: #856404;
     }
 
-    .motivos-rechazo li {
+    .result__reasons-item {
       margin: 0.5rem 0;
     }
 
-    .botones-accion {
+    /* Elemento: Acciones */
+    .result__actions {
       display: flex;
       gap: 1rem;
       justify-content: center;
@@ -93,7 +107,7 @@
       flex-wrap: wrap;
     }
 
-    .btn-reintentar {
+    .result__btn--retry {
       background: #dc3545;
       color: white;
       text-decoration: none;
@@ -102,11 +116,11 @@
       transition: background 0.3s;
     }
 
-    .btn-reintentar:hover {
+    .result__btn--retry:hover {
       background: #c82333;
     }
 
-    .btn-volver {
+    .result__btn--back {
       background: #19a8b6;
       color: white;
       text-decoration: none;
@@ -115,7 +129,7 @@
       transition: background 0.3s;
     }
 
-    .btn-volver:hover {
+    .result__btn--back:hover {
       background: #148a96;
     }
   </style>
@@ -123,57 +137,57 @@
 
 <body>
   <!-- Header -->
-  <header>
-    <div class="logo">
-      <img src="/images/ISOLOGOTIPO-EL_MANZANO.webp" alt="Logo Municipio">
+  <header class="header">
+    <div class="header__logo">
+      <img src="<%= municipalidad.logos.principal %>" alt="Logo <%= municipalidad.nombre %>" class="header__logo-img">
     </div>
-    <div class="titulo-header">
-      <h2>Portal de Pago<br>Comuna de El Manzano</h2>
+    <div class="header__title">
+      <h2>Portal de Pago<br><%= municipalidad.nombreCompleto %></h2>
     </div>
-    <div class="header-icon">
-      <img src="/images/alcaldiaLogo.webp" alt="Logo Alcald+IA">
+    <div class="header__icon">
+      <img src="<%= municipalidad.logos.secundario %>" alt="Logo Alcald+IA" class="header__icon-img">
     </div>
   </header>
 
   <!-- Contenido Principal -->
-  <main>
-    <section class="resultado-pago fallido">
-      <div class="icono-resultado">❌</div>
-      <h1 class="titulo-resultado">Pago Rechazado</h1>
-      <p class="subtitulo-resultado">No se pudo procesar tu pago</p>
+  <main class="main">
+    <section class="result result--failed">
+      <div class="result__icon">❌</div>
+      <h1 class="result__title">Pago Rechazado</h1>
+      <p class="result__subtitle">No se pudo procesar tu pago</p>
 
-      <div class="info-pago">
-        <p>
-          <strong>Número de operación:</strong>
-          <span><%= external_reference %></span>
+      <div class="result__info">
+        <p class="result__info-row">
+          <span class="result__info-label">Número de operación:</span>
+          <span class="result__info-value"><%= external_reference %></span>
         </p>
-        <p>
-          <strong>Estado:</strong>
-          <span style="color: #dc3545; font-weight: bold;">Rechazado</span>
+        <p class="result__info-row">
+          <span class="result__info-label">Estado:</span>
+          <span class="result__info-value result__info-value--failed">Rechazado</span>
         </p>
       </div>
 
-      <div class="motivos-rechazo">
-        <h3>⚠️ Posibles motivos del rechazo:</h3>
-        <ul>
-          <li>Fondos insuficientes en la tarjeta</li>
-          <li>Datos de la tarjeta incorrectos</li>
-          <li>La tarjeta está vencida</li>
-          <li>El banco rechazó la operación</li>
-          <li>Se superó el límite de compra</li>
+      <div class="result__reasons">
+        <h3 class="result__reasons-title">⚠️ Posibles motivos del rechazo:</h3>
+        <ul class="result__reasons-list">
+          <li class="result__reasons-item">Fondos insuficientes en la tarjeta</li>
+          <li class="result__reasons-item">Datos de la tarjeta incorrectos</li>
+          <li class="result__reasons-item">La tarjeta está vencida</li>
+          <li class="result__reasons-item">El banco rechazó la operación</li>
+          <li class="result__reasons-item">Se superó el límite de compra</li>
         </ul>
       </div>
 
-      <div class="botones-accion">
-        <a href="/" class="btn-reintentar">🔄 Reintentar pago</a>
-        <a href="/" class="btn-volver">🏠 Volver al inicio</a>
+      <div class="result__actions">
+        <a href="/" class="result__btn--retry">🔄 Reintentar pago</a>
+        <a href="/" class="result__btn--back">🏠 Volver al inicio</a>
       </div>
     </section>
   </main>
 
   <!-- Footer -->
-  <footer>
-    <p>&copy; Power by Alcald+IA. Todos los derechos reservados.</p>
+  <footer class="footer">
+    <p class="footer__text">&copy; Power by Alcald+IA. Todos los derechos reservados.</p>
   </footer>
 </body>
 

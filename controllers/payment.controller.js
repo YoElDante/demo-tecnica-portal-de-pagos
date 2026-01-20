@@ -3,11 +3,14 @@
  * Maneja las rutas relacionadas con el proceso de pago con MercadoPago
  * 
  * @author Generado para integración MP
- * @version 1.0
- * @date 2025-12-13
+ * @version 1.2
+ * @date 2026-01-20
  */
 
 const paymentGatewayService = require('../services/paymentGateway.service');
+const pagosService = require('../services/pagos.service');
+// Configuración centralizada - cambiar municipio en .env (MUNICIPIO=xxx)
+const { municipalidad } = require('../config');
 
 /**
  * Inicia el proceso de pago
@@ -49,8 +52,8 @@ async function iniciarPago(req, res) {
     });
 
     // En desarrollo usamos sandbox_url, en producción payment_url
-    const redirectUrl = process.env.NODE_ENV === 'production' 
-      ? resultado.payment_url 
+    const redirectUrl = process.env.NODE_ENV === 'production'
+      ? resultado.payment_url
       : resultado.sandbox_url;
 
     console.log('🔗 Redirigiendo a MercadoPago:', redirectUrl);
@@ -108,13 +111,31 @@ async function confirmacion(req, res) {
 
     // Procesar según el estado
     if (status === 'approved') {
-      // TODO: Llamar a pagos.service.js para actualizar BD
-      // await pagosService.marcarComoPagado(metadata.conceptos_ids, {
-      //   external_reference,
-      //   payment_id,
-      //   date_approved
-      // });
-      console.log('✅ Pago aprobado - Pendiente actualizar BD');
+      // Llamar al servicio de pagos para actualizar BD
+      const resultado = await pagosService.confirmarPago({
+        payment_id,
+        status,
+        external_reference,
+        transaction_amount,
+        date_approved,
+        metadata
+      });
+
+      console.log('✅ Pago aprobado y procesado:', {
+        payment_id,
+        conceptos_procesados: resultado.conceptos_procesados,
+        numero_pago: resultado.numero_pago
+      });
+
+      // Responder con detalles del procesamiento
+      return res.json({
+        received: true,
+        processed: resultado.processed,
+        message: resultado.already_processed
+          ? 'Pago ya procesado anteriormente'
+          : `${resultado.conceptos_procesados} conceptos actualizados`,
+        numero_pago: resultado.numero_pago
+      });
     } else if (status === 'rejected') {
       console.log('❌ Pago rechazado:', status_detail);
     } else if (status === 'pending') {
@@ -157,6 +178,7 @@ async function pagoExitoso(req, res) {
 
   res.render('pago/exitoso', {
     title: 'Pago Exitoso',
+    municipalidad,
     external_reference: external_reference || 'N/A',
     payment_id: payment_id || 'N/A',
     status: status || 'approved',
@@ -180,6 +202,7 @@ async function pagoFallido(req, res) {
 
   res.render('pago/fallido', {
     title: 'Pago Rechazado',
+    municipalidad,
     external_reference: external_reference || 'N/A',
     status: status || 'rejected'
   });
@@ -201,6 +224,7 @@ async function pagoPendiente(req, res) {
 
   res.render('pago/pendiente', {
     title: 'Pago Pendiente',
+    municipalidad,
     external_reference: external_reference || 'N/A',
     status: status || 'pending'
   });

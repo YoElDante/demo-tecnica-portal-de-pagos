@@ -8,7 +8,11 @@
   <link rel="stylesheet" href="/stylesheets/styles.css">
   <title><%= title %> - Portal de Pagos</title>
   <style>
-    .resultado-pago {
+    /* ============================================
+       BLOQUE: .result
+       Resultado de operación de pago
+       ============================================ */
+    .result {
       max-width: 600px;
       margin: 2rem auto;
       padding: 2rem;
@@ -18,27 +22,29 @@
       text-align: center;
     }
 
-    .resultado-pago.pendiente {
+    /* Modificador: Resultado pendiente */
+    .result--pending {
       border-top: 5px solid #ffc107;
     }
 
-    .icono-resultado {
+    .result__icon {
       font-size: 4rem;
       margin-bottom: 1rem;
     }
 
-    .titulo-resultado {
+    .result__title {
       font-size: 1.8rem;
       color: #856404;
       margin-bottom: 0.5rem;
     }
 
-    .subtitulo-resultado {
+    .result__subtitle {
       color: #666;
       margin-bottom: 2rem;
     }
 
-    .info-pago {
+    /* Elemento: Información del pago */
+    .result__info {
       background: #f8f9fa;
       padding: 1.5rem;
       border-radius: 8px;
@@ -46,22 +52,29 @@
       text-align: left;
     }
 
-    .info-pago p {
+    .result__info-row {
       margin: 0.5rem 0;
       display: flex;
       justify-content: space-between;
     }
 
-    .info-pago strong {
+    .result__info-label {
       color: #333;
+      font-weight: bold;
     }
 
-    .info-pago span {
+    .result__info-value {
       color: #666;
       font-family: monospace;
     }
 
-    .instrucciones-pendiente {
+    .result__info-value--pending {
+      color: #856404;
+      font-weight: bold;
+    }
+
+    /* Elemento: Instrucciones */
+    .result__instructions {
       background: #fff3cd;
       padding: 1.5rem;
       border-radius: 8px;
@@ -70,27 +83,28 @@
       border-left: 4px solid #ffc107;
     }
 
-    .instrucciones-pendiente h3 {
+    .result__instructions-title {
       color: #856404;
       margin-bottom: 1rem;
     }
 
-    .instrucciones-pendiente p {
+    .result__instructions-text {
       color: #856404;
       margin: 0.5rem 0;
     }
 
-    .instrucciones-pendiente ul {
+    .result__instructions-list {
       margin: 1rem 0;
       padding-left: 1.5rem;
       color: #856404;
     }
 
-    .instrucciones-pendiente li {
+    .result__instructions-item {
       margin: 0.5rem 0;
     }
 
-    .nota-importante {
+    /* Elemento: Nota importante */
+    .result__note {
       background: #e8f4fd;
       padding: 1rem;
       border-radius: 8px;
@@ -99,7 +113,17 @@
       font-size: 0.9rem;
     }
 
-    .botones-accion {
+    .result__note-label {
+      font-weight: bold;
+    }
+
+    .result__note-small {
+      display: block;
+      margin-top: 0.5rem;
+    }
+
+    /* Elemento: Acciones */
+    .result__actions {
       display: flex;
       gap: 1rem;
       justify-content: center;
@@ -107,7 +131,7 @@
       flex-wrap: wrap;
     }
 
-    .btn-volver {
+    .result__btn--back {
       background: #19a8b6;
       color: white;
       text-decoration: none;
@@ -116,7 +140,7 @@
       transition: background 0.3s;
     }
 
-    .btn-volver:hover {
+    .result__btn--back:hover {
       background: #148a96;
     }
   </style>
@@ -124,61 +148,61 @@
 
 <body>
   <!-- Header -->
-  <header>
-    <div class="logo">
-      <img src="/images/ISOLOGOTIPO-EL_MANZANO.webp" alt="Logo Municipio">
+  <header class="header">
+    <div class="header__logo">
+      <img src="<%= municipalidad.logos.principal %>" alt="Logo <%= municipalidad.nombre %>" class="header__logo-img">
     </div>
-    <div class="titulo-header">
-      <h2>Portal de Pago<br>Comuna de El Manzano</h2>
+    <div class="header__title">
+      <h2>Portal de Pago<br><%= municipalidad.nombreCompleto %></h2>
     </div>
-    <div class="header-icon">
-      <img src="/images/alcaldiaLogo.webp" alt="Logo Alcald+IA">
+    <div class="header__icon">
+      <img src="<%= municipalidad.logos.secundario %>" alt="Logo Alcald+IA" class="header__icon-img">
     </div>
   </header>
 
   <!-- Contenido Principal -->
-  <main>
-    <section class="resultado-pago pendiente">
-      <div class="icono-resultado">⏳</div>
-      <h1 class="titulo-resultado">Pago Pendiente</h1>
-      <p class="subtitulo-resultado">Tu pago está siendo procesado</p>
+  <main class="main">
+    <section class="result result--pending">
+      <div class="result__icon">⏳</div>
+      <h1 class="result__title">Pago Pendiente</h1>
+      <p class="result__subtitle">Tu pago está siendo procesado</p>
 
-      <div class="info-pago">
-        <p>
-          <strong>Número de operación:</strong>
-          <span><%= external_reference %></span>
+      <div class="result__info">
+        <p class="result__info-row">
+          <span class="result__info-label">Número de operación:</span>
+          <span class="result__info-value"><%= external_reference %></span>
         </p>
-        <p>
-          <strong>Estado:</strong>
-          <span style="color: #856404; font-weight: bold;">Pendiente de acreditación</span>
+        <p class="result__info-row">
+          <span class="result__info-label">Estado:</span>
+          <span class="result__info-value result__info-value--pending">Pendiente de acreditación</span>
         </p>
       </div>
 
-      <div class="instrucciones-pendiente">
-        <h3>ℹ️ Información importante</h3>
-        <p>Tu pago fue registrado pero está pendiente de confirmación.</p>
-        <p>Esto puede ocurrir cuando:</p>
-        <ul>
-          <li>Elegiste pagar en efectivo (RapiPago, Pago Fácil, etc.)</li>
-          <li>El pago está siendo verificado por el banco</li>
-          <li>Usaste transferencia bancaria</li>
+      <div class="result__instructions">
+        <h3 class="result__instructions-title">ℹ️ Información importante</h3>
+        <p class="result__instructions-text">Tu pago fue registrado pero está pendiente de confirmación.</p>
+        <p class="result__instructions-text">Esto puede ocurrir cuando:</p>
+        <ul class="result__instructions-list">
+          <li class="result__instructions-item">Elegiste pagar en efectivo (RapiPago, Pago Fácil, etc.)</li>
+          <li class="result__instructions-item">El pago está siendo verificado por el banco</li>
+          <li class="result__instructions-item">Usaste transferencia bancaria</li>
         </ul>
       </div>
 
-      <div class="nota-importante">
-        <strong>📋 Guardá tu número de operación:</strong> <%= external_reference %><br>
-        <small>Una vez acreditado el pago, podrás ver el comprobante en este portal.</small>
+      <div class="result__note">
+        <span class="result__note-label">📋 Guardá tu número de operación:</span> <%= external_reference %>
+        <small class="result__note-small">Una vez acreditado el pago, podrás ver el comprobante en este portal.</small>
       </div>
 
-      <div class="botones-accion">
-        <a href="/" class="btn-volver">🏠 Volver al inicio</a>
+      <div class="result__actions">
+        <a href="/" class="result__btn--back">🏠 Volver al inicio</a>
       </div>
     </section>
   </main>
 
   <!-- Footer -->
-  <footer>
-    <p>&copy; Power by Alcald+IA. Todos los derechos reservados.</p>
+  <footer class="footer">
+    <p class="footer__text">&copy; Power by Alcald+IA. Todos los derechos reservados.</p>
   </footer>
 </body>
 

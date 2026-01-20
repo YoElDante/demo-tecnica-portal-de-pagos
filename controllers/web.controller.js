@@ -4,12 +4,14 @@
  * Solo maneja renderizado, la lógica está en services
  * 
  * @author Dante Marcos Delprato
- * @version 1.0
- * @date 2025-11-08
+ * @version 1.1
+ * @date 2026-01-20
  */
 
 const ClientesService = require('../services/clientes.service');
 const DeudasService = require('../services/deudas.service');
+// Configuración centralizada - cambiar municipio en .env (MUNICIPIO=xxx)
+const { municipalidad } = require('../config');
 
 /**
  * Renderiza la página principal
@@ -18,6 +20,7 @@ const DeudasService = require('../services/deudas.service');
 exports.renderIndex = (req, res) => {
   res.render('index', {
     title: 'Portal de Pagos',
+    municipalidad,
     cliente: null,
     deudas: [],
     tiposDeuda: [],
@@ -42,6 +45,7 @@ exports.buscarPorDni = async (req, res) => {
     if (!ClientesService.validarDni(dni)) {
       return res.render('index', {
         title: 'Portal de Pagos',
+        municipalidad,
         dni,
         cliente: null,
         deudas: [],
@@ -60,9 +64,10 @@ exports.buscarPorDni = async (req, res) => {
     if (!cliente) {
       return res.render('index', {
         title: 'Portal de Pagos',
+        municipalidad,
         dni,
         cliente: null,
-        deudas: [],  // ← AGREGAR ESTA LÍNEA
+        deudas: [],
         tiposDeuda: [],
         tipoDescripciones: DeudasService.TIPO_DESCRIPCIONES,
         tipoIconos: DeudasService.TIPO_ICONOS,
@@ -88,6 +93,7 @@ exports.buscarPorDni = async (req, res) => {
     // Render
     return res.render('index', {
       title: 'Portal de Pagos',
+      municipalidad,
       dni,
       cliente,
       deudas,
@@ -103,6 +109,7 @@ exports.buscarPorDni = async (req, res) => {
     console.error('Error en buscarPorDni (web):', error);
     return res.render('index', {
       title: 'Portal de Pagos',
+      municipalidad,
       dni: req.body?.dni || '',
       cliente: null,
       deudas: [],

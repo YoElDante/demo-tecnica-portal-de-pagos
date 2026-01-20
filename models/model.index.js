@@ -3,12 +3,12 @@
  * Versión CommonJS para Express Generator
  * 
  * @author Dante Marcos Delprato
- * @version 1.0
- * @date 2025-10-30
+ * @version 1.1
+ * @date 2026-01-20
  */
 
-const sequelize = require('../config/database.config.manzano.js');
-//const sequelize = require('../config/database.config.sanjosedelassalinas.js');
+// Configuración centralizada - cambiar municipio en .env (MUNICIPIO=xxx)
+const { sequelize } = require('../config');
 const ClienteModel = require('./Cliente');
 const ClientesCtaCteModel = require('./ClientesCtasCtes');
 

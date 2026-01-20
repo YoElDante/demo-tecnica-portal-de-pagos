@@ -1,5 +1,5 @@
-// const sequelize = require('../config/database.config.manzano.js');
-const sequelize = require('../config/database.config.sanjosedelassalinas.js');
+// Configuración centralizada - cambiar municipio en .env (MUNICIPIO=xxx)
+const { sequelize } = require('../config');
 
 (async () => {
   try {

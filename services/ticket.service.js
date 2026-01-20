@@ -6,8 +6,8 @@
  * @version 1.0
  */
 
-// const municipalidadConfig = require('../config/municipalidad.config.sanjosedelassalinas.js');
-const municipalidadConfig = require('../config/municipalidad.config.manzano.js');
+// Configuración centralizada - cambiar municipio en .env (MUNICIPIO=xxx)
+const { municipalidad: municipalidadConfig } = require('../config');
 
 /**
  * Formatea un número como moneda argentina
@@ -94,9 +94,11 @@ function procesarConceptos(conceptos) {
       anio: concepto.anio || concepto.Anio || '-',
       importe: formatearMoneda(importe),
       importeNumerico: importe, // Para cálculos
-      interes: formatearMoneda(Math.abs(interes)),
+      // Si interés < 0 es descuento: mostrar con signo negativo
+      interes: interes < 0 ? '-' + formatearMoneda(Math.abs(interes)) : formatearMoneda(interes),
       interesNumerico: interes, // Para cálculos (con signo)
-      interesClase: interes >= 0 ? 'interes-negativo' : 'descuento-positivo',
+      // Cargo (>= 0) = negro, Descuento (< 0) = verde
+      interesClase: interes < 0 ? 'ticket__value--discount' : 'ticket__value--interest',
       total: formatearMoneda(total),
       totalNumerico: total // Para cálculos
     };
