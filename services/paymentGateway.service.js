@@ -9,13 +9,13 @@
 
 const axios = require('axios');
 
+// Configuración centralizada - cambiar municipio en .env (MUNICIPIO=xxx)
+const { municipalidad: municipalidadConfig, MUNICIPIO } = require('../config');
+
 // Configuración desde variables de entorno
 const API_GATEWAY_URL = process.env.API_GATEWAY_URL || 'http://localhost:3000';
-const MUNICIPIO_ID = process.env.MUNICIPIO_ID || 'manzano';
+const MUNICIPIO_ID = process.env.MUNICIPIO_ID || MUNICIPIO;
 const FRONTEND_PUBLIC_URL = process.env.FRONTEND_PUBLIC_URL || 'http://localhost:4000';
-
-// Cargar configuración del municipio
-const municipalidadConfig = require('../config/municipalidad.config.manzano');
 
 /**
  * Crea una preferencia de pago en el API Gateway
@@ -63,14 +63,14 @@ async function createPayment(paymentData) {
       telefono: contribuyente.telefono || ''
     },
     conceptos: conceptos.map(c => ({
-      id: String(c.IdTrans),
+      id: String(c.IdTrans || c.id),
       descripcion: c.Detalle || c.descripcion || 'Concepto municipal',
       monto: Number(c.Total || c.monto || 0)
     })),
     monto_total: Number(montoTotal),
     callback_url: `${FRONTEND_PUBLIC_URL}/api/pagos/confirmacion`,
     metadata: {
-      conceptos_ids: conceptos.map(c => c.IdTrans),
+      conceptos_ids: conceptos.map(c => c.IdTrans || c.id),
       contribuyente_dni: contribuyente.dni
     }
   };

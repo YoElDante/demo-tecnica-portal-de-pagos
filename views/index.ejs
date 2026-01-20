@@ -4,79 +4,85 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- <link rel="icon" type="image/ico" href="/images/ISOLOGOTIPO-EL_MANZANO.webp"> -->
-  <link rel="icon" type="image/jpg" href="/images/logo_El_Manzano.jpg">
+  <link rel="icon" type="image/webp" href="<%= municipalidad.logos.principal %>">
+
+  <!-- Fuentes Google (consistentes con sitio oficial ALCALD+IA) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <!-- Estilos principales del portal -->
   <link rel="stylesheet" href="/stylesheets/styles.css">
+  <!-- Estilos del componente Ticket (independiente) -->
+  <link rel="stylesheet" href="/stylesheets/ticket.css">
 
   <!-- Librería para generación de PDF vectorial -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <script src="/javascripts/deudas.js" defer></script>
-  <title><%= title %></title>
+  <title><%= title %> - <%= municipalidad.nombre %></title>
 </head>
 
 <body>
   <!-- ============================================
        HEADER
        ============================================ -->
-  <header>
-    <div class="logo">
-      <!-- <img src="/images/sanjosedelassalinas.webp" alt="Icono Header"> -->
-      <img src="/images/ISOLOGOTIPO-EL_MANZANO.webp" alt="Icono Header">
+  <header class="header">
+    <div class="header__logo">
+      <img src="<%= municipalidad.logos.principal %>" alt="Logo <%= municipalidad.nombre %>" class="header__logo-img">
     </div>
-    <div class="titulo-header">
-      <!-- <h2>Municipalidad de<br>San José de las Salinas</h2> -->
-      <h2>Portal de Pago<br>Comuna de El Manzano</h2>
+    <div class="header__title">
+      <h2>Portal de Pago<br><%= municipalidad.nombreCompleto %></h2>
     </div>
-    <div class="header-icon">
-      <img src="/images/alcaldiaLogo.webp" alt="Logo Alcald+IA">
+    <div class="header__icon">
+      <img src="<%= municipalidad.logos.secundario %>" alt="Logo Alcald+IA" class="header__icon-img">
     </div>
   </header>
 
   <!-- ============================================
        CONTENIDO PRINCIPAL
        ============================================ -->
-  <main>
+  <main class="main">
     <!-- Formulario de búsqueda -->
-    <section class="form-section">
-      <h1>Sistema de Pago Online</h1>
+    <section class="form">
+      <h1 class="form__title">Sistema de Pago Online</h1>
       <br>
-      <h2>Datos del Contribuyente</h2>
+      <h2 class="form__subtitle">Datos del Contribuyente</h2>
 
-      <form action="/buscar" method="POST">
-        <div class="form-group">
-          <label for="dni">DNI (7-10 dígitos)</label>
-          <div class="input-wrapper">
-            <input type="text" id="dni" name="dni" pattern="\d{7,10}" minlength="7" maxlength="10" title="El DNI debe tener entre 7 y 10 números" placeholder="Ingrese su número de DNI" value="<%= typeof dni !== 'undefined' ? dni : '' %>" required oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-            <button type="submit" class="btn buscar">Buscar</button>
+      <form action="/buscar" method="POST" class="form__content">
+        <div class="form__group">
+          <label for="dni" class="form__label">DNI (7-10 dígitos)</label>
+          <div class="form__input-wrapper">
+            <input type="text" id="dni" name="dni" pattern="\d{7,10}" minlength="7" maxlength="10" title="El DNI debe tener entre 7 y 10 números" placeholder="Ingrese su número de DNI" value="<%= typeof dni !== 'undefined' ? dni : '' %>" required oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="form__input">
+            <button type="submit" class="btn btn--search">Buscar</button>
           </div>
           <% if (typeof mensaje !== 'undefined' && mensaje) { %>
-          <span class="error-message"><%= mensaje %></span>
+          <span class="form__error"><%= mensaje %></span>
           <% } %>
         </div>
 
-        <div class="form-group">
-          <label for="nombre">Nombre Completo</label>
-          <input type="text" id="nombre" name="nombre" value="<%= clienteNoEncontrado ? 'Contribuyente no encontrado' : (cliente ? (cliente.Nombre + ' ' + cliente.Apellido) : '') %>" placeholder="Nombre del contribuyente" class="<%= clienteNoEncontrado ? 'cliente-no-encontrado' : '' %>" readonly>
+        <div class="form__group">
+          <label for="nombre" class="form__label">Nombre Completo</label>
+          <input type="text" id="nombre" name="nombre" value="<%= clienteNoEncontrado ? 'Contribuyente no encontrado' : (cliente ? (cliente.Nombre + ' ' + cliente.Apellido) : '') %>" placeholder="Nombre del contribuyente" class="form__input <%= clienteNoEncontrado ? 'form__input--not-found' : '' %>" readonly>
         </div>
       </form>
     </section>
 
     <!-- Tabla de deudas -->
     <% if (typeof deudas !== 'undefined') { %>
-    <section class="tabla-section">
-      <h2>Detalle de Boletas</h2>
-      <p style="margin: 10px 0; color: #555; font-weight: 500;">Seleccione los conceptos a abonar:</p>
+    <section class="deudas">
+      <h2 class="deudas__title">Detalle de Boletas</h2>
+      <p class="deudas__subtitle">Seleccione los conceptos a abonar:</p>
 
       <% const TIPO_DESCRIPCIONES = typeof tipoDescripciones !== 'undefined' ? tipoDescripciones : {}; %>
       <% const TIPO_ICONOS = typeof tipoIconos !== 'undefined' ? tipoIconos : {}; %>
 
-      <div style="margin: 0 0 1rem 0; display:flex; gap:1rem; align-items:center; flex-wrap:wrap;">
-        <label for="filtro-tipo" style="font-weight:600;">Filtrar por Tipo:</label>
+      <div class="deudas__filter">
+        <label for="filtro-tipo" class="deudas__filter-label">Filtrar por Tipo:</label>
         <% if ((tiposDeuda || []).length === 0) { %>
-        <small style="color:#555;">No hay tipos diferenciados en esta búsqueda.</small>
+        <small class="deudas__filter-empty">No hay tipos diferenciados en esta búsqueda.</small>
         <% } %>
-        <select id="filtro-tipo" class="filtro-tipo" style="padding:0.4rem 0.6rem; border:1px solid #19a8b6; border-radius:6px;">
+        <select id="filtro-tipo" class="deudas__filter-select">
           <option value="">Todas</option>
           <% (tiposDeuda || []).forEach(t => { %>
           <option value="<%= t %>"><%= TIPO_ICONOS[t] %> <%= TIPO_DESCRIPCIONES[t] || t %></option>
@@ -84,20 +90,20 @@
         </select>
       </div>
 
-      <div id="resumen-deudas" style="margin: 0 0 1rem 0; color:#333; font-weight:600;">
+      <div id="resumen-deudas" class="deudas__summary">
         Deudas: <span id="contador-deudas-total"><%= (deudas || []).length %></span> |
         Seleccionadas: <span id="contador-deudas-seleccionadas"><%= (deudas || []).length %></span>
       </div>
 
-      <div class="tabla-wrapper">
-        <table>
+      <div class="deudas__wrapper">
+        <table class="deudas__table">
           <thead>
-            <tr class="seleccionar-todos-row">
+            <tr class="deudas__row--select-all">
               <th style="text-align: center;">
-                <input type="checkbox" id="checkbox-todos" checked>
+                <input type="checkbox" id="checkbox-todos" class="deudas__checkbox" checked>
               </th>
               <th colspan="7" style="text-align: left; padding-left: 1rem;">
-                <label for="checkbox-todos" style="cursor: pointer; user-select: none; font-weight: 500;">
+                <label for="checkbox-todos">
                   Seleccionar/Deseleccionar Todo
                 </label>
               </th>
@@ -117,21 +123,21 @@
           <tbody>
             <% if ((deudas || []).length === 0) { %>
             <tr>
-              <td colspan="8" style="text-align:center; color:#555; padding:1rem 0;">No tiene deudas pendientes.</td>
+              <td colspan="8" class="deudas__empty">No tiene deudas pendientes.</td>
             </tr>
             <% } %>
             <% (deudas || []).forEach((deuda, index) => { %>
-            <tr data-tipo="<%= deuda.Tipo %>">
+            <tr data-tipo="<%= deuda.Tipo %>" data-idtrans="<%= deuda.IdTrans %>">
               <td style="text-align: center;">
-                <input type="checkbox" class="checkbox-deuda" data-total="<%= deuda.Total %>" checked>
+                <input type="checkbox" class="deudas__checkbox" data-total="<%= deuda.Total %>" data-idtrans="<%= deuda.IdTrans %>" checked>
               </td>
               <td><%= deuda.FechaVto ? new Date(deuda.FechaVto).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '-' %></td>
-              <td><span class="tipo-icono"><%= deuda.TipoIcono %></span><%= deuda.TipoDescripcion %><% if (deuda.Detalle) { %> - <%= deuda.Detalle %><% } %></td>
+              <td><span class="deudas__type-icon"><%= deuda.TipoIcono %></span><%= deuda.TipoDescripcion %><% if (deuda.Detalle) { %> - <%= deuda.Detalle %><% } %></td>
               <td><%= deuda.Cuota || '-' %></td>
               <td><%= deuda.Anio || '-' %></td>
               <td>$ <%= deuda.Importe.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
-              <td class="<%= deuda.Interes >= 0 ? 'interes-negativo' : 'descuento-positivo' %>">
-                $ <%= Math.abs(deuda.Interes).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+              <td class="<%= deuda.Interes >= 0 ? 'deudas__value--interest' : 'deudas__value--discount' %>">
+                <%= deuda.Interes < 0 ? '-' : '' %>$ <%= Math.abs(deuda.Interes).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
               </td>
               <td>$ <%= deuda.Total.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
             </tr>
@@ -139,9 +145,9 @@
           </tbody>
 
           <tfoot>
-            <tr class="total-row">
+            <tr class="deudas__row--total">
               <td colspan="7" style="text-align: right;"><strong>Total a Pagar:</strong></td>
-              <td><strong id="total-final">$ <%= totalGeneral ? totalGeneral.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00' %></strong></td>
+              <td><strong id="total-final" class="deudas__total">$ <%= totalGeneral ? totalGeneral.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00' %></strong></td>
             </tr>
           </tfoot>
         </table>
@@ -151,14 +157,14 @@
 
     <!-- Botones de acción -->
     <% if (deudas && deudas.length > 0) { %>
-    <section class="ticket-actions">
-      <button class="btn-ticket btn-generar-ticket" id="btn-generar-ticket">
+    <section class="actions">
+      <button class="btn btn--ticket btn--generate" id="btn-generar-ticket">
         📄 Generar Ticket
       </button>
-      <button class="btn-ticket btn-descargar-pdf" id="btn-descargar-pdf" disabled>
+      <button class="btn btn--ticket btn--download" id="btn-descargar-pdf" disabled>
         💾 Descargar PDF
       </button>
-      <button class="btn qr" id="generate-qr" onclick="mostrarQR()">
+      <button class="btn btn--qr" id="generate-qr" onclick="mostrarQR()">
         📱 Generar QR
       </button>
     </section>
@@ -169,51 +175,175 @@
     </div>
 
     <!-- Botones de acción POST-TICKET (aparecen después de generar el ticket) -->
-    <section class="ticket-actions ticket-actions-bottom" id="ticket-actions-bottom" style="display: none;">
-      <button class="btn-ticket btn-descargar-pdf" id="btn-descargar-pdf-bottom">
+    <section class="actions actions--bottom" id="ticket-actions-bottom" style="display: none;">
+      <button class="btn btn--ticket btn--download" id="btn-descargar-pdf-bottom">
         💾 Descargar PDF
       </button>
-      <button class="btn qr" id="generate-qr-bottom" onclick="mostrarQR()">
+      <button class="btn btn--qr" id="generate-qr-bottom" onclick="mostrarQR()">
         📱 Generar QR
       </button>
-      <button class="btn-ticket btn-volver-arriba" id="btn-volver-arriba" onclick="volverArriba()">
+      <button class="btn btn--ticket btn--back" id="btn-volver-arriba" onclick="volverArriba()">
         ⬆️ Volver Arriba
       </button>
     </section>
     <% } %>
 
-    <!-- Contenedor del código QR -->
-    <div class="qr-container">
-      <img class="imgqr" id="qr-image" src="/images/qr_mercado.webp" alt="QR Code" style="display:none;" />
-      <a id="pay-button" href="https://mercadopago.com.ar" style="display:none;" class="btn-ticket btn-pagar" target="_blank">
-        💳 Ir a Pagar
-      </a>
+    <!-- Contenedor del código QR y botón de pago -->
+    <div class="qr" id="qr-container" style="display:none;">
+      <img class="qr__image" id="qr-image" src="/images/qr_mercado.webp" alt="QR Code" />
+      <button id="pay-button" class="btn btn--ticket btn--pay" onclick="iniciarPagoMercadoPago()">
+        💳 Ir a Pagar con MercadoPago
+      </button>
+      <p id="pago-loading" class="qr__loading" style="display:none;">⏳ Procesando pago...</p>
     </div>
 
     <!-- Botón Generar QR (se oculta después de generarlo) -->
     <% if (deudas && deudas.length > 0 && false) { %>
-    <section class="botones">
-      <button class="btn qr" id="generate-qr-old" onclick="mostrarQR()">Generar QR</button>
+    <section class="actions">
+      <button class="btn btn--qr" id="generate-qr-old" onclick="mostrarQR()">Generar QR</button>
     </section>
     <% } %>
   </main>
 
   <script>
+    // Datos del contribuyente desde el servidor
+    const contribuyenteData = {
+      dni: '<%= cliente ? cliente.Codigo : "" %>',
+      nombre: '<%= cliente ? (cliente.Nombre + " " + cliente.Apellido).trim() : "" %>',
+      email: '<%= cliente ? (cliente.Email || "") : "" %>'
+    };
+
     function mostrarQR() {
+      const qrContainer = document.getElementById('qr-container');
       const qrImage = document.getElementById('qr-image');
       const payButton = document.getElementById('pay-button');
 
-      // Mostrar imagen QR y botón de pagar
+      // Mostrar contenedor con QR y botón de pagar
+      qrContainer.style.display = 'flex';
       qrImage.style.display = 'block';
       payButton.style.display = 'block';
 
       // Scroll suave al QR
       setTimeout(() => {
-        qrImage.scrollIntoView({
+        qrContainer.scrollIntoView({
           behavior: 'smooth',
           block: 'center'
         });
       }, 100);
+    }
+
+    /**
+     * Recopila los IDs de transacción de las deudas seleccionadas
+     * @returns {Array<number>} Array de IdTrans seleccionados
+     */
+    function recopilarIdTransSeleccionados() {
+      const checkboxes = document.querySelectorAll('.deudas__checkbox:checked');
+      const ids = [];
+
+      checkboxes.forEach(cb => {
+        const fila = cb.closest('tr');
+        if (fila && fila.style.display !== 'none') {
+          const idTrans = parseInt(cb.dataset.idtrans);
+          if (idTrans) ids.push(idTrans);
+        }
+      });
+
+      return ids;
+    }
+
+    /**
+     * Inicia el proceso de pago con MercadoPago
+     */
+    async function iniciarPagoMercadoPago() {
+      const payButton = document.getElementById('pay-button');
+      const loadingMsg = document.getElementById('pago-loading');
+
+      // Recopilar conceptos seleccionados
+      const conceptosIds = recopilarIdTransSeleccionados();
+
+      if (conceptosIds.length === 0) {
+        alert('Por favor, seleccione al menos un concepto para pagar.');
+        return;
+      }
+
+      // Obtener el total desde la UI
+      const totalElement = document.getElementById('total-final');
+      const totalText = totalElement?.textContent.replace(/[^\d,.-]/g, '').replace(',', '.') || '0';
+      const montoTotal = parseFloat(totalText);
+
+      if (montoTotal <= 0) {
+        alert('El monto total debe ser mayor a cero.');
+        return;
+      }
+
+      // Recopilar conceptos con detalle para el API
+      const conceptos = recopilarConceptosParaPago();
+
+      // Mostrar loading
+      payButton.disabled = true;
+      payButton.style.display = 'none';
+      loadingMsg.style.display = 'block';
+
+      try {
+        const response = await fetch('/pago/iniciar', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            contribuyente: contribuyenteData,
+            conceptos: conceptos,
+            montoTotal: montoTotal
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.redirect_url) {
+          // Redirigir a MercadoPago
+          window.location.href = data.redirect_url;
+        } else {
+          throw new Error(data.message || 'Error al iniciar el pago');
+        }
+      } catch (error) {
+        console.error('Error al iniciar pago:', error);
+        alert('Error al procesar el pago: ' + error.message);
+
+        // Restaurar botón
+        payButton.disabled = false;
+        payButton.style.display = 'block';
+        loadingMsg.style.display = 'none';
+      }
+    }
+
+    /**
+     * Recopila los conceptos seleccionados con formato para el API
+     * @returns {Array} Array de conceptos para enviar al backend
+     */
+    function recopilarConceptosParaPago() {
+      const checkboxes = document.querySelectorAll('.deudas__checkbox:checked');
+      const conceptos = [];
+
+      checkboxes.forEach(cb => {
+        const fila = cb.closest('tr');
+        if (fila && fila.style.display !== 'none') {
+          const celdas = fila.querySelectorAll('td');
+          const idTrans = parseInt(cb.dataset.idtrans);
+          const total = parseFloat(cb.dataset.total || '0');
+
+          // Extraer descripción del concepto
+          const detalleCell = celdas[2];
+          const descripcion = detalleCell ? detalleCell.textContent.trim() : 'Concepto';
+
+          conceptos.push({
+            id: idTrans,
+            descripcion: descripcion,
+            monto: total
+          });
+        }
+      });
+
+      return conceptos;
     }
 
     function volverArriba() {
@@ -228,8 +358,8 @@
   <!-- ============================================
        FOOTER
        ============================================ -->
-  <footer>
-    <p>&copy; Power by Alcald+IA. Todos los derechos reservados.</p>
+  <footer class="footer">
+    <p class="footer__text">&copy; Power by Alcald+IA. Todos los derechos reservados.</p>
   </footer>
 
 </body>

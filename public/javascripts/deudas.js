@@ -9,7 +9,7 @@
 // ============================================
 
 function actualizarTotal() {
-  const checkboxes = document.querySelectorAll('.checkbox-deuda:checked');
+  const checkboxes = document.querySelectorAll('.deudas__checkbox:checked');
   let total = 0;
 
   checkboxes.forEach(cb => {
@@ -31,7 +31,7 @@ function actualizarCheckboxTodos() {
   const checkboxTodos = document.getElementById('checkbox-todos');
   if (!checkboxTodos) return;
   const filasVisibles = document.querySelectorAll('tbody tr[data-tipo]:not([style*="display: none"])');
-  const checkboxesVisibles = Array.from(filasVisibles).map(f => f.querySelector('.checkbox-deuda')).filter(Boolean);
+  const checkboxesVisibles = Array.from(filasVisibles).map(f => f.querySelector('.deudas__checkbox')).filter(Boolean);
   const marcadosVisibles = checkboxesVisibles.filter(cb => cb.checked);
   if (checkboxesVisibles.length > 0) {
     checkboxTodos.checked = checkboxesVisibles.length === marcadosVisibles.length;
@@ -44,7 +44,7 @@ function toggleTodos() {
   const checkboxTodos = document.getElementById('checkbox-todos');
   const filasVisibles = document.querySelectorAll('tbody tr[data-tipo]:not([style*="display: none"])');
   filasVisibles.forEach(fila => {
-    const cb = fila.querySelector('.checkbox-deuda');
+    const cb = fila.querySelector('.deudas__checkbox');
     if (cb) cb.checked = checkboxTodos.checked;
   });
   actualizarTotal();
@@ -55,7 +55,7 @@ function actualizarContadores() {
   const totalVisibles = filasVisibles.length;
   let seleccionadasVisibles = 0;
   filasVisibles.forEach(fila => {
-    const cb = fila.querySelector('.checkbox-deuda');
+    const cb = fila.querySelector('.deudas__checkbox');
     if (cb && cb.checked) seleccionadasVisibles++;
   });
   const totalEl = document.getElementById('contador-deudas-total');
@@ -88,7 +88,7 @@ function parsearFechaParaOrden(fechaStr) {
  * @returns {Array} Array de conceptos seleccionados ordenados por tipo y fecha descendente
  */
 function recopilarConceptosSeleccionados() {
-  const checkboxes = document.querySelectorAll('.checkbox-deuda:checked');
+  const checkboxes = document.querySelectorAll('.deudas__checkbox:checked');
   const conceptos = [];
 
   checkboxes.forEach(cb => {
@@ -173,8 +173,10 @@ function extraerNumero(texto) {
 function extraerNumeroConSigno(celda) {
   if (!celda) return 0;
   const valor = extraerNumero(celda.textContent);
-  const esNegativo = celda.classList.contains('interes-negativo');
-  return esNegativo ? valor : -valor;
+  // Si tiene clase BEM de descuento o contiene signo '-', es negativo (descuento)
+  const esDescuento = celda.classList.contains('deudas__value--discount') ||
+    celda.textContent.includes('-$');
+  return esDescuento ? -valor : valor;
 }
 
 /**
@@ -213,7 +215,7 @@ async function generarTicket() {
     // Mostrar indicador de carga
     const container = document.getElementById('ticket-preview-container');
     if (container) {
-      container.innerHTML = '<div class="ticket-loading">Generando ticket...</div>';
+      container.innerHTML = '<div class=\"ticket--loading\">Generando ticket...</div>';
       container.style.display = 'block';
     }
 
@@ -321,7 +323,7 @@ async function descargarPDF() {
 
     // Intentar cargar el logo como imagen base64
     let logoData = null;
-    const logoImg = document.querySelector('.ticket-logo img');
+    const logoImg = document.querySelector('.ticket__logo-img');
     if (logoImg) {
       try {
         const canvas = document.createElement('canvas');
@@ -337,7 +339,7 @@ async function descargarPDF() {
 
     // Intentar cargar el logo de Alcald+IA para el recuadro IMPORTANTE
     let logoAlcaldiaData = null;
-    const logoAlcaldiaImg = document.querySelector('.header-icon img');
+    const logoAlcaldiaImg = document.querySelector('.header__icon-img');
     if (logoAlcaldiaImg) {
       try {
         const canvas = document.createElement('canvas');
@@ -352,7 +354,7 @@ async function descargarPDF() {
     }
 
     // Obtener todas las páginas del ticket
-    const paginas = container.querySelectorAll('.ticket-page');
+    const paginas = container.querySelectorAll('.ticket__page');
 
     for (let i = 0; i < paginas.length; i++) {
       const pagina = paginas[i];
@@ -372,13 +374,13 @@ async function descargarPDF() {
       }
 
       // Título de la municipalidad (centrado, al lado del logo)
-      const titulo = pagina.querySelector('.ticket-title h1')?.textContent?.trim() || 'Municipalidad';
+      const titulo = pagina.querySelector('.ticket__title h1')?.textContent?.trim() || 'Municipalidad';
       pdf.setFontSize(16);
       pdf.setFont('helvetica', 'bold');
       pdf.text(titulo, pageWidth / 2, y + 8, { align: 'center' });
 
       // Fecha de emisión (derecha, una línea debajo del título)
-      const fechaEmision = pagina.querySelector('.ticket-fecha-valor')?.textContent?.trim() || '';
+      const fechaEmision = pagina.querySelector('.ticket__fecha-valor')?.textContent?.trim() || '';
       pdf.setFontSize(9);
       pdf.setFont('helvetica', 'normal');
       pdf.text(`Fecha: ${fechaEmision}`, pageWidth - margin, y + 14, { align: 'right' });
@@ -394,7 +396,7 @@ async function descargarPDF() {
       pdf.line(margin, y, pageWidth - margin, y);
 
       // === DIRECCIÓN DEL MUNICIPIO (CENTRADA VERTICALMENTE) ===
-      const direccionItems = pagina.querySelectorAll('.ticket-direccion p');
+      const direccionItems = pagina.querySelectorAll('.ticket__direccion p');
       pdf.setFontSize(9);
       let direccionTexto = '';
       direccionItems.forEach((p, idx) => {
@@ -407,8 +409,8 @@ async function descargarPDF() {
       // Línea separadora
       pdf.line(margin, y, pageWidth - margin, y);
       // === DATOS DEL CONTRIBUYENTE (CENTRADOS VERTICALMENTE) ===
-      const contribuyenteNombre = pagina.querySelector('.ticket-contribuyente p:first-child')?.textContent?.trim() || '';
-      const contribuyenteDni = pagina.querySelector('.ticket-contribuyente p:last-child')?.textContent?.trim() || '';
+      const contribuyenteNombre = pagina.querySelector('.ticket__contribuyente p:first-child')?.textContent?.trim() || '';
+      const contribuyenteDni = pagina.querySelector('.ticket__contribuyente p:last-child')?.textContent?.trim() || '';
       pdf.setFontSize(10);
       pdf.setFont('helvetica', 'bold');
       // Centrar ambos datos en una línea, centrado verticalmente entre las líneas
@@ -422,7 +424,7 @@ async function descargarPDF() {
       y += 5;
 
       // Resumen de conceptos (solo cantidad, sin número de ticket que ya está arriba)
-      const resumen = pagina.querySelector('.ticket-resumen');
+      const resumen = pagina.querySelector('.ticket__resumen');
       if (resumen) {
         // Extraer solo "Conceptos en ticket: X" sin el número de ticket
         const conceptosSpan = resumen.querySelector('span:first-child');
@@ -436,7 +438,7 @@ async function descargarPDF() {
       }
 
       // === TABLA ===
-      const tabla = pagina.querySelector('.ticket-table');
+      const tabla = pagina.querySelector('.ticket__table');
       if (tabla) {
         // Anchos de columnas (en mm) - ajustados para A4 con más espacio
         const colWidths = [20, 60, 14, 14, 26, 26, 26]; // Total: 186mm
@@ -543,8 +545,8 @@ async function descargarPDF() {
 
       // === FOOTER ===
       // Mensaje de validez (SIN ICONO) + Nota de conservar comprobante
-      const validez = pagina.querySelector('.ticket-validez p');
-      const nota = pagina.querySelector('.ticket-nota p');
+      const validez = pagina.querySelector('.ticket__validez p');
+      const nota = pagina.querySelector('.ticket__nota p');
 
       if (validez) {
         // Obtener texto sin el emoji/icono y sin "IMPORTANTE:" duplicado
@@ -609,7 +611,7 @@ async function descargarPDF() {
       }
 
       // Paginación - siempre al pie de página, fuera de la caja
-      const paginacion = pagina.querySelector('.ticket-paginacion p');
+      const paginacion = pagina.querySelector('.ticket__paginacion p');
       if (paginacion) {
         pdf.setFontSize(8);
         pdf.setFont('helvetica', 'normal');
@@ -653,7 +655,7 @@ document.addEventListener('DOMContentLoaded', function () {
   actualizarTotal();
 
   // Agregar listeners a todos los checkboxes de deudas
-  const checkboxes = document.querySelectorAll('.checkbox-deuda');
+  const checkboxes = document.querySelectorAll('.deudas__checkbox');
   checkboxes.forEach(cb => {
     cb.addEventListener('change', actualizarTotal);
   });

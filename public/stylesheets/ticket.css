@@ -1,0 +1,1744 @@
+/**
+ * Estilos del Ticket de Pago - Componente Independiente
+ * Metodología BEM (Block Element Modifier)
+ * Mobile-first, formato A4 para impresión
+ * 
+ * @author Dante Marcos Delprato
+ * @version 2.0 - BEM
+ * @date 2026-01-19
+ * 
+ * Estructura BEM:
+ * - Bloque: .ticket
+ * - Elementos: .ticket__header, .ticket__body, .ticket__footer, etc.
+ * - Modificadores: .ticket--loading, .ticket__row--subtotal, etc.
+ */
+
+/* ============================================
+   VARIABLES DEL TICKET
+   ============================================ */
+:root {
+  /* Colores del ticket */
+  --ticket-bg: #ffffff;
+  --ticket-border: #000000;
+  --ticket-border-light: #dddddd;
+  --ticket-text: #000000;
+  --ticket-text-muted: #999999;
+  --ticket-success: #28a745;
+  --ticket-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  /* Tipografía del ticket */
+  --ticket-font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --ticket-font-size-base: smaller;
+  --ticket-font-size-small: x-small;
+  --ticket-font-size-title: 1.3rem;
+
+  /* Espaciado del ticket */
+  --ticket-padding: 1rem;
+  --ticket-gap: 1rem;
+}
+
+/* ============================================
+   BLOQUE PRINCIPAL: .ticket
+   Componente totalmente aislado e independiente
+   ============================================ */
+.ticket {
+  max-width: 100%;
+  margin: 2rem auto;
+  background-color: var(--ticket-bg);
+  border: 1px solid var(--ticket-border-light);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--ticket-shadow);
+  font-family: var(--ticket-font-family);
+}
+
+/*
+ * RESET DE ESTILOS HEREDADOS
+ * Asegura que el ticket sea completamente independiente
+ * de los estilos de la página principal
+ */
+.ticket h1,
+.ticket h2,
+.ticket h3,
+.ticket h4,
+.ticket h5,
+.ticket h6 {
+  font-family: var(--ticket-font-family);
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--ticket-text);
+  margin: 0;
+  padding: 0;
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: unset;
+  background-clip: unset;
+}
+
+.ticket p {
+  font-family: var(--ticket-font-family);
+  margin: 0;
+  padding: 0;
+}
+
+/* Modificador: Estado de carga */
+.ticket--loading {
+  text-align: center;
+  padding: 2rem;
+  color: var(--ticket-text-muted);
+}
+
+.ticket--loading::before {
+  content: '⏳ ';
+  font-size: 1.5rem;
+}
+
+/* ============================================
+   ELEMENTO: .ticket__page
+   Página individual (formato A4)
+   ============================================ */
+.ticket__page {
+  background: var(--ticket-bg);
+  padding: var(--ticket-padding);
+  page-break-after: always;
+  position: relative;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* ============================================
+   ELEMENTO: .ticket__header
+   Encabezado del ticket - COMPLETAMENTE INDEPENDIENTE
+   No hereda estilos del header de la página principal
+   ============================================ */
+.ticket__header {
+  display: block;
+  flex-wrap: wrap;
+  border-bottom: 2px solid var(--ticket-border);
+  margin-bottom: 0.75rem;
+  background-color: var(--ticket-bg);
+  /* Resetear cualquier estilo heredado de header global */
+  padding: 0;
+  position: static;
+  box-shadow: none;
+  background-image: none;
+}
+
+/* Sub-elemento: Primera línea (Logo - Nombre - Fecha) */
+.ticket__header-top {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--ticket-gap);
+  align-items: center;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--ticket-border);
+  width: 100%;
+}
+
+/* Sub-elemento: Logo */
+.ticket__logo {
+  width: 60px;
+  height: 60px;
+}
+
+.ticket__logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Sub-elemento: Título */
+.ticket__title {
+  text-align: center;
+  flex: 1;
+}
+
+.ticket__title h1 {
+  margin: 0;
+  font-size: var(--ticket-font-size-title);
+  color: var(--ticket-text);
+  font-weight: 700;
+  font-family: var(--ticket-font-family);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.ticket__subtitle {
+  margin: 0.2rem 0 0;
+  font-size: 0.9rem;
+  color: var(--ticket-text);
+}
+
+/* Sub-elemento: Fecha */
+.ticket__fecha {
+  text-align: right;
+  font-size: small;
+  white-space: nowrap;
+}
+
+.ticket__fecha-label {
+  margin: 0;
+  font-weight: 600;
+  color: var(--ticket-text);
+}
+
+.ticket__fecha-valor {
+  margin: 0.2rem 0 0;
+  font-weight: 400;
+  color: var(--ticket-text);
+  font-size: smaller;
+}
+
+/* Sub-elemento: Info del municipio */
+.ticket__header-info {
+  background-color: var(--ticket-bg);
+  padding: 0.75rem 0;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid var(--ticket-border);
+  width: 100%;
+}
+
+.ticket__direccion {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--ticket-gap);
+  width: 100%;
+}
+
+.ticket__direccion p {
+  margin: 0;
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
+  color: var(--ticket-text);
+  white-space: nowrap;
+  flex: 0 1 auto;
+}
+
+/* Sub-elemento: Datos del contribuyente */
+.ticket__contribuyente {
+  background-color: var(--ticket-bg);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2rem;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: clamp(0rem, (100vw - 768px) * 100, 1rem);
+}
+
+.ticket__contribuyente p {
+  margin: 0;
+  font-size: var(--ticket-font-size-small);
+  color: var(--ticket-text);
+}
+
+.ticket__contribuyente p:first-child {
+  text-align: left;
+}
+
+.ticket__contribuyente p:last-child {
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* ============================================
+   ELEMENTO: .ticket__body
+   Cuerpo del ticket (tabla de conceptos)
+   ============================================ */
+.ticket__body {
+  margin: 0.75rem 0;
+}
+
+.ticket__resumen {
+  font-size: var(--ticket-font-size-small);
+  margin: 0.25rem 0;
+  color: var(--ticket-text);
+  display: flex;
+  justify-content: space-between;
+}
+
+/* ============================================
+   ELEMENTO: .ticket__table
+   Tabla de conceptos
+   ============================================ */
+.ticket__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--ticket-font-size-base);
+  color: var(--ticket-text);
+  table-layout: fixed;
+}
+
+.ticket__table thead {
+  background-color: var(--ticket-bg);
+  color: var(--ticket-text);
+  border-bottom: 2px solid var(--ticket-border);
+}
+
+.ticket__table th {
+  padding: 0.35rem;
+  text-align: left;
+  font-weight: 600;
+  border: none;
+}
+
+.ticket__table td {
+  padding: 0.35rem;
+  border: none;
+  border-bottom: none;
+}
+
+.ticket__table tbody tr:nth-child(even) {
+  background-color: var(--ticket-bg);
+}
+
+.ticket__table tbody tr:hover {
+  background-color: var(--ticket-bg);
+}
+
+.ticket__table tfoot {
+  background-color: var(--ticket-bg);
+  font-weight: 600;
+}
+
+/* Columna: Fecha Vto. (1ra) */
+.ticket__table th:nth-child(1),
+.ticket__table td:nth-child(1) {
+  text-align: left !important;
+  width: 54px;
+  min-width: 50px;
+  max-width: 60px;
+  white-space: nowrap;
+}
+
+/* Columna: Detalle (2da) */
+.ticket__table th:nth-child(2),
+.ticket__table td:nth-child(2) {
+  width: auto;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+/* Columna: Cuota (3ra) */
+.ticket__table th:nth-child(3),
+.ticket__table td:nth-child(3) {
+  text-align: right !important;
+  width: 40px;
+  min-width: 36px;
+  max-width: 46px;
+  white-space: nowrap;
+}
+
+/* Columna: Año (4ta) */
+.ticket__table th:nth-child(4),
+.ticket__table td:nth-child(4) {
+  width: 42px;
+  min-width: 38px;
+  max-width: 48px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Columnas numéricas: Importe, Int/Dto, Total (5, 6, 7) */
+.ticket__table th:nth-child(5),
+.ticket__table td:nth-child(5),
+.ticket__table th:nth-child(6),
+.ticket__table td:nth-child(6),
+.ticket__table th:nth-child(7),
+.ticket__table td:nth-child(7) {
+  width: 72px;
+  min-width: 70px;
+  max-width: 80px;
+  white-space: nowrap;
+}
+
+/* Modificador: Alineación derecha */
+.ticket__col--right {
+  text-align: right !important;
+}
+
+/* Elemento: Celda de detalle */
+.ticket__detalle {
+  max-width: 280px;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+}
+
+/* Modificador: Interés - color negro */
+.ticket__value--interest {
+  color: var(--ticket-text);
+}
+
+/* Modificador: Descuento positivo */
+.ticket__value--discount {
+  color: var(--ticket-success);
+}
+
+/* Fila: Subtotal */
+.ticket__row--subtotal td {
+  padding: 0.75rem 0.5rem;
+  border-top: 2px solid var(--ticket-border);
+  border-bottom: none;
+}
+
+/* Fila: Total */
+.ticket__row--total {
+  background-color: var(--ticket-bg) !important;
+}
+
+.ticket__row--total td {
+  padding: 0.9rem 0.5rem;
+  font-size: 1rem;
+  border-top: 3px double var(--ticket-border);
+  border-bottom: none;
+  text-align: center;
+}
+
+/* ============================================
+   ELEMENTO: .ticket__footer
+   Pie del ticket
+   ============================================ */
+.ticket__footer {
+  padding-top: 1rem;
+  border-top: 2px solid var(--ticket-border);
+  padding-bottom: 1rem;
+}
+
+.ticket__validez {
+  background-color: var(--ticket-bg);
+  border: 1px solid var(--ticket-border);
+  padding: 0.75rem;
+}
+
+.ticket__validez p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--ticket-text);
+  font-weight: 600;
+}
+
+.ticket__nota {
+  text-align: center;
+  margin: 0.75rem 0;
+  padding: 0.5rem;
+}
+
+.ticket__nota p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--ticket-text);
+}
+
+.ticket__paginacion {
+  text-align: center;
+  color: var(--ticket-text);
+  font-size: smaller;
+  margin-top: 0.5rem;
+}
+
+.ticket__paginacion p {
+  margin: 0;
+  padding: 0.5rem;
+}
+
+/* ============================================
+   ELEMENTO: .ticket__page-break
+   Separador de páginas
+   ============================================ */
+.ticket__page-break {
+  page-break-after: always;
+  height: 2rem;
+  background: repeating-linear-gradient(45deg,
+      #f0f0f0,
+      #f0f0f0 10px,
+      #e0e0e0 10px,
+      #e0e0e0 20px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ticket-text-muted);
+  font-size: 0.8rem;
+}
+
+.ticket__page-break::before {
+  content: '--- Separación de páginas ---';
+}
+
+/* ============================================
+   ELEMENTO: .ticket__actions
+   Botones de acción del ticket
+   ============================================ */
+.ticket__actions {
+  display: flex;
+  gap: var(--ticket-gap);
+  justify-content: center;
+  margin: 1.5rem 0;
+  flex-wrap: wrap;
+}
+
+/* Modificador: Botones inferiores */
+.ticket__actions--bottom {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px dashed #ccc;
+}
+
+/* Elemento: Botón base */
+.ticket__btn {
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+/* Modificador: Botón generar */
+.ticket__btn--generate {
+  background-color: var(--color-primary, #19a8b6);
+  color: white;
+}
+
+.ticket__btn--generate:hover {
+  background-color: var(--color-primary-dark, #005e75);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Modificador: Botón descargar PDF */
+.ticket__btn--download {
+  background-color: var(--ticket-success);
+  color: white;
+}
+
+.ticket__btn--download:hover {
+  background-color: #218838;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.ticket__btn--download:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Modificador: Botón volver arriba */
+.ticket__btn--back {
+  background-color: #6c757d;
+  color: #fff;
+}
+
+.ticket__btn--back:hover {
+  background-color: #5a6268;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* ============================================
+   RESPONSIVE: Mobile (< 600px)
+   ============================================ */
+@media (max-width: 600px) {
+  .ticket__direccion {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1rem;
+  }
+
+  .ticket__direccion p {
+    font-size: var(--ticket-font-size-small);
+    white-space: normal;
+  }
+}
+
+/* ============================================
+   RESPONSIVE: Mobile (< 680px) - Scroll horizontal
+   ============================================ */
+@media (max-width: 680px) {
+  .ticket__body {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+    scrollbar-width: thin;
+  }
+
+  .ticket__table {
+    min-width: 680px;
+  }
+
+  /* Columna Fecha Vto. - más compacta */
+  .ticket__table th:nth-child(1),
+  .ticket__table td:nth-child(1) {
+    width: 50px;
+    min-width: 48px;
+    max-width: 55px;
+    padding-right: 0.25rem;
+  }
+
+  /* Columna Detalle - desplazada a la derecha y más angosta */
+  .ticket__table th:nth-child(2),
+  .ticket__table td:nth-child(2) {
+    padding-left: 1.5rem;
+    max-width: 180px;
+    width: 180px;
+  }
+
+  .ticket__detalle {
+    max-width: 170px;
+    padding-left: 0.5rem;
+  }
+
+  /* Sombras laterales para indicar scroll */
+  .ticket__body::before,
+  .ticket__body::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 16px;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .ticket__body::before {
+    left: 0;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0));
+  }
+
+  .ticket__body::after {
+    position: sticky;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background: linear-gradient(to left, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0));
+  }
+
+  /* Scrollbar personalizado */
+  .ticket__body::-webkit-scrollbar {
+    height: 10px;
+  }
+
+  .ticket__body::-webkit-scrollbar-track {
+    background: #f0f0f0;
+  }
+
+  .ticket__body::-webkit-scrollbar-thumb {
+    background: #c2c2c2;
+    border-radius: 8px;
+  }
+
+  .ticket__body::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+  }
+
+  /* Fila subtotal/total - letra más pequeña para valores grandes (hasta $ XX.XXX.XXX,XX) */
+  .ticket__table tfoot td,
+  .ticket__row--subtotal td,
+  .ticket__row--total td {
+    font-size: 0.7rem;
+    white-space: nowrap;
+  }
+
+  .ticket__table tfoot td strong,
+  .ticket__row--subtotal td strong,
+  .ticket__row--total td strong {
+    font-weight: 700;
+  }
+}
+
+/* ============================================
+   RESPONSIVE: Rango intermedio (681px - 767px)
+   Evita solapamiento entre columnas
+   ============================================ */
+@media (min-width: 681px) and (max-width: 767px) {
+
+  /* Columna Fecha Vto. - más compacta con separación */
+  .ticket__table th:nth-child(1),
+  .ticket__table td:nth-child(1) {
+    width: 55px;
+    min-width: 50px;
+    max-width: 60px;
+    padding-right: 0.5rem;
+    white-space: nowrap;
+  }
+
+  /* Columna Detalle - desplazada a la derecha */
+  .ticket__table th:nth-child(2),
+  .ticket__table td:nth-child(2) {
+    padding-left: 1rem;
+    max-width: 160px;
+    width: 160px;
+  }
+
+  .ticket__detalle {
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: clamp(0.65rem, 1.5vw, 0.8rem);
+  }
+
+  /* Columnas numéricas - compactas con nowrap */
+  .ticket__table th:nth-child(5),
+  .ticket__table td:nth-child(5),
+  .ticket__table th:nth-child(6),
+  .ticket__table td:nth-child(6),
+  .ticket__table th:nth-child(7),
+  .ticket__table td:nth-child(7) {
+    width: 75px;
+    min-width: 70px;
+    max-width: 80px;
+    white-space: nowrap;
+  }
+
+  /* Fila subtotal/total - letra más pequeña */
+  .ticket__table tfoot td,
+  .ticket__row--subtotal td,
+  .ticket__row--total td {
+    font-size: 0.7rem;
+    white-space: nowrap;
+  }
+
+  .ticket__table tfoot td strong,
+  .ticket__row--subtotal td strong,
+  .ticket__row--total td strong {
+    font-weight: 700;
+  }
+}
+
+/* ============================================
+   RESPONSIVE: Tablet (>= 768px)
+   ============================================ */
+@media (min-width: 768px) {
+  .ticket {
+    max-width: 800px;
+  }
+
+  .ticket__page {
+    padding: 2rem;
+  }
+
+  .ticket__logo {
+    width: 80px;
+    height: 80px;
+  }
+
+  .ticket__title h1 {
+    font-size: 1.6rem;
+  }
+
+  .ticket__subtitle {
+    font-size: 1rem;
+  }
+
+  /* Tamaño de letra dinámico que crece con el viewport */
+  .ticket__table {
+    font-size: clamp(0.7rem, 1.2vw, 0.9rem);
+  }
+
+  /* Columna Fecha Vto. - separación clara */
+  .ticket__table th:nth-child(1),
+  .ticket__table td:nth-child(1) {
+    width: 70px;
+    min-width: 65px;
+    max-width: 80px;
+    padding-right: 0.75rem;
+    white-space: nowrap;
+  }
+
+  /* Columna Detalle - controlada y sin encimar */
+  .ticket__table th:nth-child(2),
+  .ticket__table td:nth-child(2) {
+    padding-left: 0.5rem;
+    width: auto;
+    max-width: 200px;
+  }
+
+  .ticket__detalle {
+    max-width: 190px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Columnas numéricas - distribuir espacio equitativamente */
+  .ticket__table th:nth-child(5),
+  .ticket__table td:nth-child(5),
+  .ticket__table th:nth-child(6),
+  .ticket__table td:nth-child(6),
+  .ticket__table th:nth-child(7),
+  .ticket__table td:nth-child(7) {
+    width: 90px;
+    min-width: 85px;
+    max-width: 100px;
+    white-space: nowrap;
+  }
+
+  /* Fila subtotal/total - nunca dividir valores */
+  .ticket__table tfoot td,
+  .ticket__row--subtotal td,
+  .ticket__row--total td {
+    font-size: clamp(0.65rem, 1.1vw, 0.85rem);
+    white-space: nowrap;
+  }
+
+  .ticket__table tfoot td strong,
+  .ticket__row--subtotal td strong,
+  .ticket__row--total td strong {
+    font-weight: 700;
+  }
+}
+
+/* ============================================
+   RESPONSIVE: Desktop (>= 1024px) - Formato A4
+   ============================================ */
+@media (min-width: 1024px) {
+  .ticket {
+    max-width: 21cm;
+  }
+
+  .ticket__page {
+    min-height: 29.7cm;
+    padding: 1.5rem 1rem;
+    max-width: 100%;
+  }
+
+  .ticket__logo {
+    width: 100px;
+    height: 100px;
+  }
+
+  .ticket__title h1 {
+    font-size: 1.8rem;
+  }
+
+  /* Tamaño de letra dinámico para desktop */
+  .ticket__table {
+    font-size: clamp(0.75rem, 0.9vw, 0.95rem);
+  }
+
+  /* Columna Fecha Vto. - más espacio en desktop */
+  .ticket__table th:nth-child(1),
+  .ticket__table td:nth-child(1) {
+    width: 80px;
+    min-width: 75px;
+    max-width: 90px;
+    padding-right: 1rem;
+    white-space: nowrap;
+  }
+
+  /* Columna Detalle - ancho controlado */
+  .ticket__table th:nth-child(2),
+  .ticket__table td:nth-child(2) {
+    padding-left: 0.5rem;
+    max-width: 220px;
+    width: auto;
+  }
+
+  .ticket__detalle {
+    max-width: 210px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Columnas Cuota y Año */
+  .ticket__table th:nth-child(3),
+  .ticket__table td:nth-child(3) {
+    width: 50px;
+    min-width: 45px;
+    max-width: 56px;
+  }
+
+  .ticket__table th:nth-child(4),
+  .ticket__table td:nth-child(4) {
+    width: 52px;
+    min-width: 48px;
+    max-width: 58px;
+  }
+
+  /* Columnas numéricas - más espacio para valores grandes */
+  .ticket__table th:nth-child(5),
+  .ticket__table td:nth-child(5),
+  .ticket__table th:nth-child(6),
+  .ticket__table td:nth-child(6),
+  .ticket__table th:nth-child(7),
+  .ticket__table td:nth-child(7) {
+    width: 100px;
+    min-width: 95px;
+    max-width: 110px;
+    white-space: nowrap;
+  }
+
+  /* Fila subtotal/total */
+  .ticket__table tfoot td,
+  .ticket__row--subtotal td,
+  .ticket__row--total td {
+    font-size: clamp(0.7rem, 0.85vw, 0.9rem);
+    white-space: nowrap;
+  }
+
+  .ticket__contribuyente p {
+    margin: 0;
+    font-size: var(--ticket-font-size-small);
+    color: var(--ticket-text);
+  }
+}
+
+/* ============================================
+   MODO PDF
+   ============================================ */
+.ticket--pdf .ticket__page {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.ticket--pdf .ticket__table {
+  width: 100% !important;
+  table-layout: fixed;
+  font-size: smaller;
+}
+
+/* ============================================
+   ESTILOS DE IMPRESIÓN
+   ============================================ */
+@media print {
+  .ticket {
+    box-shadow: none;
+    border: none;
+    max-width: 100%;
+  }
+
+  .ticket__page {
+    page-break-after: always;
+    box-shadow: none;
+    border: none;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .ticket__page-break {
+    display: none;
+  }
+
+  .ticket__actions {
+    display: none !important;
+  }
+
+  .ticket__table {
+    page-break-inside: avoid;
+    width: 100% !important;
+    table-layout: fixed;
+    font-size: smaller;
+  }
+
+  .ticket__header,
+  .ticket__footer {
+    page-break-inside: avoid;
+  }
+}
+
+/* ============================================
+   CLASES DE COMPATIBILIDAD (Legacy)
+   Para mantener retrocompatibilidad con vistas existentes
+   Estas clases mapean los nombres originales a los nuevos estilos BEM
+   ============================================ */
+
+/* Contenedor principal */
+.ticket-container {
+  max-width: 100%;
+  margin: 2rem auto;
+  background-color: var(--ticket-bg);
+  border: 1px solid var(--ticket-border-light);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--ticket-shadow);
+  font-family: var(--ticket-font-family);
+}
+
+/* Página */
+.ticket-page {
+  background: var(--ticket-bg);
+  padding: var(--ticket-padding);
+  page-break-after: always;
+  position: relative;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Header */
+.ticket-header {
+  flex-wrap: wrap;
+  border-bottom: 2px solid var(--ticket-border);
+  margin-bottom: 0.75rem;
+  background-color: var(--ticket-bg);
+}
+
+.ticket-header-top {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--ticket-gap);
+  align-items: center;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--ticket-border);
+  width: 100%;
+}
+
+.ticket-logo {
+  width: 60px;
+  height: 60px;
+}
+
+.ticket-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.ticket-title {
+  text-align: center;
+  flex: 1;
+}
+
+.ticket-title h1 {
+  margin: 0;
+  font-size: var(--ticket-font-size-title);
+  color: var(--ticket-text);
+  font-weight: 700;
+  font-family: var(--ticket-font-family);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.ticket-subtitle {
+  margin: 0.2rem 0 0;
+  font-size: 0.9rem;
+  color: var(--ticket-text);
+}
+
+.ticket-fecha {
+  text-align: right;
+  font-size: small;
+  white-space: nowrap;
+}
+
+.ticket-fecha-label {
+  margin: 0;
+  font-weight: 600;
+  color: var(--ticket-text);
+}
+
+.ticket-fecha-valor {
+  margin: 0.2rem 0 0;
+  font-weight: 400;
+  color: var(--ticket-text);
+  font-size: smaller;
+}
+
+.ticket-header-info {
+  background-color: var(--ticket-bg);
+  padding: 0.75rem 0;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid var(--ticket-border);
+  width: 100%;
+}
+
+.ticket-direccion {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--ticket-gap);
+  width: 100%;
+}
+
+.ticket-direccion p {
+  margin: 0;
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
+  color: var(--ticket-text);
+  white-space: nowrap;
+  flex: 0 1 auto;
+}
+
+.ticket-contribuyente {
+  background-color: var(--ticket-bg);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2rem;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: clamp(0rem, (100vw - 768px) * 100, 1rem);
+}
+
+.ticket-contribuyente p {
+  margin: 0;
+  font-size: var(--ticket-font-size-small);
+  color: var(--ticket-text);
+}
+
+.ticket-contribuyente p:first-child {
+  text-align: left;
+}
+
+.ticket-contribuyente p:last-child {
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Body */
+.ticket-body {
+  margin: 0.75rem 0;
+}
+
+.ticket-resumen {
+  font-size: var(--ticket-font-size-small);
+  margin: 0.25rem 0;
+  color: var(--ticket-text);
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Tabla */
+.ticket-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--ticket-font-size-base);
+  color: var(--ticket-text);
+  table-layout: fixed;
+}
+
+.ticket-table thead {
+  background-color: var(--ticket-bg);
+  color: var(--ticket-text);
+  border-bottom: 2px solid var(--ticket-border);
+}
+
+.ticket-table th {
+  padding: 0.35rem;
+  text-align: left;
+  font-weight: 600;
+  border: none;
+}
+
+.ticket-table td {
+  padding: 0.35rem;
+  border: none;
+  border-bottom: none;
+}
+
+.ticket-table tbody tr:nth-child(even) {
+  background-color: var(--ticket-bg);
+}
+
+.ticket-table tbody tr:hover {
+  background-color: var(--ticket-bg);
+}
+
+.ticket-table tfoot {
+  background-color: var(--ticket-bg);
+  font-weight: 600;
+}
+
+.ticket-table th:nth-child(1),
+.ticket-table td:nth-child(1) {
+  text-align: left !important;
+  width: 54px;
+  min-width: 50px;
+  max-width: 60px;
+  white-space: nowrap;
+}
+
+.ticket-table th:nth-child(2),
+.ticket-table td:nth-child(2) {
+  width: auto;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.ticket-table th:nth-child(3),
+.ticket-table td:nth-child(3) {
+  text-align: right !important;
+  width: 40px;
+  min-width: 36px;
+  max-width: 46px;
+  white-space: nowrap;
+}
+
+.ticket-table th:nth-child(4),
+.ticket-table td:nth-child(4) {
+  width: 42px;
+  min-width: 38px;
+  max-width: 48px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.ticket-table th:nth-child(5),
+.ticket-table td:nth-child(5),
+.ticket-table th:nth-child(6),
+.ticket-table td:nth-child(6),
+.ticket-table th:nth-child(7),
+.ticket-table td:nth-child(7) {
+  width: 72px;
+  min-width: 70px;
+  max-width: 80px;
+  white-space: nowrap;
+}
+
+.ticket-col-right {
+  text-align: right !important;
+}
+
+.ticket-detalle {
+  max-width: 280px;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+}
+
+.ticket-subtotal-row td {
+  padding: 0.75rem 0.5rem;
+  border-top: 2px solid var(--ticket-border);
+  border-bottom: none;
+}
+
+.ticket-total-row {
+  background-color: var(--ticket-bg) !important;
+}
+
+.ticket-total-row td {
+  padding: 0.9rem 0.5rem;
+  font-size: 1rem;
+  border-top: 3px double var(--ticket-border);
+  border-bottom: none;
+  text-align: center;
+}
+
+/* Footer */
+.ticket-footer {
+  padding-top: 1rem;
+  border-top: 2px solid var(--ticket-border);
+  padding-bottom: 1rem;
+}
+
+.ticket-validez {
+  background-color: var(--ticket-bg);
+  border: 1px solid var(--ticket-border);
+  padding: 0.75rem;
+}
+
+.ticket-validez p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--ticket-text);
+  font-weight: 600;
+}
+
+.ticket-nota {
+  text-align: center;
+  margin: 0.75rem 0;
+  padding: 0.5rem;
+}
+
+.ticket-nota p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--ticket-text);
+}
+
+.ticket-paginacion {
+  text-align: center;
+  color: var(--ticket-text);
+  font-size: smaller;
+  margin-top: 0.5rem;
+}
+
+.ticket-paginacion p {
+  margin: 0;
+  padding: 0.5rem;
+}
+
+.ticket-page-break {
+  page-break-after: always;
+  height: 2rem;
+  background: repeating-linear-gradient(45deg,
+      #f0f0f0,
+      #f0f0f0 10px,
+      #e0e0e0 10px,
+      #e0e0e0 20px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ticket-text-muted);
+  font-size: 0.8rem;
+}
+
+.ticket-page-break::before {
+  content: '--- Separación de páginas ---';
+}
+
+/* Acciones */
+.ticket-actions {
+  display: flex;
+  gap: var(--ticket-gap);
+  justify-content: center;
+  margin: 1.5rem 0;
+  flex-wrap: wrap;
+}
+
+.ticket-actions-bottom {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px dashed #ccc;
+}
+
+.btn-ticket {
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-generar-ticket {
+  background-color: var(--color-primary, #19a8b6);
+  color: white;
+}
+
+.btn-generar-ticket:hover {
+  background-color: var(--color-primary-dark, #005e75);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-descargar-pdf {
+  background-color: var(--ticket-success);
+  color: white;
+}
+
+.btn-descargar-pdf:hover {
+  background-color: #218838;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-descargar-pdf:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn-volver-arriba {
+  background-color: #6c757d;
+  color: #fff;
+}
+
+.btn-volver-arriba:hover {
+  background-color: #5a6268;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.ticket-loading {
+  text-align: center;
+  padding: 2rem;
+  color: var(--ticket-text-muted);
+}
+
+.ticket-loading::before {
+  content: '⏳ ';
+  font-size: 1.5rem;
+}
+
+/* Modo PDF legacy */
+.pdf-mode .ticket-page {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.pdf-mode .ticket-table {
+  width: 100% !important;
+  table-layout: fixed;
+  font-size: smaller;
+}
+
+/* ============================================
+   RESPONSIVE LEGACY: Mobile (< 600px)
+   ============================================ */
+@media (max-width: 600px) {
+  .ticket-direccion {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1rem;
+  }
+
+  .ticket-direccion p {
+    font-size: x-small;
+    white-space: normal;
+  }
+}
+
+/* ============================================
+   RESPONSIVE LEGACY: Mobile (< 680px)
+   ============================================ */
+@media (max-width: 680px) {
+  .ticket-body {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+    scrollbar-width: thin;
+  }
+
+  .ticket-table {
+    min-width: 680px;
+  }
+
+  /* Columna Fecha Vto. - más compacta */
+  .ticket-table th:nth-child(1),
+  .ticket-table td:nth-child(1) {
+    width: 50px;
+    min-width: 48px;
+    max-width: 55px;
+    padding-right: 0.25rem;
+  }
+
+  /* Columna Detalle - desplazada a la derecha y más angosta */
+  .ticket-table th:nth-child(2),
+  .ticket-table td:nth-child(2) {
+    padding-left: 1.5rem;
+    max-width: 180px;
+    width: 180px;
+  }
+
+  .ticket-detalle {
+    max-width: 170px;
+    padding-left: 0.5rem;
+  }
+
+  .ticket-body::before,
+  .ticket-body::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 16px;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .ticket-body::before {
+    left: 0;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0));
+  }
+
+  .ticket-body::after {
+    position: sticky;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background: linear-gradient(to left, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0));
+  }
+
+  .ticket-body::-webkit-scrollbar {
+    height: 10px;
+  }
+
+  .ticket-body::-webkit-scrollbar-track {
+    background: #f0f0f0;
+  }
+
+  .ticket-body::-webkit-scrollbar-thumb {
+    background: #c2c2c2;
+    border-radius: 8px;
+  }
+
+  .ticket-body::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+  }
+
+  /* Fila subtotal/total - letra más pequeña para valores grandes (hasta $ XX.XXX.XXX,XX) */
+  .ticket-table tfoot td,
+  .ticket-subtotal-row td,
+  .ticket-total-row td {
+    font-size: 0.7rem;
+    white-space: nowrap;
+  }
+
+  .ticket-table tfoot td strong,
+  .ticket-subtotal-row td strong,
+  .ticket-total-row td strong {
+    font-weight: 700;
+  }
+}
+
+/* ============================================
+   RESPONSIVE LEGACY: Rango intermedio (681px - 767px)
+   Evita solapamiento entre columnas
+   ============================================ */
+@media (min-width: 681px) and (max-width: 767px) {
+
+  /* Columna Fecha Vto. - más compacta con separación */
+  .ticket-table th:nth-child(1),
+  .ticket-table td:nth-child(1) {
+    width: 55px;
+    min-width: 50px;
+    max-width: 60px;
+    padding-right: 0.5rem;
+    white-space: nowrap;
+  }
+
+  /* Columna Detalle - desplazada a la derecha */
+  .ticket-table th:nth-child(2),
+  .ticket-table td:nth-child(2) {
+    padding-left: 1rem;
+    max-width: 160px;
+    width: 160px;
+  }
+
+  .ticket-detalle {
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: clamp(0.65rem, 1.5vw, 0.8rem);
+  }
+
+  /* Columnas numéricas - compactas con nowrap */
+  .ticket-table th:nth-child(5),
+  .ticket-table td:nth-child(5),
+  .ticket-table th:nth-child(6),
+  .ticket-table td:nth-child(6),
+  .ticket-table th:nth-child(7),
+  .ticket-table td:nth-child(7) {
+    width: 75px;
+    min-width: 70px;
+    max-width: 80px;
+    white-space: nowrap;
+  }
+
+  /* Fila subtotal/total - letra más pequeña */
+  .ticket-table tfoot td,
+  .ticket-subtotal-row td,
+  .ticket-total-row td {
+    font-size: 0.7rem;
+    white-space: nowrap;
+  }
+
+  .ticket-table tfoot td strong,
+  .ticket-subtotal-row td strong,
+  .ticket-total-row td strong {
+    font-weight: 700;
+  }
+}
+
+/* ============================================
+   RESPONSIVE LEGACY: Tablet (>= 768px)
+   ============================================ */
+@media (min-width: 768px) {
+  .ticket-container {
+    max-width: 800px;
+  }
+
+  .ticket-page {
+    padding: 2rem;
+  }
+
+  .ticket-logo {
+    width: 80px;
+    height: 80px;
+  }
+
+  .ticket-title h1 {
+    font-size: 1.6rem;
+  }
+
+  .ticket-subtitle {
+    font-size: 1rem;
+  }
+
+  /* Tamaño de letra dinámico que crece con el viewport */
+  .ticket-table {
+    font-size: clamp(0.7rem, 1.2vw, 0.9rem);
+  }
+
+  /* Columna Fecha Vto. - separación clara */
+  .ticket-table th:nth-child(1),
+  .ticket-table td:nth-child(1) {
+    width: 70px;
+    min-width: 65px;
+    max-width: 80px;
+    padding-right: 0.75rem;
+    white-space: nowrap;
+  }
+
+  /* Columna Detalle - controlada */
+  .ticket-table th:nth-child(2),
+  .ticket-table td:nth-child(2) {
+    padding-left: 0.5rem;
+    width: auto;
+    max-width: 200px;
+  }
+
+  .ticket-detalle {
+    max-width: 190px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Columnas numéricas */
+  .ticket-table th:nth-child(5),
+  .ticket-table td:nth-child(5),
+  .ticket-table th:nth-child(6),
+  .ticket-table td:nth-child(6),
+  .ticket-table th:nth-child(7),
+  .ticket-table td:nth-child(7) {
+    width: 90px;
+    min-width: 85px;
+    max-width: 100px;
+    white-space: nowrap;
+  }
+
+  /* Fila subtotal/total */
+  .ticket-table tfoot td,
+  .ticket-subtotal-row td,
+  .ticket-total-row td {
+    font-size: clamp(0.65rem, 1.1vw, 0.85rem);
+    white-space: nowrap;
+  }
+
+  .ticket-table tfoot td strong,
+  .ticket-subtotal-row td strong,
+  .ticket-total-row td strong {
+    font-weight: 700;
+  }
+}
+
+/* ============================================
+   RESPONSIVE LEGACY: Desktop (>= 1024px)
+   ============================================ */
+@media (min-width: 1024px) {
+  .ticket-container {
+    max-width: 21cm;
+  }
+
+  .ticket-page {
+    min-height: 29.7cm;
+    padding: 2.5cm 2cm;
+    max-width: 100%;
+  }
+
+  .ticket-logo {
+    width: 100px;
+    height: 100px;
+  }
+
+  .ticket-title h1 {
+    font-size: 1.8rem;
+  }
+
+  /* Tamaño de letra dinámico para desktop */
+  .ticket-table {
+    font-size: clamp(0.75rem, 0.9vw, 0.95rem);
+  }
+
+  /* Columna Fecha Vto. */
+  .ticket-table th:nth-child(1),
+  .ticket-table td:nth-child(1) {
+    width: 80px;
+    min-width: 75px;
+    max-width: 90px;
+    padding-right: 1rem;
+    white-space: nowrap;
+  }
+
+  /* Columna Detalle */
+  .ticket-table th:nth-child(2),
+  .ticket-table td:nth-child(2) {
+    padding-left: 0.5rem;
+    max-width: 220px;
+    width: auto;
+  }
+
+  .ticket-detalle {
+    max-width: 210px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Columnas numéricas - más espacio */
+  .ticket-table th:nth-child(5),
+  .ticket-table td:nth-child(5),
+  .ticket-table th:nth-child(6),
+  .ticket-table td:nth-child(6),
+  .ticket-table th:nth-child(7),
+  .ticket-table td:nth-child(7) {
+    width: 100px;
+    min-width: 95px;
+    max-width: 110px;
+    white-space: nowrap;
+  }
+
+  /* Fila subtotal/total */
+  .ticket-table tfoot td,
+  .ticket-subtotal-row td,
+  .ticket-total-row td {
+    font-size: clamp(0.7rem, 0.85vw, 0.9rem);
+    white-space: nowrap;
+  }
+
+  .ticket-contribuyente p {
+    margin: 0;
+    font-size: x-small;
+    color: var(--ticket-text);
+  }
+}
+
+/* ============================================
+   PRINT LEGACY
+   ============================================ */
+@media print {
+  .ticket-container {
+    box-shadow: none;
+    border: none;
+    max-width: 100%;
+  }
+
+  .ticket-page {
+    page-break-after: always;
+    box-shadow: none;
+    border: none;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .ticket-page-break {
+    display: none;
+  }
+
+  .ticket-actions {
+    display: none !important;
+  }
+
+  .ticket-table {
+    page-break-inside: avoid;
+    width: 100% !important;
+    table-layout: fixed;
+    font-size: smaller;
+  }
+
+  .ticket-header,
+  .ticket-footer {
+    page-break-inside: avoid;
+  }
+}

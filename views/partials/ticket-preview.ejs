@@ -5,7 +5,7 @@
   @version 1.0
 -->
 
-<div id="ticket-container" class="ticket-container">
+<div id="ticket-container" class="ticket">
   <% 
     // Configuración de paginación
     const CONCEPTOS_POR_PAGINA = municipalidad.ticket.conceptosPorPagina || 15;
@@ -31,27 +31,27 @@
       const esUltimaPagina = pagina === totalPaginas - 1;
     %>
 
-  <div class="ticket-page" data-page="<%= pagina + 1 %>">
+  <div class="ticket__page" data-page="<%= pagina + 1 %>">
     <!-- HEADER -->
-    <header class="ticket-header">
+    <header class="ticket__header">
       <!-- Primera línea: Logo, Nombre Municipalidad, Fecha -->
-      <div class="ticket-header-top">
-        <div class="ticket-logo">
-          <img src="<%= municipalidad.logos.principal %>" alt="Logo <%= municipalidad.nombre %>" class="ticket-logo-img">
+      <div class="ticket__header-top">
+        <div class="ticket__logo">
+          <img src="<%= municipalidad.logos.principal %>" alt="Logo <%= municipalidad.nombre %>" class="ticket__logo-img">
         </div>
-        <div class="ticket-title">
+        <div class="ticket__title">
           <h1><%= municipalidad.nombreCompleto %></h1>
-          <!-- <p class="ticket-subtitle"><%= municipalidad.ticket.encabezado || 'Comprobante de Pago' %></p> -->
+          <!-- <p class="ticket__subtitle"><%= municipalidad.ticket.encabezado || 'Comprobante de Pago' %></p> -->
         </div>
-        <div class="ticket-fecha">
-          <p class="ticket-fecha-label">Fecha de Emisión:</p>
-          <p class="ticket-fecha-valor"><%= fechaEmision %></p>
+        <div class="ticket__fecha">
+          <p class="ticket__fecha-label">Fecha de Emisión:</p>
+          <p class="ticket__fecha-valor"><%= fechaEmision %></p>
         </div>
       </div>
 
       <!-- Segunda línea: Dirección y datos de contacto del Municipio -->
-      <div class="ticket-header-info">
-        <div class="ticket-direccion">
+      <div class="ticket__header-info">
+        <div class="ticket__direccion">
           <p><strong>Dirección:</strong> <%= municipalidad.direccion %>, <%= municipalidad.localidad %>, <%= municipalidad.provincia %> </p>
           <p><strong>CP:</strong> <%= municipalidad.codigoPostal %> </p>
           <p><strong>Tel:</strong> <%= municipalidad.telefono %></p>
@@ -59,58 +59,58 @@
       </div>
 
       <!-- Tercera línea: Datos del contribuyente -->
-      <div class="ticket-contribuyente">
+      <div class="ticket__contribuyente">
         <p><strong>Contribuyente:</strong> <%= contribuyente.nombreCompleto %></p>
         <p><strong>DNI:</strong> <%= contribuyente.dni %></p>
       </div>
     </header>
 
     <!-- TABLA DE CONCEPTOS -->
-    <div class="ticket-body">
+    <div class="ticket__body">
       <% if (pagina === 0 || esUltimaPagina) { %>
-      <div class="ticket-resumen" style="font-size: x-small; margin: 0.25rem 0; color:#000; display: flex; justify-content: space-between;">
+      <div class="ticket__resumen">
         <span>Conceptos en ticket: <strong><%= conceptos.length %></strong></span>
         <span>Ticket N°: <strong>XXXX-XXXXXX</strong></span>
       </div>
       <% } %>
-      <table class="ticket-table">
+      <table class="ticket__table">
         <thead>
           <tr>
             <th>Fecha Vto.</th>
             <th>Detalle</th>
             <th>Cuota</th>
             <th>Año</th>
-            <th class="ticket-col-right">Importe</th>
-            <th class="ticket-col-right">Int/Dto</th>
-            <th class="ticket-col-right">Total</th>
+            <th class="ticket__col--right">Importe</th>
+            <th class="ticket__col--right">Int/Dto</th>
+            <th class="ticket__col--right">Total</th>
           </tr>
         </thead>
         <tbody>
           <% conceptosPagina.forEach((concepto, idx) => { %>
           <tr>
             <td><%= concepto.fechaVto %></td>
-            <td class="ticket-detalle">
+            <td class="ticket__detalle">
               <%= concepto.tipoDescripcion %><% if (concepto.detalle) { %> - <%= concepto.detalle %><% } %>
             </td>
             <td><%= concepto.cuota || '-' %></td>
             <td><%= concepto.anio || '-' %></td>
-            <td class="ticket-col-right">$ <%= concepto.importe %></td>
-            <td class="ticket-col-right <%= concepto.interesClase %>">
+            <td class="ticket__col--right">$ <%= concepto.importe %></td>
+            <td class="ticket__col--right <%= concepto.interesClase %>">
               $ <%= concepto.interes %>
             </td>
-            <td class="ticket-col-right"><strong>$ <%= concepto.total %></strong></td>
+            <td class="ticket__col--right"><strong>$ <%= concepto.total %></strong></td>
           </tr>
           <% }) %>
         </tbody>
         <tfoot>
-          <tr class="ticket-subtotal-row">
-            <td colspan="4" class="ticket-col-right"><strong>Subtotal Pág. <%= pagina + 1 %>:</strong></td>
-            <td class="ticket-col-right"><strong>$ <%= subtotalImportePagina.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></strong></td>
-            <td class="ticket-col-right <%= subtotalInteresPagina >= 0 ? 'interes-negativo' : 'descuento-positivo' %>"><strong>$ <%= Math.abs(subtotalInteresPagina).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></strong></td>
-            <td class="ticket-col-right"><strong>$ <%= subtotalTotalPagina.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></strong></td>
+          <tr class="ticket__row--subtotal">
+            <td colspan="4" class="ticket__col--right"><strong>Subtotal Pág. <%= pagina + 1 %>:</strong></td>
+            <td class="ticket__col--right"><strong>$ <%= subtotalImportePagina.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></strong></td>
+            <td class="ticket__col--right <%= subtotalInteresPagina < 0 ? 'ticket__value--discount' : 'ticket__value--interest' %>"><strong><%= subtotalInteresPagina < 0 ? '-' : '' %>$ <%= Math.abs(subtotalInteresPagina).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></strong></td>
+            <td class="ticket__col--right"><strong>$ <%= subtotalTotalPagina.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></strong></td>
           </tr>
           <% if (esUltimaPagina) { %>
-          <tr class="ticket-total-row">
+          <tr class="ticket__row--total">
             <td colspan="7" style="text-align: center;"><strong>TOTAL A PAGAR: $ <%= totalGeneral %></strong></td>
           </tr>
           <% } %>
@@ -119,23 +119,23 @@
     </div>
 
     <!-- FOOTER -->
-    <footer class="ticket-footer">
-      <div class="ticket-validez">
+    <footer class="ticket__footer">
+      <div class="ticket__validez">
         <p><strong>⚠️ IMPORTANTE:</strong> <%= municipalidad.ticket.mensajeValidez %></p>
       </div>
       <% if (municipalidad.ticket.piePagina) { %>
-      <div class="ticket-nota">
+      <div class="ticket__nota">
         <p><em><%= municipalidad.ticket.piePagina %></em></p>
       </div>
       <% } %>
-      <div class="ticket-paginacion">
+      <div class="ticket__paginacion">
         <p>Página <%= pagina + 1 %> de <%= totalPaginas %></p>
       </div>
     </footer>
   </div>
 
   <% if (!esUltimaPagina) { %>
-  <div class="ticket-page-break"></div>
+  <div class="ticket__page-break"></div>
   <% } %>
   <% } %>
 </div>

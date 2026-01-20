@@ -1,17 +1,27 @@
 /**
  * Estilos del Portal de Pagos Municipal
+ * Metodología BEM (Block Element Modifier)
+ * 
  * @author Dante Marcos Delprato
- * @version 2.0
- * @date 2025-11-04
+ * @version 4.0 - BEM + ALCALD+IA
+ * @date 2026-01-19
+ * 
+ * Estructura BEM:
+ * - Bloques: .header, .form, .deudas, .qr, .footer, .btn
+ * - Elementos: .header__logo, .form__input, .deudas__tabla, etc.
+ * - Modificadores: .btn--primary, .btn--search, .deudas__row--selected, etc.
  */
 
 /* ============================================
-   VARIABLES DE COLORES
+   VARIABLES DE COLORES (Alineado con ALCALD+IA)
    ============================================ */
 :root {
-    /* Colores principales */
-    --color-primary: #19a8b6;
-    --color-primary-dark: #005e75;
+    /* Colores principales - Paleta ALCALD+IA */
+    --turquesa: #00A8B5;
+    --azul-oscuro: #003E5C;
+    --azul-claro: #E0F7FA;
+    --color-primary: #00A8B5;
+    --color-primary-dark: #003E5C;
     --color-white: #ffffff;
     --color-background: #f9f9f9;
     --color-border: #ddd;
@@ -19,101 +29,365 @@
     /* Colores de estado */
     --color-success: #28a745;
     --color-error: #dc3545;
+    --color-warning: #ffc107;
     --color-text-dark: #333;
     --color-text-muted: #555;
     --color-text-light: #999;
 
     /* Colores de tabla */
-    --color-table-header: #19a8b6;
+    --color-table-header: #00A8B5;
     --color-table-footer: #e0f7fa;
     --color-table-row-alt: #f0f0f0;
 
     /* Colores de cliente no encontrado */
     --color-not-found-bg: #d4d4d4;
     --color-not-found-text: darkred;
+
+    /* Efectos y transiciones */
+    --sombra: 0 4px 20px rgba(0, 0, 0, 0.1);
+    --sombra-hover: 0 8px 30px rgba(0, 0, 0, 0.15);
+    --transicion: all 0.3s ease;
+    --border-radius: 12px;
+    --border-radius-btn: 50px;
 }
 
 /* ============================================
    ESTILOS GENERALES
    ============================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Open Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
     background-color: var(--color-white);
     margin: 0;
     padding: 0;
     color: var(--color-primary-dark);
 }
 
-h1,
-h2 {
+/* Estilos de headings SOLO para contenido principal (no ticket) */
+.main h1,
+.main h2,
+.main h3,
+.main h4,
+.form__title,
+.form__subtitle {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     color: var(--color-primary-dark);
 }
 
 /* ============================================
-   HEADER
+   BLOQUE: .header
+   Encabezado principal del portal
    ============================================ */
-header {
+.header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0rem 2rem;
-    background-color: var(--color-primary);
+    padding: 0.5rem 2rem;
+    background: linear-gradient(135deg, var(--azul-oscuro) 0%, #005a6e 50%, var(--turquesa) 100%);
+    box-shadow: var(--sombra);
+    position: relative;
 }
 
-header img {
+.header__logo {
+    flex-shrink: 0;
+}
+
+.header__logo-img {
     height: clamp(80px, 18vh, 150px);
     width: auto;
     object-fit: contain;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
+    transition: var(--transicion);
 }
 
-/* Ajuste adicional para pantallas muy grandes */
-@media (min-width: 1200px) {
-    header img {
-        height: clamp(160px, 15vh, 250px);
-    }
+.header__logo-img:hover {
+    transform: scale(1.03);
 }
 
-/* Mobile (ya estaba correcto, se fuerza por claridad) */
-
-@media (max-width: 600px) {
-    header img {
-        height: clamp(60px, 8vh, 100px);
-    }
-}
-
-.titulo-header {
-    font-size: clamp(0.75rem, 2.5vw + 0.25rem, 2rem);
+.header__title {
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(0.9rem, 2.5vw + 0.25rem, 2rem);
     flex: 1 1 auto;
     min-width: 160px;
     text-align: center;
     padding: clamp(0.5rem, 2vw, 2rem);
     box-sizing: border-box;
+    color: var(--color-white);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.header__icon {
+    flex-shrink: 0;
+}
+
+.header__icon-img {
+    height: clamp(80px, 18vh, 150px);
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
+    transition: var(--transicion);
+}
+
+.header__icon-img:hover {
+    transform: scale(1.03);
+}
+
+/* Ajuste adicional para pantallas muy grandes */
+@media (min-width: 1200px) {
+
+    .header__logo-img,
+    .header__icon-img {
+        height: clamp(160px, 15vh, 250px);
+    }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+
+    .header__logo-img,
+    .header__icon-img {
+        height: clamp(60px, 8vh, 100px);
+    }
+
+    .header__title {
+        font-size: clamp(0.7rem, 4vw, 1rem);
+        letter-spacing: 1px;
+    }
 }
 
 /* ============================================
-   MAIN CONTENT
+   BLOQUE: .header (PÁGINA PRINCIPAL ÚNICAMENTE)
+   Encabezado principal del portal
+   NO afecta al ticket - usa selector de clase específico
    ============================================ */
-main {
-    padding: 2rem;
-}
-
-/* ============================================
-   SECCIÓN DE FORMULARIO
-   ============================================ */
-.form-section {
-    background-color: var(--color-background);
-    padding: 1.5rem;
-    border-radius: 12px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+.header {
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 2rem;
+    background: linear-gradient(135deg, var(--azul-oscuro) 0%, #005a6e 50%, var(--turquesa) 100%);
+    box-shadow: var(--sombra);
+    position: relative;
+}
+
+/* Contenedor del logo izquierdo */
+.header__logo {
+    display: flex;
     align-items: center;
 }
 
-.form-section h1,
-.form-section h2 {
+/* Imagen del logo izquierdo */
+.header__logo-img {
+    height: clamp(80px, 18vh, 150px);
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
+    transition: var(--transicion);
+}
+
+.header__logo-img:hover {
+    transform: scale(1.03);
+}
+
+/* Título central del header */
+.header__title {
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(0.9rem, 2.5vw + 0.25rem, 2rem);
+    flex: 1 1 auto;
+    min-width: 160px;
     text-align: center;
+    padding: clamp(0.5rem, 2vw, 2rem);
+    box-sizing: border-box;
+    color: var(--color-white);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Contenedor del icono derecho */
+.header__icon {
+    display: flex;
+    align-items: center;
+}
+
+/* Imagen del icono derecho */
+.header__icon-img {
+    height: clamp(80px, 18vh, 150px);
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
+    transition: var(--transicion);
+}
+
+.header__icon-img:hover {
+    transform: scale(1.03);
+}
+
+/* Ajuste header para pantallas muy grandes */
+@media (min-width: 1200px) {
+
+    .header__logo-img,
+    .header__icon-img {
+        height: clamp(160px, 15vh, 250px);
+    }
+}
+
+/* Header Mobile */
+@media (max-width: 600px) {
+
+    .header__logo-img,
+    .header__icon-img {
+        height: clamp(60px, 8vh, 100px);
+    }
+
+    .header__title {
+        font-size: clamp(0.7rem, 4vw, 1rem);
+        letter-spacing: 1px;
+    }
+}
+
+/* ============================================
+   BLOQUE: .main (PÁGINA PRINCIPAL ÚNICAMENTE)
+   Contenido principal del portal
+   NO afecta al contenido del ticket
+   ============================================ */
+.main {
+    padding: 2rem;
+    background: linear-gradient(180deg, var(--azul-claro) 0%, var(--color-white) 100%);
+    min-height: calc(100vh - 200px);
+}
+
+/* ============================================
+   BLOQUE: .form
+   Formulario de búsqueda de contribuyente
+   ============================================ */
+.form {
+    background-color: var(--color-white);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--sombra);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: var(--transicion);
+}
+
+.form:hover {
+    box-shadow: var(--sombra-hover);
+}
+
+.form__title {
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--azul-oscuro), var(--turquesa));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.form__subtitle {
+    font-size: clamp(1rem, 3vw, 1.4rem);
+    color: var(--color-text-muted);
+    font-weight: 500;
+    text-transform: none;
+}
+
+.form__content {
+    width: 90%;
+    max-width: 900px;
+}
+
+.form__group {
+    margin-bottom: 1rem;
     width: 100%;
+}
+
+.form__label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.form__input-wrapper {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+.form__input {
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid var(--color-primary);
+    border-radius: 8px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.form__input-wrapper .form__input {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Modificador: Input de cliente no encontrado */
+.form__input--not-found {
+    background-color: var(--color-not-found-bg);
+    color: var(--color-not-found-text);
+    font-weight: 500;
+}
+
+.form__error {
+    color: var(--color-error);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+/* Legacy support - mantener compatibilidad temporal */
+.form-section {
+    background-color: var(--color-white);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--sombra);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: var(--transicion);
+}
+
+.form-section:hover {
+    box-shadow: var(--sombra-hover);
+}
+
+.form-section h1 {
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--azul-oscuro), var(--turquesa));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.form-section h2 {
+    font-size: clamp(1rem, 3vw, 1.4rem);
+    color: var(--color-text-muted);
+    font-weight: 500;
+    text-transform: none;
 }
 
 .form-section form {
@@ -158,14 +432,154 @@ input[type="text"].cliente-no-encontrado {
     font-weight: 500;
 }
 
+/* ============================================
+   BLOQUE: .btn
+   Botones del sistema
+   ============================================ */
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transicion);
+    font-family: 'Oswald', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+/* Modificador: Botón primario */
+.btn--primary {
+    background: linear-gradient(135deg, var(--turquesa) 0%, var(--azul-oscuro) 100%);
+    color: var(--color-white);
+    box-shadow: var(--sombra);
+}
+
+.btn--primary:hover {
+    box-shadow: var(--sombra-hover);
+    background: linear-gradient(135deg, var(--azul-oscuro) 0%, var(--turquesa) 100%);
+}
+
+/* Modificador: Botón de búsqueda */
+.btn--search {
+    flex-shrink: 0;
+    width: auto;
+    min-width: 120px;
+    padding: 0.8rem 1.8rem;
+    background: linear-gradient(135deg, var(--turquesa) 0%, var(--azul-oscuro) 100%);
+    color: var(--color-white);
+    white-space: nowrap;
+    border-radius: var(--border-radius-btn);
+    box-shadow: var(--sombra);
+}
+
+.btn--search:hover {
+    box-shadow: var(--sombra-hover);
+    background: linear-gradient(135deg, var(--azul-oscuro) 0%, var(--turquesa) 100%);
+}
+
+/* Modificador: Botón QR */
+.btn--qr {
+    background-color: var(--color-primary-dark);
+    color: var(--color-white);
+}
+
+/* Modificador: Botón de pago */
+.btn--pay {
+    background-color: #007bff;
+    color: var(--color-white);
+    text-decoration: none;
+    text-align: center;
+}
+
+.btn--pay:hover {
+    background-color: #0056b3;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Modificador: Botón de ticket */
+.btn--ticket {
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    border-radius: 6px;
+}
+
+/* Modificador: Botón generar ticket */
+.btn--generate {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+}
+
+.btn--generate:hover {
+    background-color: var(--color-primary-dark);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Modificador: Botón descargar PDF */
+.btn--download {
+    background-color: var(--color-success);
+    color: var(--color-white);
+}
+
+.btn--download:hover {
+    background-color: #218838;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn--download:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none;
+}
+
+/* Modificador: Botón volver */
+.btn--back {
+    background-color: #6c757d;
+    color: var(--color-white);
+}
+
+.btn--back:hover {
+    background-color: #5a6268;
+}
+
+/* Legacy support - mantener compatibilidad temporal */
 .btn.buscar {
     flex-shrink: 0;
     width: auto;
-    min-width: 100px;
-    padding: 0.6rem 1.5rem;
-    background-color: var(--color-primary);
+    min-width: 120px;
+    padding: 0.8rem 1.8rem;
+    background: linear-gradient(135deg, var(--turquesa) 0%, var(--azul-oscuro) 100%);
     color: var(--color-white);
     white-space: nowrap;
+    border: none;
+    border-radius: var(--border-radius-btn);
+    font-family: 'Oswald', sans-serif;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: var(--transicion);
+    box-shadow: var(--sombra);
+}
+
+.btn.buscar:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--sombra-hover);
+    background: linear-gradient(135deg, var(--azul-oscuro) 0%, var(--turquesa) 100%);
+}
+
+.btn.buscar:active {
+    transform: translateY(0);
 }
 
 .error-message {
@@ -176,10 +590,226 @@ input[type="text"].cliente-no-encontrado {
 }
 
 /* ============================================
-   SECCIÓN DE TABLA
+   BLOQUE: .deudas
+   Sección de tabla de deudas
    ============================================ */
+.deudas {
+    margin-top: 2rem;
+    animation: fadeInUp 0.5s ease;
+}
+
+.deudas__title {
+    margin-bottom: 1rem;
+}
+
+.deudas__subtitle {
+    margin: 10px 0;
+    color: var(--color-text-muted);
+    font-weight: 500;
+}
+
+.deudas__filter {
+    margin: 0 0 1rem 0;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.deudas__filter-label {
+    font-weight: 600;
+}
+
+.deudas__filter-select {
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--color-primary);
+    border-radius: 6px;
+    font-size: 0.95rem;
+}
+
+.deudas__summary {
+    margin: 0 0 1rem 0;
+    color: var(--color-text-dark);
+    font-weight: 600;
+}
+
+.deudas__wrapper {
+    position: relative;
+    width: 100%;
+    max-height: 80vh;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: var(--border-radius);
+    box-shadow: var(--sombra);
+}
+
+.deudas__table {
+    width: 100%;
+    min-width: 100%;
+    border-collapse: collapse;
+    margin-top: 0;
+}
+
+.deudas__table th,
+.deudas__table td {
+    padding: 0.75rem;
+    text-align: center;
+    border-bottom: 1px solid var(--color-border);
+    white-space: nowrap;
+}
+
+.deudas__table th {
+    background-color: var(--color-table-header);
+    color: var(--color-white);
+}
+
+/* Ancho mínimo para columnas de montos */
+.deudas__table th:nth-child(6),
+.deudas__table td:nth-child(6),
+.deudas__table th:nth-child(7),
+.deudas__table td:nth-child(7),
+.deudas__table th:nth-child(8),
+.deudas__table td:nth-child(8) {
+    min-width: 100px;
+}
+
+/* Ancho fijo para columna Total */
+.deudas__table th:last-child,
+.deudas__table td:last-child {
+    width: 120px;
+    min-width: 120px;
+    max-width: 120px;
+    text-align: center;
+}
+
+/* Header fijo en scroll */
+.deudas__wrapper thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: var(--color-table-header);
+}
+
+/* Footer fijo en scroll */
+.deudas__wrapper tfoot {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    background-color: var(--color-table-footer);
+}
+
+/* Fila: Seleccionar todos */
+.deudas__row--select-all {
+    background-color: var(--color-table-row-alt);
+    border-bottom: 2px solid var(--color-primary);
+}
+
+.deudas__row--select-all td,
+.deudas__row--select-all th {
+    padding: 0.75rem;
+    background-color: var(--color-table-row-alt);
+}
+
+.deudas__row--select-all label {
+    font-weight: 500;
+    color: var(--color-primary-dark);
+    margin: 0;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Fila: Total */
+.deudas__row--total {
+    font-weight: bold;
+    background-color: var(--color-table-footer);
+    border-top: 2px solid var(--color-primary);
+}
+
+.deudas__row--total td {
+    padding: 1rem 0.75rem;
+}
+
+/* Elemento: Icono de tipo */
+.deudas__type-icon {
+    display: inline-block;
+    width: 1.4em;
+    text-align: center;
+    font-size: 1.1rem;
+    margin-right: 4px;
+}
+
+/* Elemento: Total final */
+.deudas__total {
+    display: inline-block;
+    width: 100%;
+    font-size: clamp(0.9rem, 1vw, 1rem);
+    white-space: nowrap;
+}
+
+/* Elemento: Checkbox de deuda */
+.deudas__checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--color-primary);
+}
+
+.deudas__checkbox:hover {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+/* Modificador: Descuento positivo (resta del total) - COLOR VERDE */
+.deudas__value--discount {
+    color: var(--color-success);
+    font-weight: 500;
+}
+
+/* Modificador: Interés/Cargo (suma al total) - COLOR NEGRO */
+.deudas__value--interest {
+    color: #000;
+    font-weight: 500;
+}
+
+/* Clases BEM para valores de interés/descuento */
+.deudas__value--interest {
+    color: #000;
+    font-weight: 500;
+}
+
+.deudas__value--discount {
+    color: var(--color-success);
+    font-weight: 500;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Legacy support - mantener compatibilidad temporal */
 .tabla-section {
     margin-top: 2rem;
+    animation: fadeInUp 0.5s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .tabla-wrapper {
@@ -188,7 +818,8 @@ input[type="text"].cliente-no-encontrado {
     max-height: 80vh;
     overflow: auto;
     -webkit-overflow-scrolling: touch;
-    border-radius: 8px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--sombra);
 }
 
 .tabla-wrapper table {
@@ -196,32 +827,33 @@ input[type="text"].cliente-no-encontrado {
     margin-top: 0;
 }
 
-table {
+/* Estilos de tabla SOLO para la tabla de deudas (no afecta al ticket) */
+.tabla-section table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 1rem;
 }
 
-th,
-td {
+.tabla-section th,
+.tabla-section td {
     padding: 0.75rem;
     text-align: center;
     border-bottom: 1px solid var(--color-border);
     white-space: nowrap;
 }
 
-th {
+.tabla-section th {
     background-color: var(--color-table-header);
     color: var(--color-white);
 }
 
 /* Ancho mínimo para columnas de montos */
-table th:nth-child(6),
-table td:nth-child(6),
-table th:nth-child(7),
-table td:nth-child(7),
-table th:nth-child(8),
-table td:nth-child(8) {
+.tabla-section table th:nth-child(6),
+.tabla-section table td:nth-child(6),
+.tabla-section table th:nth-child(7),
+.tabla-section table td:nth-child(7),
+.tabla-section table th:nth-child(8),
+.tabla-section table td:nth-child(8) {
     min-width: 100px;
 }
 
@@ -241,9 +873,9 @@ table td:nth-child(8) {
     background-color: var(--color-table-footer);
 }
 
-/* Ancho fijo para columna Total */
-table th:last-child,
-table td:last-child {
+/* Ancho fijo para columna Total (solo tabla de deudas) */
+.tabla-section table th:last-child,
+.tabla-section table td:last-child {
     width: 120px;
     min-width: 120px;
     max-width: 120px;
@@ -270,9 +902,43 @@ table td:last-child {
 }
 
 /* ============================================
+   BLOQUE: .actions
+   Sección de acciones/botones
+   ============================================ */
+.actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin: 1.5rem 0;
+    flex-wrap: wrap;
+}
+
+/* Modificador: Acciones inferiores */
+.actions--bottom {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px dashed #ccc;
+}
+
+/* Legacy support */
+.ticket-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin: 1.5rem 0;
+    flex-wrap: wrap;
+}
+
+.ticket-actions-bottom {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px dashed #ccc;
+}
+
+/* ============================================
    CHECKBOXES
    ============================================ */
-.checkbox-deuda,
+.deudas__checkbox,
 #checkbox-todos {
     width: 18px;
     height: 18px;
@@ -280,13 +946,13 @@ table td:last-child {
     accent-color: var(--color-primary);
 }
 
-.checkbox-deuda:hover {
+.deudas__checkbox:hover {
     transform: scale(1.1);
     transition: transform 0.2s ease;
 }
 
 /* ============================================
-   FILAS ESPECIALES DE LA TABLA
+   FILAS ESPECIALES DE LA TABLA (Legacy)
    ============================================ */
 .seleccionar-todos-row {
     background-color: var(--color-table-row-alt);
@@ -316,16 +982,178 @@ table td:last-child {
 }
 
 /* ============================================
-   DESCUENTOS E INTERESES
+   DESCUENTOS E INTERESES (SOLO TABLA DE DEUDAS)
+   NO afecta al ticket - limitado a .tabla-section y .deudas
    ============================================ */
-.descuento-positivo {
+.tabla-section .descuento-positivo,
+.deudas .descuento-positivo {
     color: var(--color-success);
     font-weight: 500;
 }
 
-.interes-negativo {
+.tabla-section .interes-negativo,
+.deudas .interes-negativo {
     color: #000;
     font-weight: 500;
+}
+
+/* ============================================
+   BLOQUE: .qr
+   Contenedor del código QR
+   ============================================ */
+.qr {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 2rem;
+}
+
+.qr__image {
+    height: 50vh;
+    width: auto;
+    margin-bottom: 1.5rem;
+}
+
+/* Legacy support */
+.qr-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 2rem;
+}
+
+.imgqr {
+    height: 50vh;
+    width: auto;
+    margin-bottom: 1.5rem;
+}
+
+.qr-container .btn.pagar {
+    text-decoration: none;
+}
+
+/* Botón Ir a Pagar (estilo consistente con otros botones) */
+.btn-pagar {
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    text-align: center;
+}
+
+.btn-pagar:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Legacy: Botones generales */
+.botones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.btn.qr {
+    background-color: var(--color-primary-dark);
+    color: var(--color-white);
+}
+
+.btn.pagar {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+}
+
+/* Legacy: Botones de ticket */
+.btn-ticket {
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-generar-ticket {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.btn-generar-ticket:hover {
+    background-color: var(--color-primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-descargar-pdf {
+    background-color: var(--color-success);
+    color: white;
+}
+
+.btn-descargar-pdf:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-descargar-pdf:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.btn-volver-arriba {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-volver-arriba:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+}
+
+/* ============================================
+   BLOQUE: .footer
+   Pie de página del portal
+   ============================================ */
+.footer {
+    display: flex;
+    justify-content: center;
+    padding: 1rem 2rem;
+    color: var(--color-white);
+    background: linear-gradient(135deg, var(--azul-oscuro) 0%, var(--turquesa) 100%);
+    align-items: center;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.9rem;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.footer__text {
+    margin: 0;
+}
+
+/* Legacy support */
+footer {
+    display: flex;
+    justify-content: center;
+    padding: 1rem 2rem;
+    color: var(--color-white);
+    background: linear-gradient(135deg, var(--azul-oscuro) 0%, var(--turquesa) 100%);
+    align-items: center;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.9rem;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.total-row {
+    font-weight: bold;
+    background-color: var(--color-table-footer);
+    border-top: 2px solid var(--color-primary);
+}
+
+.total-row td {
+    padding: 1rem 0.75rem;
 }
 
 /* ============================================
@@ -401,41 +1229,52 @@ table td:last-child {
 }
 
 /* ============================================
-   FOOTER
+   FOOTER (Estilo ALCALD+IA)
    ============================================ */
 footer {
     display: flex;
     justify-content: center;
-    padding: 0.25rem 0.75rem;
+    padding: 1rem 2rem;
     color: var(--color-white);
-    background-color: var(--color-primary);
+    background: linear-gradient(135deg, var(--azul-oscuro) 0%, var(--turquesa) 100%);
     align-items: center;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.9rem;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 /* ============================================
    RESPONSIVE - MOBILE
    ============================================ */
 @media screen and (max-width: 768px) {
+
+    .main,
     main {
         padding: 1rem;
     }
 
+    .header,
     header {
         padding: 0.75rem 1rem;
     }
 
+    .form__content,
     .form-section form {
         width: 95%;
     }
 
+    .btn--search,
     .btn.buscar {
         min-width: 80px;
         padding: 0.6rem 1rem;
         font-size: 0.9rem;
     }
 
-    th,
-    td {
+    /* Solo afecta a tablas de deudas, no al ticket */
+    .deudas__table th,
+    .deudas__table td,
+    .tabla-section th,
+    .tabla-section td {
         padding: 0.5rem 0.3rem;
         font-size: smaller;
     }
@@ -447,677 +1286,31 @@ footer {
 }
 
 /* ============================================
-   ESTILOS DEL TICKET DE PAGO
-   Mobile-first, formato A4 para impresión
+   ESTILOS ADICIONALES BEM
    ============================================ */
 
-/* Contenedor principal del ticket */
-.ticket-container {
-    max-width: 100%;
-    margin: 2rem auto;
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+/* Elemento: Loading del QR */
+.qr__loading {
+    color: #666;
+    margin-top: 1rem;
 }
 
-/* Página individual del ticket (formato A4) */
-.ticket-page {
-    background: #ffffff;
-    padding: 1rem;
-    page-break-after: always;
-    position: relative;
-    max-width: 100%;
-    overflow-x: hidden;
-}
-
-/* Header del ticket */
-.ticket-header {
-    flex-wrap: wrap;
-    border-bottom: 2px solid #000;
-    margin-bottom: 0.75rem;
-    /* Header más cerca del cuerpo */
-    background-color: #fff;
-}
-
-/* Primera línea: Logo - Nombre - Fecha */
-.ticket-header-top {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: 1rem;
-    align-items: center;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid #000;
-    width: 100%;
-}
-
-.ticket-logo {
-    width: 60px;
-    height: 60px;
-}
-
-.ticket-logo-img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-
-.ticket-title {
+/* Elemento: Celda vacía de deudas */
+.deudas__empty {
     text-align: center;
-    flex: 1;
+    color: var(--color-text-muted);
+    padding: 1rem 0;
 }
 
-.ticket-title h1 {
-    margin: 0;
-    font-size: 1.3rem;
-    color: #000;
-    font-weight: 700;
-}
-
-.ticket-subtitle {
-    margin: 0.2rem 0 0;
-    font-size: 0.9rem;
-    color: #000;
-}
-
-.ticket-fecha {
-    text-align: right;
-    font-size: small;
-    white-space: nowrap;
-}
-
-.ticket-fecha-label {
-    margin: 0;
-    font-weight: 600;
-    color: #000;
-}
-
-.ticket-fecha-valor {
-    margin: 0.2rem 0 0;
-    font-weight: 400;
-    color: #000;
-    font-size: smaller;
-}
-
-/* Segunda línea: Dirección del Municipio */
-.ticket-header-info {
-    background-color: #fff;
-    padding: 0.75rem 0;
-    margin-bottom: 0.75rem;
-    border-bottom: 1px solid #000;
-    width: 100%;
-}
-
-.ticket-direccion {
-    display: flex;
-    justify-content: space-between;
-    /* Dirección | CP | Tel distribuidos */
-    align-items: center;
-    gap: 1rem;
-    width: 100%;
-}
-
-.ticket-direccion p {
-    margin: 0;
-    font-size: clamp(0.75rem, 2vw, 0.875rem);
-    color: #000;
-    white-space: nowrap;
-    /* Evita saltos en desktop */
-    flex: 0 1 auto;
-}
-
-@media (max-width: 600px) {
-    .ticket-direccion {
-        flex-wrap: wrap;
-        /* Permite acomodarse si no entra */
-        justify-content: center;
-        /* Centra cuando hace wrap */
-        gap: 0.5rem 1rem;
-    }
-
-    .ticket-direccion p {
-        font-size: x-small;
-        /* Más pequeño en móvil estrecho */
-        white-space: normal;
-        /* Permite cortar si es necesario */
-    }
-}
-
-/* Tercera línea: Datos del Contribuyente */
-.ticket-contribuyente {
-    background-color: #fff;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 2rem;
-    width: 100%;
-    justify-content: center;
-    align-items: center;
-    padding-bottom: clamp(0rem, (100vw - 768px) * 100, 1rem);
-}
-
-.ticket-contribuyente p {
-    margin: 0;
-    /* Tamaño base: nunca superior a x-small en cualquier resolución */
-    font-size: x-small;
-    color: #000;
-}
-
-.ticket-contribuyente p:first-child {
-    text-align: left;
-}
-
-.ticket-contribuyente p:last-child {
-    text-align: right;
-    white-space: nowrap;
-}
-
-/* Tabla del ticket */
-.ticket-body {
-    margin: 0.75rem 0;
-    /* Reduce separación para acercar tabla al header */
-}
-
-.ticket-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: smaller;
-    /* Más compacto para que entren más columnas y filas */
-    color: #000;
-    table-layout: fixed;
-    /* Evita que se expanda más allá del contenedor */
-}
-
-.ticket-table thead {
-    background-color: #fff;
-    color: #000;
-    border-bottom: 2px solid #000;
-}
-
-.ticket-table th {
-    padding: 0.35rem 0.35rem;
-    /* Reducir padding para mayor densidad */
-    text-align: left;
-    font-weight: 600;
-    border: none;
-}
-
-.ticket-table td {
-    padding: 0.35rem 0.35rem;
-    /* Reducir padding para más filas por página */
-    border: none;
-    border-bottom: none;
-}
-
-/* Alineaciones específicas de columnas */
-/* 1) Fecha Vto. (col 1) siempre a la izquierda */
-.ticket-table th:nth-child(1),
-.ticket-table td:nth-child(1) {
-    text-align: left !important;
-    /* Reducir ancho ~45% para ceder espacio a Detalle */
-    width: 54px;
-    min-width: 50px;
-    max-width: 60px;
-    white-space: nowrap;
-}
-
-/* 2) Cuota (col 3) siempre a la derecha */
-.ticket-table th:nth-child(3),
-.ticket-table td:nth-child(3) {
-    text-align: right !important;
-}
-
-.ticket-table tbody tr:nth-child(even) {
-    background-color: #fff;
-}
-
-.ticket-table tbody tr:hover {
-    background-color: #fff;
-}
-
-.ticket-col-right {
-    text-align: right !important;
-}
-
-.ticket-detalle {
-    max-width: 280px;
-    /* Más espacio para leer el detalle */
-    word-wrap: break-word;
-    overflow-wrap: anywhere;
-}
-
-/* Columnas numéricas compactas: Importe, Int/Dto, Total (5,6,7) */
-.ticket-table th:nth-child(5),
-.ticket-table td:nth-child(5),
-.ticket-table th:nth-child(6),
-.ticket-table td:nth-child(6),
-.ticket-table th:nth-child(7),
-.ticket-table td:nth-child(7) {
-    width: 72px;
-    /* Suficiente para "$ 123.456" y margen */
-    min-width: 70px;
-    max-width: 80px;
-    white-space: nowrap;
-}
-
-/* 3) Reducir ancho de Cuota (col 3) ~60% respecto actual */
-.ticket-table th:nth-child(3),
-.ticket-table td:nth-child(3) {
-    width: 40px;
-    min-width: 36px;
-    max-width: 46px;
-    white-space: nowrap;
-}
-
-/* 4) Dar más espacio a Detalle (col 2) aprovechando el ahorro de Cuota */
-.ticket-table th:nth-child(2),
-.ticket-table td:nth-child(2) {
-    /* Permitir ocupar más espacio dentro del table-layout: fixed */
-    width: auto;
-    /* Ayuda a que la columna detalle absorba el espacio liberado */
-    word-break: break-word;
-    overflow-wrap: anywhere;
-}
-
-/* Columna Año (4ta) más angosta: solo 4 dígitos */
-.ticket-table th:nth-child(4),
-.ticket-table td:nth-child(4) {
-    width: 42px;
-    min-width: 38px;
-    max-width: 48px;
-    text-align: center;
-    white-space: nowrap;
-}
-
-@media (min-width: 1024px) {
-    .ticket-detalle {
-        max-width: 340px;
-    }
-
-    .ticket-table th:nth-child(5),
-    .ticket-table td:nth-child(5),
-    .ticket-table th:nth-child(6),
-    .ticket-table td:nth-child(6),
-    .ticket-table th:nth-child(7),
-    .ticket-table td:nth-child(7) {
-        width: 78px;
-    }
-
-    .ticket-contribuyente p {
-        margin: 0;
-        font-size: x-small;
-        color: #000;
-    }
-}
-
-/* Estilos para intereses/descuentos en el ticket */
-.ticket-table .interes-negativo {
-    color: #000;
-}
-
-.ticket-table .descuento-positivo {
-    color: #28a745;
-}
-
-/* Footer de la tabla */
-.ticket-table tfoot {
-    background-color: #fff;
-    font-weight: 600;
-}
-
-.ticket-subtotal-row td {
-    padding: 0.75rem 0.5rem;
-    border-top: 2px solid #000;
-    border-bottom: none;
-}
-
-.ticket-total-row {
-    background-color: #fff !important;
-}
-
-.ticket-total-row td {
-    padding: 0.9rem 0.5rem;
-    font-size: 1rem;
-    border-top: 3px double #000;
-    border-bottom: none;
-    text-align: center;
-}
-
-/* Footer del ticket */
-.ticket-footer {
-    padding-top: 1rem;
-    border-top: 2px solid #000;
-    padding-bottom: 1rem;
-}
-
-.ticket-validez {
-    background-color: #fff;
-    border: 1px solid #000;
-    padding: 0.75rem;
-}
-
-.ticket-validez p {
-    margin: 0;
-    font-size: 0.85rem;
-    color: #000;
-    font-weight: 600;
-}
-
-.ticket-nota {
-    text-align: center;
-    margin: 0.75rem 0;
-    padding: 0.5rem;
-}
-
-.ticket-nota p {
-    margin: 0;
-    font-size: 0.85rem;
-    color: #000;
-}
-
-.ticket-paginacion {
-    text-align: center;
-    color: #000;
-    font-size: smaller;
-    margin-top: 0.5rem;
-}
-
-.ticket-paginacion p {
-    margin: 0;
-    padding: 0.5rem;
-}
-
-/* Salto de página para impresión */
-.ticket-page-break {
-    page-break-after: always;
-    height: 2rem;
-    background: repeating-linear-gradient(45deg,
-            #f0f0f0,
-            #f0f0f0 10px,
-            #e0e0e0 10px,
-            #e0e0e0 20px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #999;
-    font-size: 0.8rem;
-}
-
-.ticket-page-break::before {
-    content: '--- Separación de páginas ---';
-}
-
-/* Botones de acción del ticket */
-.ticket-actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    margin: 1.5rem 0;
-    flex-wrap: wrap;
-}
-
-.btn-ticket {
-    padding: 0.75rem 2rem;
-    font-size: 1rem;
-    font-weight: 600;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-decoration: none;
-    display: inline-block;
-}
-
-.btn-generar-ticket {
-    background-color: var(--color-primary);
-    color: white;
-}
-
-.btn-generar-ticket:hover {
-    background-color: var(--color-primary-dark);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.btn-descargar-pdf {
-    background-color: #28a745;
-    color: white;
-}
-
-.btn-descargar-pdf:hover {
-    background-color: #218838;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.btn-descargar-pdf:disabled {
-    background-color: #6c757d;
-    cursor: not-allowed;
-    opacity: 0.6;
-}
-
-.btn-volver-arriba {
-    background-color: #6c757d;
-    color: #fff;
-}
-
-.btn-volver-arriba:hover {
-    background-color: #5a6268;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-/* Botones inferiores del ticket */
-.ticket-actions-bottom {
-    margin-top: 1.5rem;
-    padding-top: 1rem;
-    border-top: 1px dashed #ccc;
-}
-
-/* Estado de carga */
-.ticket-loading {
-    text-align: center;
-    padding: 2rem;
+/* Elemento: Texto vacío del filtro */
+.deudas__filter-empty {
     color: var(--color-text-muted);
 }
 
-.ticket-loading::before {
-    content: '⏳ ';
-    font-size: 1.5rem;
-}
-
 /* ============================================
-   RESPONSIVE TICKET < 680px: SCROLL + SOMBRAS
+   NOTA: Los estilos del ticket han sido movidos
+   a un archivo separado: ticket.css
+   
+   Para usar el componente de ticket, incluir:
+   <link rel="stylesheet" href="/stylesheets/ticket.css">
    ============================================ */
-@media (max-width: 680px) {
-
-    /* El cuerpo del ticket maneja el scroll horizontal */
-    .ticket-body {
-        overflow-x: auto;
-        overflow-y: hidden;
-        -webkit-overflow-scrolling: touch;
-        position: relative;
-    }
-
-    /* La tabla conserva un ancho mínimo útil para evitar pisado */
-    .ticket-table {
-        min-width: 680px;
-    }
-
-    /* Sombras laterales para indicar que hay desplazamiento horizontal */
-    .ticket-body::before,
-    .ticket-body::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        width: 16px;
-        pointer-events: none;
-        z-index: 1;
-    }
-
-    .ticket-body::before {
-        left: 0;
-        background: linear-gradient(to right, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0));
-    }
-
-    .ticket-body::after {
-        position: sticky;
-        /* fija al borde visible derecho mientras se desplaza */
-        right: 0;
-        top: 0;
-        bottom: 0;
-        background: linear-gradient(to left, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0));
-    }
-
-    /* Scrollbar visible y delgado */
-    .ticket-body {
-        scrollbar-width: thin;
-        /* Firefox */
-    }
-
-    .ticket-body::-webkit-scrollbar {
-        height: 10px;
-        /* un poco más grande para mejor agarre */
-    }
-
-    .ticket-body::-webkit-scrollbar-track {
-        background: #f0f0f0;
-    }
-
-    .ticket-body::-webkit-scrollbar-thumb {
-        background: #c2c2c2;
-        border-radius: 8px;
-    }
-
-    .ticket-body::-webkit-scrollbar-thumb:hover {
-        background: #a8a8a8;
-    }
-}
-
-/* Modo PDF: asegurar tipografía pequeña y límites de ancho */
-.pdf-mode .ticket-page {
-    max-width: 100%;
-    overflow-x: hidden;
-}
-
-.pdf-mode .ticket-table {
-    width: 100% !important;
-    table-layout: fixed;
-    font-size: smaller;
-}
-
-/* Responsive - Tablet */
-@media (min-width: 768px) {
-    .ticket-container {
-        max-width: 800px;
-    }
-
-    .ticket-page {
-        padding: 2rem;
-    }
-
-    .ticket-logo {
-        width: 80px;
-        height: 80px;
-    }
-
-    .ticket-title h1 {
-        font-size: 1.6rem;
-    }
-
-    .ticket-subtitle {
-        font-size: 1rem;
-    }
-
-    .ticket-table {
-        font-size: 0.9rem;
-        font-size: x-small;
-    }
-
-    .ticket-detalle {
-        max-width: 300px;
-    }
-}
-
-/* Responsive - Desktop y formato A4 */
-@media (min-width: 1024px) {
-    .ticket-container {
-        max-width: 21cm;
-        /* A4 width */
-    }
-
-    .ticket-page {
-        min-height: 29.7cm;
-        /* A4 height */
-        padding: 2.5cm 2cm;
-        max-width: 100%;
-    }
-
-    .ticket-logo {
-        width: 100px;
-        height: 100px;
-    }
-
-    .ticket-title h1 {
-        font-size: 1.8rem;
-    }
-
-    .ticket-table {
-        font-size: x-small;
-    }
-
-    /* Mantener siempre tamaño pequeño también en desktop (cap en small) */
-    .ticket-contribuyente p {
-        margin: 0;
-        font-size: x-small;
-        color: #000;
-    }
-}
-
-/* Estilos para impresión */
-@media print {
-    body {
-        background: white;
-    }
-
-    .ticket-container {
-        box-shadow: none;
-        border: none;
-        max-width: 100%;
-    }
-
-    .ticket-page {
-        page-break-after: always;
-        box-shadow: none;
-        border: none;
-        max-width: 100%;
-        overflow-x: hidden;
-    }
-
-    .ticket-page-break {
-        display: none;
-    }
-
-    .ticket-actions,
-    .botones,
-    header,
-    footer,
-    .form-section {
-        display: none !important;
-    }
-
-    /* Asegurar que no se corten elementos */
-    .ticket-table {
-        page-break-inside: avoid;
-        width: 100% !important;
-        table-layout: fixed;
-        font-size: smaller;
-        /* Letra pequeña en PDF */
-    }
-
-    .ticket-header,
-    .ticket-footer {
-        page-break-inside: avoid;
-    }
-}

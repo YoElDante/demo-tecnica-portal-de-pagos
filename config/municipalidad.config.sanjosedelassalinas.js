@@ -23,7 +23,7 @@ module.exports = {
   // Rutas de imágenes/logos (relativas a /public)
   logos: {
     principal: '/images/sanjosedelassalinas.webp',
-    secundario: '../public/images/alcaldiaLogo.webp',
+    secundario: '/images/alcaldiaLogo.webp',
     favicon: '/images/sanjosedelassalinas.ico'
   },
 
