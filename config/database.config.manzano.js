@@ -9,7 +9,8 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
-const sequelize = new Sequelize('X9adQvSSfS5Hlhw', process.env.DB_USER, process.env.DB_PASS, {
+// const sequelize = new Sequelize('X9adQvSSfS5Hlhw', process.env.DB_USER, process.env.DB_PASS, {
+const sequelize = new Sequelize('X9adQvSSfS5Hlhw', 'XXXXAdmin', 'XXXXX-XXXX-XXXX-XXX-XXXXXXXX', {
   host: 'XXXXXXXX.database.windows.net',
   port: process.env.DB_PORT || 1433,
   dialect: process.env.DB_DIALECT || 'mssql',

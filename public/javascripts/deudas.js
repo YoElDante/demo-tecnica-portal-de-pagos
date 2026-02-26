@@ -8,14 +8,22 @@
 // GESTIÓN DE SELECCIÓN Y TOTALES
 // ============================================
 
+function obtenerCheckboxesConceptos() {
+  return Array.from(document.querySelectorAll('.deudas__checkbox[data-idtrans]'));
+}
+
+function obtenerCheckboxesConceptosMarcados() {
+  return Array.from(document.querySelectorAll('.deudas__checkbox[data-idtrans]:checked'));
+}
+
 function actualizarTotal() {
-  const checkboxes = document.querySelectorAll('.deudas__checkbox:checked');
+  const checkboxes = obtenerCheckboxesConceptosMarcados();
   let total = 0;
 
   checkboxes.forEach(cb => {
     // Ignorar filas ocultas
     if (cb.closest('tr') && cb.closest('tr').style.display === 'none') return;
-    total += parseFloat(cb.dataset.total);
+    total += parseFloat(cb.dataset.total || '0');
   });
 
   const totalElement = document.getElementById('total-final');
@@ -34,9 +42,13 @@ function actualizarCheckboxTodos() {
   const checkboxesVisibles = Array.from(filasVisibles).map(f => f.querySelector('.deudas__checkbox')).filter(Boolean);
   const marcadosVisibles = checkboxesVisibles.filter(cb => cb.checked);
   if (checkboxesVisibles.length > 0) {
-    checkboxTodos.checked = checkboxesVisibles.length === marcadosVisibles.length;
+    const todosMarcados = checkboxesVisibles.length === marcadosVisibles.length;
+    const ningunoMarcado = marcadosVisibles.length === 0;
+    checkboxTodos.checked = todosMarcados;
+    checkboxTodos.indeterminate = !todosMarcados && !ningunoMarcado;
   } else {
     checkboxTodos.checked = false;
+    checkboxTodos.indeterminate = false;
   }
 }
 
@@ -88,7 +100,7 @@ function parsearFechaParaOrden(fechaStr) {
  * @returns {Array} Array de conceptos seleccionados ordenados por tipo y fecha descendente
  */
 function recopilarConceptosSeleccionados() {
-  const checkboxes = document.querySelectorAll('.deudas__checkbox:checked');
+  const checkboxes = obtenerCheckboxesConceptosMarcados();
   const conceptos = [];
 
   checkboxes.forEach(cb => {
@@ -654,8 +666,8 @@ async function descargarPDF() {
 document.addEventListener('DOMContentLoaded', function () {
   actualizarTotal();
 
-  // Agregar listeners a todos los checkboxes de deudas
-  const checkboxes = document.querySelectorAll('.deudas__checkbox');
+  // Agregar listeners a los checkboxes de conceptos
+  const checkboxes = obtenerCheckboxesConceptos();
   checkboxes.forEach(cb => {
     cb.addEventListener('change', actualizarTotal);
   });
