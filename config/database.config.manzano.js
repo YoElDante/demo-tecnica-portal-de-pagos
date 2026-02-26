@@ -9,8 +9,9 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
-const sequelize = new Sequelize('X9adQvSSfS5Hlhw', process.env.DB_USER, process.env.DB_PASS, {
-  host: 'alcaldiasmlqdsprueba.database.windows.net',
+// const sequelize = new Sequelize('X9adQvSSfS5Hlhw', process.env.DB_USER, process.env.DB_PASS, {
+const sequelize = new Sequelize('X9adQvSSfS5Hlhw', 'SmlqdSAdmin', 'SMLQDS-2024-0022-101-pesospesos-0022', {
+  host: 'alcaldiasmlqdsmanzano.database.windows.net',
   port: process.env.DB_PORT || 1433,
   dialect: process.env.DB_DIALECT || 'mssql',
   dialectOptions: {
