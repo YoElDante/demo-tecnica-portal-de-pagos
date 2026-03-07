@@ -237,7 +237,7 @@
      * @returns {Array<number>} Array de IdTrans seleccionados
      */
     function recopilarIdTransSeleccionados() {
-      const checkboxes = document.querySelectorAll('.deudas__checkbox:checked');
+      const checkboxes = document.querySelectorAll('.deudas__checkbox[data-idtrans]:checked');
       const ids = [];
 
       checkboxes.forEach(cb => {
@@ -321,7 +321,7 @@
      * @returns {Array} Array de conceptos para enviar al backend
      */
     function recopilarConceptosParaPago() {
-      const checkboxes = document.querySelectorAll('.deudas__checkbox:checked');
+      const checkboxes = document.querySelectorAll('.deudas__checkbox[data-idtrans]:checked');
       const conceptos = [];
 
       checkboxes.forEach(cb => {
