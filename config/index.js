@@ -35,6 +35,10 @@ const municipiosDisponibles = {
   sanjosedelassalinas: {
     database: () => require('./database.config.sanjosedelassalinas'),
     municipalidad: () => require('./municipalidad.config.sanjosedelassalinas')
+  },
+  tinoco: {
+    database: () => require('./database.config.tinoco'),
+    municipalidad: () => require('./municipalidad.config.tinoco')
   }
 };
 

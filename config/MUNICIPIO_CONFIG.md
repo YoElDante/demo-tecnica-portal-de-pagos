@@ -1,7 +1,7 @@
 # ⚙️ Configuración de Municipios
 
 > **Propósito**: Documentar cómo cambiar la configuración de municipios
-> **Última actualización**: 2026-01-20
+> **Última actualización**: 2026-01-31
 > **Estado**: ✅ IMPLEMENTADO
 
 ---
@@ -13,7 +13,7 @@
 En el archivo `.env`, cambiar la variable `MUNICIPIO`:
 
 ```env
-# Opciones disponibles: manzano, sanjosedelassalinas
+# Opciones disponibles: manzano, sanjosedelassalinas, tinoco
 MUNICIPIO=manzano
 ```
 

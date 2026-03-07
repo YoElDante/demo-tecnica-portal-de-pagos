@@ -9,7 +9,7 @@
 // ============================================
 
 function actualizarTotal() {
-  const checkboxes = document.querySelectorAll('.deudas__checkbox:checked');
+  const checkboxes = document.querySelectorAll('tbody .deudas__checkbox:checked');
   let total = 0;
 
   checkboxes.forEach(cb => {
@@ -88,7 +88,7 @@ function parsearFechaParaOrden(fechaStr) {
  * @returns {Array} Array de conceptos seleccionados ordenados por tipo y fecha descendente
  */
 function recopilarConceptosSeleccionados() {
-  const checkboxes = document.querySelectorAll('.deudas__checkbox:checked');
+  const checkboxes = document.querySelectorAll('tbody .deudas__checkbox:checked');
   const conceptos = [];
 
   checkboxes.forEach(cb => {
@@ -654,8 +654,8 @@ async function descargarPDF() {
 document.addEventListener('DOMContentLoaded', function () {
   actualizarTotal();
 
-  // Agregar listeners a todos los checkboxes de deudas
-  const checkboxes = document.querySelectorAll('.deudas__checkbox');
+  // Agregar listeners a los checkboxes de deudas (excluyendo el de "todos")
+  const checkboxes = document.querySelectorAll('tbody .deudas__checkbox');
   checkboxes.forEach(cb => {
     cb.addEventListener('change', actualizarTotal);
   });

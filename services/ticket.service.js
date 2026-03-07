@@ -81,28 +81,46 @@ function obtenerFechaEmision() {
  * @returns {Array} Conceptos procesados y formateados
  */
 function procesarConceptos(conceptos) {
-  return conceptos.map(concepto => {
-    const interes = parseFloat(concepto.interes || concepto.Interes || 0);
-    const importe = parseFloat(concepto.importe || concepto.Importe || 0);
-    const total = parseFloat(concepto.total || concepto.Total || 0);
+  // Filtrar conceptos vacíos o inválidos
+  return conceptos
+    .filter(concepto => {
+      // Debe tener al menos un valor numérico válido
+      if (!concepto) return false;
+      const total = concepto.total ?? concepto.Total;
+      const importe = concepto.importe ?? concepto.Importe;
+      // Si todos son undefined/null/0 y no hay descripción, descartar
+      if (
+        (!total && !importe) &&
+        !(concepto.tipoDescripcion || concepto.TipoDescripcion)
+      ) {
+        return false;
+      }
+      // Si es un objeto vacío
+      if (Object.keys(concepto).length === 0) return false;
+      return true;
+    })
+    .map(concepto => {
+      const interes = parseFloat(concepto.interes || concepto.Interes || 0);
+      const importe = parseFloat(concepto.importe || concepto.Importe || 0);
+      const total = parseFloat(concepto.total || concepto.Total || 0);
 
-    return {
-      fechaVto: formatearFecha(concepto.fechaVto || concepto.FechaVto),
-      tipoDescripcion: concepto.tipoDescripcion || concepto.TipoDescripcion || 'Concepto',
-      detalle: concepto.detalle || concepto.Detalle || '',
-      cuota: concepto.cuota || concepto.Cuota || '-',
-      anio: concepto.anio || concepto.Anio || '-',
-      importe: formatearMoneda(importe),
-      importeNumerico: importe, // Para cálculos
-      // Si interés < 0 es descuento: mostrar con signo negativo
-      interes: interes < 0 ? '-' + formatearMoneda(Math.abs(interes)) : formatearMoneda(interes),
-      interesNumerico: interes, // Para cálculos (con signo)
-      // Cargo (>= 0) = negro, Descuento (< 0) = verde
-      interesClase: interes < 0 ? 'ticket__value--discount' : 'ticket__value--interest',
-      total: formatearMoneda(total),
-      totalNumerico: total // Para cálculos
-    };
-  });
+      return {
+        fechaVto: formatearFecha(concepto.fechaVto || concepto.FechaVto),
+        tipoDescripcion: concepto.tipoDescripcion || concepto.TipoDescripcion || 'Concepto',
+        detalle: concepto.detalle || concepto.Detalle || '',
+        cuota: concepto.cuota || concepto.Cuota || '-',
+        anio: concepto.anio || concepto.Anio || '-',
+        importe: formatearMoneda(importe),
+        importeNumerico: importe, // Para cálculos
+        // Si interés < 0 es descuento: mostrar con signo negativo
+        interes: interes < 0 ? '-' + formatearMoneda(Math.abs(interes)) : formatearMoneda(interes),
+        interesNumerico: interes, // Para cálculos (con signo)
+        // Cargo (>= 0) = negro, Descuento (< 0) = verde
+        interesClase: interes < 0 ? 'ticket__value--discount' : 'ticket__value--interest',
+        total: formatearMoneda(total),
+        totalNumerico: total // Para cálculos
+      };
+    });
 }
 
 /**
@@ -134,8 +152,17 @@ function prepararDatosTicket({ conceptos, contribuyente }) {
     throw new Error('Datos del contribuyente incompletos');
   }
 
+  // Log para depuración
+  if (process.env.NODE_ENV !== 'production') {
+    // eslint-disable-next-line no-console
+    console.log('[Ticket] Conceptos recibidos:', JSON.stringify(conceptos, null, 2));
+  }
   // Procesar conceptos
   const conceptosProcesados = procesarConceptos(conceptos);
+  if (process.env.NODE_ENV !== 'production') {
+    // eslint-disable-next-line no-console
+    console.log('[Ticket] Conceptos procesados:', JSON.stringify(conceptosProcesados, null, 2));
+  }
   const totalGeneral = calcularTotalGeneral(conceptosProcesados);
 
   // Preparar datos del contribuyente
