@@ -2,7 +2,7 @@
 
 > **Portal de Pagos Municipal - Comuna de Tinoco**  
 > **Versión:** 1.0  
-> **Fecha:** Diciembre 2024  
+> **Fecha:** Diciembre 2025 
 > **Autor:** Equipo de Desarrollo
 
 ---

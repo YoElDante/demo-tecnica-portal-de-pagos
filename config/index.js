@@ -1,58 +1,66 @@
 /**
  * Configuración Centralizada de Municipio
  * 
- * Este archivo lee la variable MUNICIPIO desde .env y exporta
- * las configuraciones correctas (BD y datos del municipio).
+ * Este archivo lee las variables de entorno y exporta:
+ * - sequelize: Conexión a BD (ÚNICA para todos los municipios)
+ * - municipalidad: Datos visuales del municipio (nombre, logo, etc.)
+ * - MUNICIPIO: Identificador del municipio activo
  * 
  * USO:
  *   const { sequelize, municipalidad, MUNICIPIO } = require('../config');
  * 
  * CAMBIAR MUNICIPIO:
- *   En .env: MUNICIPIO=manzano (o sanjosedelassalinas, etc.)
+ *   En .env configurar:
+ *   - MUNICIPIO=manzano (controla datos visuales)
+ *   - DB_HOST, DB_NAME, DB_USER, DB_PASS (controla conexión a BD)
  * 
  * @author Dante Marcos Delprato
- * @version 1.0
- * @date 2026-01-20
+ * @version 2.0
+ * @date 2026-03-09
+ * @refactored Unificación de configuración de BD
  */
 
 require('dotenv').config();
 
-const MUNICIPIO = process.env.MUNICIPIO || 'manzano';
+// ============================================
+// VALIDACIÓN DE MUNICIPIO
+// ============================================
+
+const MUNICIPIO = process.env.MUNICIPIO;
+
+if (!MUNICIPIO) {
+  console.error('');
+  console.error('╔══════════════════════════════════════════════════════════════╗');
+  console.error('║  ❌ ERROR: Variable MUNICIPIO no definida                    ║');
+  console.error('╠══════════════════════════════════════════════════════════════╣');
+  console.error('║  La variable MUNICIPIO es requerida para cargar los datos    ║');
+  console.error('║  visuales del municipio (nombre, logo, dirección, etc.)      ║');
+  console.error('║                                                              ║');
+  console.error('║  Solución:                                                   ║');
+  console.error('║    En .env agregar: MUNICIPIO=elmanzano                      ║');
+  console.error('║    Valores: elmanzano, sanjosedelassalinas, tinoco           ║');
+  console.error('╚══════════════════════════════════════════════════════════════╝');
+  console.error('');
+  process.exit(1);
+}
 
 // ============================================
 // REGISTRO DE MUNICIPIOS DISPONIBLES
 // ============================================
 // Para agregar un nuevo municipio:
-// 1. Crear database.config.NUEVO.js
-// 2. Crear municipalidad.config.NUEVO.js
-// 3. Agregar entrada aquí abajo
+// 1. Crear municipalidad.config.NUEVO.js (solo datos visuales)
+// 2. Agregar 'nuevo' a la lista de abajo
+// 3. Configurar variables de BD en Azure App Service
 
-const municipiosDisponibles = {
-  manzano: {
-    database: () => require('./database.config.manzano'),
-    municipalidad: () => require('./municipalidad.config.manzano')
-  },
-  sanjosedelassalinas: {
-    database: () => require('./database.config.sanjosedelassalinas'),
-    municipalidad: () => require('./municipalidad.config.sanjosedelassalinas')
-  },
-  tinoco: {
-    database: () => require('./database.config.tinoco'),
-    municipalidad: () => require('./municipalidad.config.tinoco')
-  }
-};
+const municipiosDisponibles = ['elmanzano', 'sanjosedelassalinas', 'tinoco'];
 
-// ============================================
-// VALIDACIÓN
-// ============================================
-
-if (!municipiosDisponibles[MUNICIPIO]) {
+if (!municipiosDisponibles.includes(MUNICIPIO)) {
   console.error('');
   console.error('╔══════════════════════════════════════════════════════════════╗');
   console.error('║  ❌ ERROR: Municipio no configurado                          ║');
   console.error('╠══════════════════════════════════════════════════════════════╣');
   console.error(`║  Municipio solicitado: "${MUNICIPIO}"`);
-  console.error(`║  Municipios disponibles: ${Object.keys(municipiosDisponibles).join(', ')}`);
+  console.error(`║  Municipios disponibles: ${municipiosDisponibles.join(', ')}`);
   console.error('║                                                              ║');
   console.error('║  Solución: Verificar variable MUNICIPIO en archivo .env      ║');
   console.error('╚══════════════════════════════════════════════════════════════╝');
@@ -64,9 +72,12 @@ if (!municipiosDisponibles[MUNICIPIO]) {
 // CARGA DE CONFIGURACIÓN
 // ============================================
 
-const config = municipiosDisponibles[MUNICIPIO];
-const sequelize = config.database();
-const municipalidad = config.municipalidad();
+// Base de datos: UN SOLO archivo para todos los municipios
+// Las credenciales vienen de variables de entorno
+const sequelize = require('./database.config');
+
+// Datos del municipio: archivo específico según MUNICIPIO
+const municipalidad = require(`./municipalidad.config.${MUNICIPIO}`);
 
 console.log(`🏛️  Municipio activo: ${municipalidad.nombreCompleto || MUNICIPIO}`);
 
@@ -85,5 +96,5 @@ module.exports = {
   municipalidad,
 
   // Lista de municipios disponibles (para debugging/admin)
-  municipiosDisponibles: Object.keys(municipiosDisponibles)
+  municipiosDisponibles
 };

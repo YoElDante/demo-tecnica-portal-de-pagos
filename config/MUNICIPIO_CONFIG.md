@@ -13,8 +13,8 @@
 En el archivo `.env`, cambiar la variable `MUNICIPIO`:
 
 ```env
-# Opciones disponibles: manzano, sanjosedelassalinas, tinoco
-MUNICIPIO=manzano
+# Opciones disponibles: elmanzano, sanjosedelassalinas, tinoco
+MUNICIPIO=elmanzano
 ```
 
 **¡Listo!** Solo con cambiar esta variable y reiniciar el servidor, el portal cambia completamente de municipio (BD y datos visuales).
@@ -48,7 +48,7 @@ Antes de la centralización, había que modificar archivos manualmente:
 
 ```javascript
 // Descomentar el municipio deseado:
-const sequelize = require('../config/database.config.manzano.js');
+const sequelize = require('../config/database.config.elmanzano.js');
 //const sequelize = require('../config/database.config.sanjosedelassalinas.js');
 ```
 
@@ -56,7 +56,7 @@ const sequelize = require('../config/database.config.manzano.js');
 **Archivo**: `services/paymentGateway.service.js` (línea 16)
 
 ```javascript
-const municipalidadConfig = require('../config/municipalidad.config.manzano');
+const municipalidadConfig = require('../config/municipalidad.config.elmanzano');
 ```
 
 Y también en `controllers/web.ticket.controller.js`.
@@ -69,8 +69,8 @@ Y también en `controllers/web.ticket.controller.js`.
 
 ```bash
 # Copiar templates existentes
-cp config/database.config.manzano.js config/database.config.NUEVO.js
-cp config/municipalidad.config.manzano.js config/municipalidad.config.NUEVO.js
+cp config/database.config.elmanzano.js config/database.config.NUEVO.js
+cp config/municipalidad.config.elmanzano.js config/municipalidad.config.NUEVO.js
 ```
 
 ### Paso 2: Editar `database.config.NUEVO.js`
@@ -86,7 +86,7 @@ cp config/municipalidad.config.manzano.js config/municipalidad.config.NUEVO.js
 
 ```javascript
 const municipiosDisponibles = {
-  manzano: { ... },
+  elmanzano: { ... },
   sanjosedelassalinas: { ... },
   // Agregar nuevo:
   nuevo: {
