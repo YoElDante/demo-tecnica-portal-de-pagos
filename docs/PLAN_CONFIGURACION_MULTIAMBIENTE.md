@@ -804,7 +804,7 @@ TASA_INTERES_ANUAL=40
 - [x] Mover imágenes existentes
 - [x] Actualizar rutas en `municipalidad.config.*.js`
 - [x] Verificar que logos cargan correctamente
-- [ ] Commit: `refactor: organizar imágenes por municipio`
+- [x] Commit: `refactor: organizar imágenes por municipio`
 
 ### FASE 4: Archivos de Entorno ✅ COMPLETADA (2026-03-09)
 
