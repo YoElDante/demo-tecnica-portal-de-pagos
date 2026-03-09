@@ -1,8 +1,8 @@
 # ⚙️ Configuración de Municipios
 
 > **Propósito**: Documentar cómo cambiar la configuración de municipios
-> **Última actualización**: 2026-01-31
-> **Estado**: ✅ IMPLEMENTADO
+> **Última actualización**: 2026-03-09
+> **Estado**: ✅ IMPLEMENTADO (Fase 1 completada)
 
 ---
 
@@ -26,10 +26,15 @@ MUNICIPIO=elmanzano
 ### Archivo Central: `config/index.js`
 
 Este archivo:
-1. Lee la variable `MUNICIPIO` del `.env`
-2. Carga la BD correcta (`database.config.{municipio}.js`)
-3. Carga los datos del municipio (`municipalidad.config.{municipio}.js`)
-4. Exporta todo centralizado
+1. Lee la variable `MUNICIPIO` del `.env` (para datos visuales)
+2. Lee las variables `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASS` (para conexión a BD)
+3. Carga `database.config.js` (UN SOLO archivo para todas las BD)
+4. Carga `municipalidad.config.{MUNICIPIO}.js` (datos visuales específicos)
+5. Exporta todo centralizado
+
+### Archivos de configuración:
+- `config/database.config.js` → Conexión a BD (lee de variables de entorno)
+- `config/municipalidad.config.{municipio}.js` → Datos visuales (nombre, logo, etc.)
 
 ### Archivos que usan la config centralizada:
 - `models/model.index.js` → usa `sequelize`
@@ -39,7 +44,11 @@ Este archivo:
 
 ---
 
-## 📍 Estado Anterior (referencia histórica)
+## 📍 Estado Anterior (YA NO APLICA - solo referencia histórica)
+
+> ⚠️ **IMPORTANTE**: Esta sección documenta cómo funcionaba ANTES de la Fase 1.
+> Actualmente TODO se configura mediante variables de entorno.
+> NO es necesario modificar ningún archivo de código.
 
 Antes de la centralización, había que modificar archivos manualmente:
 
@@ -65,42 +74,38 @@ Y también en `controllers/web.ticket.controller.js`.
 
 ## ➕ Agregar un Nuevo Municipio
 
-### Paso 1: Crear archivos de configuración
+### Paso 1: Crear archivo de datos visuales
 
 ```bash
-# Copiar templates existentes
-cp config/database.config.elmanzano.js config/database.config.NUEVO.js
+# Solo necesitas el archivo de municipalidad (nombre, logo, dirección)
 cp config/municipalidad.config.elmanzano.js config/municipalidad.config.NUEVO.js
 ```
 
-### Paso 2: Editar `database.config.NUEVO.js`
-- Cambiar nombre de la BD en Azure
-- Las credenciales se leen del `.env`
-
-### Paso 3: Editar `municipalidad.config.NUEVO.js`
+### Paso 2: Editar `municipalidad.config.NUEVO.js`
 - Nombre del municipio
 - Dirección, teléfono, email
 - Rutas de logos (agregar imágenes en `public/images/`)
 
-### Paso 4: Registrar en `config/index.js`
+### Paso 3: Registrar en `config/index.js`
 
 ```javascript
-const municipiosDisponibles = {
-  elmanzano: { ... },
-  sanjosedelassalinas: { ... },
-  // Agregar nuevo:
-  nuevo: {
-    database: () => require('./database.config.NUEVO'),
-    municipalidad: () => require('./municipalidad.config.NUEVO')
-  }
-};
+const municipiosDisponibles = ['elmanzano', 'sanjosedelassalinas', 'tinoco', 'nuevo'];
 ```
 
-### Paso 5: Usar el nuevo municipio
+### Paso 4: Configurar Azure App Service
 
-```env
+En **Configuración → Configuración de la aplicación** del App Service:
+
+```
 MUNICIPIO=nuevo
+DB_HOST=xxx.database.windows.net
+DB_NAME=NombreBD
+DB_USER=Usuario
+DB_PASS=Contraseña
 ```
+
+> ✅ **No necesitas crear ningún archivo `database.config.nuevo.js`**
+> La conexión a BD se configura 100% por variables de entorno.
 
 ---
 
