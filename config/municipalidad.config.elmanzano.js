@@ -43,6 +43,9 @@ module.exports = {
   },
 
   // Información adicional
-  web: 'https://elmanzano.gob.ar/', // opcional
-  email: 'Info@elmanzano.gob.ar' // opcional
+  web: 'https://elmanzano.gob.ar/',
+  email: 'Info@elmanzano.gob.ar',
+
+  // Configuración de negocio (respaldo si no hay variable de entorno)
+  tasaInteresAnual: 40  // Porcentaje anual para cálculo de mora
 };

@@ -782,18 +782,19 @@ TASA_INTERES_ANUAL=40
 
 ## 9. Checklist de Implementación
 
-### FASE 1: Base de Datos ⬜
+### FASE 1: Base de Datos ✅ COMPLETADA (2026-03-09)
 
-- [ ] Crear `config/database.config.js` único
-- [ ] Actualizar `config/index.js`
-- [ ] Probar conexión con cada municipio
-- [ ] Eliminar archivos de BD individuales
-- [ ] Commit: `refactor: unificar configuración de BD`
+- [x] Crear `config/database.config.js` único
+- [x] Actualizar `config/index.js`
+- [x] Probar conexión con cada municipio (El Manzano ✅, Tinoco ✅, San José ✅)
+- [x] Respaldar credenciales en `envs/` (no eliminar archivos aún)
+- [x] Commits realizados
 
 ### FASE 2: Tasa de Interés ⬜
 
 - [ ] Modificar `services/deudas.service.js`
-- [ ] Agregar `TASA_INTERES_ANUAL` a `.env.example`
+- [ ] Agregar `tasaInteresAnual` a cada `municipalidad.config.*.js`
+- [ ] Verificar `TASA_INTERES_ANUAL` en `.env.example`
 - [ ] Probar cálculo de intereses
 - [ ] Commit: `feat: tasa de interés configurable`
 

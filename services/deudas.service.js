@@ -13,10 +13,12 @@ const { Op } = require('sequelize');
 // ============================================
 // CONFIGURACIÓN DE TASA DE INTERÉS
 // ============================================
-// Para modificar el porcentaje de interés anual, cambiar este valor
-const TASA_INTERES_ANUAL = 40; // Porcentaje anual (ejemplo: 40 = 40%)
+// La tasa se lee de variables de entorno, con fallback a 40%
+// En Azure App Service: Configuración → TASA_INTERES_ANUAL
+// En desarrollo: agregar TASA_INTERES_ANUAL=40 en .env
+const TASA_INTERES_ANUAL = parseFloat(process.env.TASA_INTERES_ANUAL) || 40;
 const DIAS_POR_ANIO = 365;
-const TASA_DIARIA = TASA_INTERES_ANUAL / 100 / DIAS_POR_ANIO; // 0.0010958904...
+const TASA_DIARIA = TASA_INTERES_ANUAL / 100 / DIAS_POR_ANIO;
 
 
 // ============================================

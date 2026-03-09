@@ -46,5 +46,8 @@ module.exports = {
 
   // Información adicional
   web: 'https://www.instagram.com/comunadetinoco.ok',
-  email: 'comunadetinoco@outlook.com'
+  email: 'comunadetinoco@outlook.com',
+
+  // Configuración de negocio (respaldo si no hay variable de entorno)
+  tasaInteresAnual: 40  // Porcentaje anual para cálculo de mora
 };

@@ -43,6 +43,9 @@ module.exports = {
   },
 
   // Información adicional
-  web: 'https://sanjosedelassalinas.gob.ar', // opcional
-  email: 'contacto@sanjosedelassalinas.gob.ar' // opcional
+  web: 'https://sanjosedelassalinas.gob.ar',
+  email: 'contacto@sanjosedelassalinas.gob.ar',
+
+  // Configuración de negocio (respaldo si no hay variable de entorno)
+  tasaInteresAnual: 40  // Porcentaje anual para cálculo de mora
 };
