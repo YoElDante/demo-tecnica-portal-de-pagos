@@ -22,9 +22,9 @@ module.exports = {
 
   // Rutas de imágenes/logos (relativas a /public)
   logos: {
-    principal: '/images/sanjosedelassalinas.webp',
-    secundario: '/images/alcaldiaLogo.webp',
-    favicon: '/images/sanjosedelassalinas.ico'
+    principal: '/images/sanjosedelassalinas/sanjosedelassalinas.webp',
+    secundario: '/images/common/alcaldiaLogo.webp',
+    favicon: '/images/sanjosedelassalinas/sanjosedelassalinas.ico'
   },
 
   // Configuración de tickets de pago

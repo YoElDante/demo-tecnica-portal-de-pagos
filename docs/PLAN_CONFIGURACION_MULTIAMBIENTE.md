@@ -790,30 +790,30 @@ TASA_INTERES_ANUAL=40
 - [x] Respaldar credenciales en `envs/` (no eliminar archivos aún)
 - [x] Commits realizados
 
-### FASE 2: Tasa de Interés ⬜
+### FASE 2: Tasa de Interés ✅ COMPLETADA (2026-03-09)
 
-- [ ] Modificar `services/deudas.service.js`
-- [ ] Agregar `tasaInteresAnual` a cada `municipalidad.config.*.js`
-- [ ] Verificar `TASA_INTERES_ANUAL` en `.env.example`
-- [ ] Probar cálculo de intereses
-- [ ] Commit: `feat: tasa de interés configurable`
+- [x] Modificar `services/deudas.service.js`
+- [x] Agregar `tasaInteresAnual` a cada `municipalidad.config.*.js`
+- [x] Verificar `TASA_INTERES_ANUAL` en `.env.example`
+- [x] Probar cálculo de intereses
+- [x] Commit: `feat: tasa de interés configurable via TASA_INTERES_ANUAL`
 
-### FASE 3: Imágenes ⬜
+### FASE 3: Imágenes ✅ COMPLETADA (2026-03-09)
 
-- [ ] Crear carpetas por municipio en `public/images/`
-- [ ] Mover imágenes existentes
-- [ ] Actualizar rutas en `municipalidad.config.*.js`
-- [ ] Verificar que logos cargan correctamente
+- [x] Crear carpetas por municipio en `public/images/`
+- [x] Mover imágenes existentes
+- [x] Actualizar rutas en `municipalidad.config.*.js`
+- [x] Verificar que logos cargan correctamente
 - [ ] Commit: `refactor: organizar imágenes por municipio`
 
-### FASE 4: Archivos de Entorno ⬜
+### FASE 4: Archivos de Entorno ✅ COMPLETADA (2026-03-09)
 
-- [ ] Crear carpeta `envs/`
-- [ ] Mover archivos `.env.*` a `envs/`
-- [ ] Actualizar `.gitignore`
-- [ ] Agregar scripts a `package.json`
-- [ ] Actualizar `.env.example`
-- [ ] Commit: `chore: organizar archivos de entorno`
+- [x] Crear carpeta `envs/`
+- [x] Mover archivos `.env.*` a `envs/`
+- [x] Actualizar `.gitignore`
+- [ ] Agregar scripts a `package.json` (pendiente)
+- [x] Actualizar `.env.example`
+- [x] Commit: `chore: proteger credenciales envs/ en .gitignore`
 
 ### FASE 5: Pasarelas de Pago ⬜
 

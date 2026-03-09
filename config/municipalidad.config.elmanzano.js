@@ -22,9 +22,9 @@ module.exports = {
 
   // Rutas de imágenes/logos (relativas a /public)
   logos: {
-    principal: '/images/ISOLOGOTIPO-EL_MANZANO.webp',
-    secundario: '/images/alcaldiaLogo.webp',
-    favicon: '../images/logo_El_Manzano.jpg'
+    principal: '/images/elmanzano/ISOLOGOTIPO-EL_MANZANO.webp',
+    secundario: '/images/common/alcaldiaLogo.webp',
+    favicon: '/images/elmanzano/logo_El_Manzano.jpg'
   },
 
   // Configuración de tickets de pago

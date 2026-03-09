@@ -24,9 +24,9 @@ module.exports = {
 
   // Rutas de imágenes/logos (relativas a /public)
   logos: {
-    principal: '/images/tinocoLogo.webp',
-    secundario: '/images/alcaldiaLogo.webp',
-    favicon: '/images/favicon.ico'
+    principal: '/images/tinoco/tinocoLogo.webp',
+    secundario: '/images/common/alcaldiaLogo.webp',
+    favicon: '/images/tinoco/favicon.ico'
   },
 
   // Configuración de tickets de pago
