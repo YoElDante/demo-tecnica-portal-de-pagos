@@ -820,7 +820,7 @@ TASA_INTERES_ANUAL=40
 - [x] Agregar variable `PAYMENT_GATEWAY`
 - [x] Preparar estructura en `paymentGateway.service.js`
 - [x] Documentar opciones disponibles
-- [ ] Commit: `feat: preparar múltiples pasarelas de pago`
+- [x] Commit: `feat: preparar múltiples pasarelas de pago`
 
 ### FASE 6: Documentación ✅ COMPLETADA (2026-03-09)
 
@@ -829,7 +829,7 @@ TASA_INTERES_ANUAL=40
 - [x] Crear `docs/DEPLOY_AZURE.md`
 - [x] Verificar que `.env.example` está completo
 - [ ] Eliminar credenciales del historial de Git (si es necesario)
-- [ ] Commit: `docs: actualizar documentación de despliegue`
+- [x] Commit: `docs: actualizar documentación de despliegue`
 
 ### Verificación Final ⬜
 
