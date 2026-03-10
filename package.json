@@ -1,8 +1,8 @@
 {
-  "name": "demo-tecnica-portal-de-pagos",
-  "version": "0.0.0",
+  "name": "portal-de-pagos-municipal",
+  "version": "1.0.0",
   "private": true,
-  "description": "Demo técnica: portal de pagos con Express y Sequelize",
+  "description": "Portal de Pagos Municipal - Sistema multi-ambiente para consulta de deudas y procesamiento de pagos",
   "main": "bin/www",
   "scripts": {
     "start": "node ./bin/www",
@@ -14,25 +14,25 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/yoelDante/demo-tecnica-portal-de-pagos.git"
+    "url": "https://github.com/YoElDante/demo-tecnica-portal-de-pagos.git"
   },
   "keywords": [
     "portal",
     "pagos",
+    "municipal",
     "express",
     "sequelize",
-    "mssql",
-    "demo",
-    "tecnica"
+    "azure",
+    "mssql"
   ],
   "author": "Dante Delprato <dantedelprato@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/tu-usuario/demo-tecnica-portal-de-pagos/issues"
+    "url": "https://github.com/YoElDante/demo-tecnica-portal-de-pagos/issues"
   },
-  "homepage": "https://github.com/tu-usuario/demo-tecnica-portal-de-pagos#readme",
+  "homepage": "https://github.com/YoElDante/demo-tecnica-portal-de-pagos#readme",
   "engines": {
-    "node": ">=16"
+    "node": ">=20"
   },
   "dependencies": {
     "axios": "^1.13.2",
