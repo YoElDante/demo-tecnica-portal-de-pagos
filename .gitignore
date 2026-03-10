@@ -59,5 +59,8 @@ typings/
 .env.prueba
 envs/
 
+# Azure publish settings (contienen credenciales)
+*.PublishSettings
+
 # next.js build output
 .next
