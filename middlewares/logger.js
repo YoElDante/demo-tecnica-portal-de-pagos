@@ -32,7 +32,7 @@ const log = (level, message) => {
   if (LOG_LEVELS[level] <= CURRENT_LEVEL) {
     const timestamp = new Date().toISOString();
     const prefix = IS_PRODUCTION ? '' : `[${timestamp}] `;
-    
+
     switch (level) {
       case 'error':
         console.error(`${prefix}${message}`);
@@ -104,7 +104,7 @@ exports.responseLogger = (req, res, next) => {
  */
 exports.errorLogger = (err, req, res, next) => {
   const timestamp = new Date().toISOString();
-  
+
   // Siempre loguear errores (van a Azure Application Insights / Log Stream)
   console.error(`[${timestamp}] ❌ ERROR:`, {
     method: req.method,
