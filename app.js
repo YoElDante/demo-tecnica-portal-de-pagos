@@ -28,12 +28,27 @@ const app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
+// Configuración según entorno
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+
 // Middlewares
-app.use(logger('dev'));
+// Morgan: en producción formato compacto, en desarrollo formato detallado
+if (IS_PRODUCTION) {
+  // En producción: log mínimo, solo errores van a stdout (Azure lo captura)
+  app.use(logger('combined', {
+    skip: (req, res) => res.statusCode < 400 // Solo loguear errores
+  }));
+} else {
+  // En desarrollo: formato colorido y detallado
+  app.use(logger('dev'));
+}
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Logger personalizado (respeta NODE_ENV y LOG_LEVEL)
 app.use(requestLogger);
 app.use(responseLogger);
 
