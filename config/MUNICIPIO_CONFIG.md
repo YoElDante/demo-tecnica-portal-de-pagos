@@ -126,11 +126,42 @@ Cuando copies el proyecto para un cliente específico:
 
 ---
 
+## � Estructura de Imágenes
+
+```
+public/images/
+├── common/              → Recursos compartidos (alcaldiaLogo.webp, favicon.ico genérico)
+├── elmanzano/           → Logos de El Manzano
+├── sanjosedelassalinas/ → Logos de San José de las Salinas
+└── tinoco/              → Logos de Tinoco
+```
+
+Las rutas se configuran en `municipalidad.config.{municipio}.js`:
+```javascript
+logos: {
+  principal: '/images/elmanzano/ISOLOGOTIPO-EL_MANZANO.webp',
+  secundario: '/images/common/alcaldiaLogo.webp',
+  favicon: '/images/elmanzano/logo_El_Manzano.jpg'
+}
+```
+
+---
+
 ## 📋 Checklist de Cambio de Municipio
 
 - [ ] Cambiar variable `MUNICIPIO` en `.env`
-- [ ] Verificar que existan los archivos de config
-- [ ] Verificar logos en `public/images/`
+- [ ] Verificar que existan los archivos de config (`config/municipalidad.config.{municipio}.js`)
+- [ ] Verificar logos en `public/images/{municipio}/`
 - [ ] Reiniciar servidor (`npm run dev`)
 - [ ] Probar con un DNI válido de ese municipio
 - [ ] Verificar que el ticket muestre el logo correcto
+
+---
+
+## 📚 Documentación Relacionada
+
+| Documento | Descripción |
+|-----------|-------------|
+| `docs/PLAN_CONFIGURACION_MULTIAMBIENTE.md` | Plan maestro de configuración |
+| `docs/DEPLOY_AZURE.md` | Guía de despliegue en Azure |
+| `.env.example` | Template de variables de entorno |

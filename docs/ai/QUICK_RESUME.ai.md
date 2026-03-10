@@ -1,7 +1,7 @@
 # ⚡ QUICK_RESUME.ai.md
 
 > **Propósito**: Volver después de días/semanas y saber exactamente qué hacer
-> **Última actualización**: 2026-01-20
+> **Última actualización**: 2026-03-09
 
 ---
 
@@ -19,19 +19,18 @@ npm run dev   # Modo desarrollo con watch
 - Probar con DNI: `17081206` o `29717814`
 
 ### 3. Ver estado del proyecto
-- Leer `docs/ai/ROADMAP.ai.md` → sección "Próximo Sprint"
+- Leer `docs/PLAN_CONFIGURACION_MULTIAMBIENTE.md` → sección "Checklist"
 
 ---
 
 ## 📍 ¿Dónde Estábamos?
 
-### Última sesión (20 Enero 2026)
-- ✅ Migración completa a BEM (CSS y clases HTML)
-- ✅ CSS responsive corregido para ticket-preview
-- ✅ Lógica de colores Int/Dto corregida (cargos=negro, descuentos=verde)
-- ✅ PDF funcionando correctamente
-- ✅ Vistas de pago (exitoso/fallido/pendiente) migradas a BEM
-- ✅ Documentación actualizada
+### Última sesión (09 Marzo 2026)
+- ✅ **FASE 1**: Configuración BD unificada (todo via variables de entorno)
+- ✅ **FASE 2**: Tasa de interés configurable (`TASA_INTERES_ANUAL`)
+- ✅ **FASE 3**: Imágenes organizadas por municipio (`public/images/{municipio}/`)
+- ✅ **FASE 4**: Credenciales protegidas en `envs/` (no en repo)
+- ✅ **FASE 5**: Estructura preparada para múltiples pasarelas de pago
 
 ### Estado del código
 | Área | Estado |
@@ -40,31 +39,48 @@ npm run dev   # Modo desarrollo con watch
 | Ver deudas | ✅ Funciona |
 | Generar ticket | ✅ Funciona |
 | Descargar PDF | ✅ Funciona |
-| CSS Responsive | ✅ Funciona |
-| Metodología BEM | ✅ Migrado |
-| Pagar con MP | ✅ Funciona (falta tabla de tickets) |
-| Registrar pago en BD | ✅ Funciona |
-| Config multi-municipio | ✅ Implementado |
+| Pagar con MP | ✅ Funciona |
+| Config multi-municipio | ✅ 100% via env vars |
+| Config multi-gateway | ✅ Estructura lista |
+| Imágenes por municipio | ✅ Organizadas |
 
 ---
 
 ## 🎯 Próxima Tarea Inmediata
 
-### Tarea: Crear Sistema de Tickets (Tabla + ID único)
+### Tarea: Completar FASE 6 - Documentación
 
-**¿Por qué es importante?**
-Necesitamos registrar los tickets generados para:
-- Saber qué pagos virtuales se hicieron
-- Enviar comprobantes por email
-- Controlar tickets expirados (>24hs)
+**Pendiente**:
+1. Crear `docs/DEPLOY_AZURE.md` (guía de despliegue)
+2. Agregar scripts `dev:municipio` a package.json
 
-**Pasos**:
-1. Crear tabla `TicketsPago` en la BD
-2. Crear modelo Sequelize `TicketPago.js`
-3. Generar ID único formato `YYYYMMDDHHMMSS-DNI`
-4. Registrar ticket al generarlo y al pagarlo
+### Luego: Sistema de Tickets
+Crear tabla `TicketsPago` para registrar tickets generados.
+Ver detalles en: `docs/ai/ROADMAP.ai.md`
 
-**Ver detalles en**: `docs/ai/ROADMAP.ai.md` → Tarea 2-4
+---
+
+## 🔧 Configuración Rápida
+
+### Cambiar de municipio
+```bash
+# Editar .env
+MUNICIPIO=elmanzano  # o sanjosedelassalinas, tinoco
+
+# Reiniciar servidor
+npm run dev
+```
+
+### Variables de entorno clave
+```env
+MUNICIPIO=tinoco              # Determina qué municipio cargar
+DB_HOST=xxx.database.windows.net
+DB_NAME=nombre_bd
+DB_USER=usuario
+DB_PASS=contraseña
+TASA_INTERES_ANUAL=40         # Tasa de interés anual (%)
+PAYMENT_GATEWAY=mercadopago   # Pasarela de pago activa
+```
 
 ---
 
@@ -72,11 +88,25 @@ Necesitamos registrar los tickets generados para:
 
 | Archivo | Para qué sirve |
 |---------|----------------|
-| `services/deudas.service.js` | Cálculo de intereses (línea ~17: `TASA_INTERES_ANUAL`) |
-| `services/pagos.service.js` | Confirma pagos, actualiza BD |
-| `models/model.index.js` | ⚠️ Aquí se cambia municipio (líneas 10-11) |
-| `controllers/payment.controller.js` | Flujo de pago con MP |
-| `public/javascripts/deudas.js` | Lógica del frontend |
+| `config/index.js` | Selector central de municipio |
+| `config/database.config.js` | Conexión a BD (lee de env) |
+| `config/municipalidad.config.*.js` | Datos visuales por municipio |
+| `services/deudas.service.js` | Cálculo de intereses |
+| `services/paymentGateway.service.js` | Multi-gateway de pagos |
+| `.env.example` | Template de variables |
+| `docs/PLAN_CONFIGURACION_MULTIAMBIENTE.md` | Plan maestro |
+
+---
+
+## 📁 Estructura de Imágenes
+
+```
+public/images/
+├── common/              → favicon.ico, alcaldiaLogo.webp, qr_mercado.webp
+├── elmanzano/           → ISOLOGOTIPO-EL_MANZANO.webp, logo_El_Manzano.jpg
+├── sanjosedelassalinas/ → sanjosedelassalinas.webp, sanjosedelassalinas.ico
+└── tinoco/              → tinocoLogo.webp, favicon.ico
+```
 
 ---
 
@@ -84,10 +114,8 @@ Necesitamos registrar los tickets generados para:
 
 | DNI | Municipio | Deudas |
 |-----|-----------|--------|
-| 17081206 | Manzano | Varias |
-| 29717814 | Manzano | Varias |
-| 10901809 | Manzano | Algunas |
-| 23765820 | Manzano | Pocas |
+| 17081206 | El Manzano | Varias |
+| 29717814 | El Manzano | Varias |
 
 ---
 
@@ -98,6 +126,44 @@ Necesitamos registrar los tickets generados para:
 npm run dev
 
 # Producción
+npm run start
+
+# Test de conexión a BD
+npm run testDB
+```
+
+---
+
+## 🐛 Problemas Comunes
+
+### Error de conexión a BD
+- Verificar variables en `.env`: `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASS`
+- Verificar IP permitida en Azure SQL firewall
+
+### Puerto ocupado
+```bash
+# Cambiar en .env
+PORT=4001
+```
+
+### Logo no carga
+- Verificar ruta en `config/municipalidad.config.{municipio}.js`
+- Confirmar que imagen existe en `public/images/{municipio}/`
+
+---
+
+## 📚 Documentación
+
+| Necesito... | Leer... |
+|-------------|---------|
+| Plan de configuración multi-ambiente | `docs/PLAN_CONFIGURACION_MULTIAMBIENTE.md` |
+| Entender el proyecto completo | `docs/ai/PROJECT_CONTEXT.ai.md` |
+| Ver qué falta hacer | `docs/ai/ROADMAP.ai.md` |
+| Cómo cambiar de municipio | `config/MUNICIPIO_CONFIG.md` |
+| Lógica de deudas/pagos | `docs/bd/LOGICA_DEUDAS_PAGOS.md` |
+| Despliegue en Azure | `docs/DEPLOY_AZURE.md` (por crear) |
+
+---
 npm run start
 
 # Test de conexión a BD

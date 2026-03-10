@@ -815,19 +815,19 @@ TASA_INTERES_ANUAL=40
 - [x] Actualizar `.env.example`
 - [x] Commit: `chore: proteger credenciales envs/ en .gitignore`
 
-### FASE 5: Pasarelas de Pago ⬜
+### FASE 5: Pasarelas de Pago ✅ COMPLETADA (2026-03-09)
 
-- [ ] Agregar variable `PAYMENT_GATEWAY`
-- [ ] Preparar estructura en `paymentGateway.service.js`
-- [ ] Documentar opciones disponibles
+- [x] Agregar variable `PAYMENT_GATEWAY`
+- [x] Preparar estructura en `paymentGateway.service.js`
+- [x] Documentar opciones disponibles
 - [ ] Commit: `feat: preparar múltiples pasarelas de pago`
 
-### FASE 6: Documentación ⬜
+### FASE 6: Documentación ✅ COMPLETADA (2026-03-09)
 
-- [ ] Actualizar `docs/QUICK_RESUME.ai.md`
-- [ ] Actualizar `docs/MUNICIPIO_CONFIG.md`
-- [ ] Crear `docs/DEPLOY_AZURE.md`
-- [ ] Verificar que `.env.example` está completo
+- [x] Actualizar `docs/ai/QUICK_RESUME.ai.md`
+- [x] Actualizar `config/MUNICIPIO_CONFIG.md`
+- [x] Crear `docs/DEPLOY_AZURE.md`
+- [x] Verificar que `.env.example` está completo
 - [ ] Eliminar credenciales del historial de Git (si es necesario)
 - [ ] Commit: `docs: actualizar documentación de despliegue`
 
