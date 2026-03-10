@@ -811,7 +811,7 @@ TASA_INTERES_ANUAL=40
 - [x] Crear carpeta `envs/`
 - [x] Mover archivos `.env.*` a `envs/`
 - [x] Actualizar `.gitignore`
-- [ ] Agregar scripts a `package.json` (pendiente)
+- [x] Agregar scripts a `package.json`
 - [x] Actualizar `.env.example`
 - [x] Commit: `chore: proteger credenciales envs/ en .gitignore`
 
