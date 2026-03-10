@@ -1,130 +1,251 @@
-# 🚀 Portal de Pagos — Demo técnica
+# 🏛️ Portal de Pagos Municipal — Demo Técnica
 
-Descripción
----------
-Portal de Pago Municipal (demo) — complemento del programa principal **Alcald+IA**. Permite que contribuyentes consulten deudas y generen datos para pago. Proyecto de ejemplo construido con Express + Sequelize y conexión a Azure SQL.
+> Portal de Pago Municipal multi-ambiente — complemento del programa **Alcald+IA**  
+> Un solo código base para múltiples municipios, configurado via variables de entorno
 
-Repositorio: https://github.com/YoElDante/demo-tecnica-portal-de-pagos
-Deploy en Render: https://demo-tecnica-portal-de-pagos.onrender.com
+**Repositorio:** https://github.com/YoElDante/demo-tecnica-portal-de-pagos  
+**Deploy en Render:** https://demo-tecnica-portal-de-pagos.onrender.com
 
-Algunos DNI para probar el servicio:
-17081206
-29717814
-10901809
-23765820
+---
 
-Características
----------
-- ✅ Búsqueda de contribuyentes por DNI
-- ✅ Consulta de deudas pendientes (saldo != 0)
-- ✅ Endpoint para generar JSON de pago a partir de transacciones seleccionadas
-- ✅ Lista de contribuyentes con conteo de deudas pendientes
-- 🖥 Interfaz simple con EJS para búsqueda por DNI
+## 📋 Descripción
 
-Tecnologías
----------
-- Node.js (ej. v22.x)
-- Express
-- Sequelize (ORM)
-- tedious (driver MSSQL para Node)
-- EJS (vistas)
-- dotenv (variables de entorno)
-- Azure SQL Database (destino de la conexión)
+Portal web que permite a contribuyentes:
+- Consultar deudas pendientes por DNI
+- Generar tickets de pago
+- Procesar pagos via MercadoPago (y otras pasarelas futuras)
 
-Instalación
----------
-1. Clonar:
-   git clone https://github.com/YoElDante/demo-tecnica-portal-de-pagos
-2. Entrar al proyecto:
-   cd c:\workspace\proyecto-minimo\minimo-sql
-3. Instalar dependencias:
-   npm install
+El sistema soporta **múltiples municipios** con el mismo código, diferenciados por variables de entorno.
 
-Variables de entorno (.env)
----------
-Asegúrate de tener un archivo `.env` en la raíz con, como mínimo:
-- DB_HOST=XXXXXXXX.database.windows.net
-- DB_NAME=PDBpgII6eODRxh7
-- DB_USER=XXXXAdmin
-- DB_PASS=TuPasswordAqui
-- DB_DIALECT=mssql
-- PORT=3000
+### Municipios configurados
 
-(Adaptar valores según tu entorno)
+| Municipio | Script | Base de datos |
+|-----------|--------|---------------|
+| El Manzano | `npm run dev:elmanzano` | Azure SQL |
+| Tinoco | `npm run dev:tinoco` | Azure SQL |
+| San José de las Salinas | `npm run dev:sanjose` | Azure SQL |
 
-Notas de conexión a Azure
----------
-- Driver usado: `tedious` (instalado en package.json).
-- Sequelize dialect: `mssql`.
-- Recomendaciones:
-  - Mantener `dialectOptions.options.encrypt = true` para Azure.
-  - Para pruebas locales con problemas TLS, `trustServerCertificate: true` temporalmente, pero no en producción.
-  - Asegurar que la IP cliente esté permitida en el firewall de Azure SQL.
-  - Usar credenciales seguras y no exponer el `.env` en VCS.
+### DNIs de prueba
 
-Scripts útiles (package.json)
----------
-- npm run dev — iniciar servidor en modo watch (node --watch ./bin/www)
-- npm start — iniciar servidor
-- npm run testDB — test de conexión (node ./tests/connection.db.test.js)
+```
+17081206 | 29717814 | 10901809 | 23765820
+```
 
-Rutas de la API
----------
-Base: /api
+---
 
-- GET /api/  
-  - Información y lista de endpoints disponibles.
+## 🚀 Inicio Rápido
 
-- GET /api/clientes  
-  - Lista paginada de clientes  
-  - Query params: `limit`, `offset`
+### 1. Clonar e instalar
 
-- GET /api/clientes/deudas/:codigo  
-  - Obtener deudas por código, dominio o DNI (si se pasa DNI busca primero en Clientes).  
-  - Responde: { codigo, nombre, apellido, registrosEncontrados, deudas: [...] }
+```bash
+git clone https://github.com/YoElDante/demo-tecnica-portal-de-pagos
+cd demo-tecnica-portal-de-pagos
+npm install
+```
 
-- GET /api/clientes/buscar/dni/:dni  
-  - Buscar cliente por DNI y sus deudas pendientes.
+### 2. Configurar variables de entorno
 
-- POST /api/clientes/generar-pago  
-  - Genera JSON de pago a partir de IDs transaccionales.  
-  - Body: { ids: [4906, 4907] }
+Copiar el archivo de ejemplo:
+```bash
+cp .env.example .env
+```
 
-- GET /api/clientes/contribuyentes  
-  - Lista contribuyentes con `codigo`, `nombreCompleto`, `documento` y `cantidadDeudas` (número de registros con saldo != 0).  
-  - Query params: `limit`, `offset`
+O usar un archivo de municipio existente (si tienes acceso a `envs/`):
+```bash
+cp envs/.env.elmanzano .env
+```
 
-Interfaz (UI)
----------
-- GET / — formulario EJS para buscar por DNI (vista en `views/index.ejs`)
-- POST /buscar — procesa búsqueda por DNI y renderiza resultados
+### 3. Ejecutar
 
-Buenas prácticas y troubleshooting
----------
-- Si ves: `DeprecationWarning: The logging-option should be either a function or false` — cambiar en `config/database.config.js`:
-  ```js
-  logging: false
-  // o
-  logging: (msg) => console.log(msg)
-  ```
-- Si sale `Cannot find module '../models'` — verificar que `models/model.index.js` exista y sea exportado con CommonJS (`module.exports = { sequelize, Cliente, ClientesCtaCte }`) y que las rutas relativas sean correctas.
-- Para problemas de TLS/SSL al conectar Azure SQL, revisar `encrypt` y `trustServerCertificate` en `dialectOptions`.
+```bash
+# Desarrollo genérico
+npm run dev
 
-Ejemplo: probar conexión rápida
----------
-Desde la raíz del proyecto:
-1. npm run testDB  
-   Debe mostrar: `Conexión a la BD: OK`
+# O por municipio específico (copia automática de envs/)
+npm run dev:elmanzano
+npm run dev:tinoco
+npm run dev:sanjose
+```
 
-Cómo contribuir
----------
-1. Abrir issue con bug o feature request.
-2. Crear branch con cambios y abrir PR.
+---
 
-Licencia
----------
+## 📁 Estructura del Proyecto
+
+```
+├── config/
+│   ├── index.js                 # Selector central de configuración
+│   ├── database.config.js       # Conexión BD (lee de variables de entorno)
+│   └── municipalidad.config.*.js # Datos públicos por municipio
+├── services/
+│   ├── deudas.service.js        # Lógica de cálculo de deudas
+│   ├── pagos.service.js         # Gestión de pagos
+│   └── paymentGateway.service.js # Multi-pasarela (MercadoPago, etc.)
+├── routes/
+│   ├── index.js                 # Rutas web
+│   └── api/                     # Rutas API REST
+├── views/                       # Templates EJS
+├── public/images/{municipio}/   # Logos por municipio
+├── envs/                        # Archivos .env por municipio (NO en repo)
+└── docs/                        # Documentación
+```
+
+---
+
+## ⚙️ Variables de Entorno
+
+Archivo `.env` en la raíz del proyecto:
+
+```env
+# === MUNICIPIO ===
+MUNICIPIO=elmanzano              # elmanzano | tinoco | sanjosedelassalinas
+
+# === BASE DE DATOS (Azure SQL) ===
+DB_HOST=servidor.database.windows.net
+DB_NAME=nombre_base_datos
+DB_USER=usuario
+DB_PASS=contraseña_segura
+DB_PORT=1433
+DB_DIALECT=mssql
+
+# === SERVIDOR ===
+PORT=4000
+NODE_ENV=development
+
+# === CONFIGURACIÓN MUNICIPAL ===
+TASA_INTERES_ANUAL=40            # Tasa de interés anual (%)
+
+# === PASARELA DE PAGOS ===
+PAYMENT_GATEWAY=mercadopago      # mercadopago | pagotic | siro | macropay
+API_GATEWAY_URL=https://api-gateway.azurewebsites.net
+FRONTEND_PUBLIC_URL=http://localhost:4000
+
+# === SEGURIDAD ===
+WEBHOOK_SECRET=secreto_para_validar_webhooks
+```
+
+Ver [.env.example](.env.example) para la plantilla completa.
+
+---
+
+## 📜 Scripts NPM
+
+| Script | Descripción |
+|--------|-------------|
+| `npm start` | Iniciar servidor (producción) |
+| `npm run dev` | Desarrollo con hot-reload |
+| `npm run dev:elmanzano` | Desarrollo con El Manzano |
+| `npm run dev:tinoco` | Desarrollo con Tinoco |
+| `npm run dev:sanjose` | Desarrollo con San José de las Salinas |
+| `npm run testDB` | Probar conexión a base de datos |
+
+---
+
+## 🌐 Rutas de la API
+
+Base: `/api`
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | `/api/` | Info y endpoints disponibles |
+| GET | `/api/clientes` | Lista paginada de clientes |
+| GET | `/api/clientes/buscar/dni/:dni` | Buscar cliente por DNI |
+| GET | `/api/clientes/deudas/:codigo` | Deudas por código/dominio/DNI |
+| POST | `/api/clientes/generar-pago` | Generar JSON de pago |
+| GET | `/api/clientes/contribuyentes` | Lista contribuyentes con deudas |
+
+### Interfaz Web
+
+| Ruta | Descripción |
+|------|-------------|
+| `GET /` | Formulario de búsqueda por DNI |
+| `POST /buscar` | Procesar búsqueda |
+| `GET /pago/exitoso` | Confirmación de pago exitoso |
+| `GET /pago/pendiente` | Pago pendiente de confirmación |
+| `GET /pago/fallido` | Error en el pago |
+
+---
+
+## 💳 Pasarelas de Pago
+
+El sistema soporta múltiples pasarelas via la variable `PAYMENT_GATEWAY`:
+
+| Pasarela | Estado | Variable |
+|----------|--------|----------|
+| MercadoPago | ✅ Activo | `mercadopago` |
+| PagoTic | ⏳ Pendiente | `pagotic` |
+| SIRO | ⏳ Pendiente | `siro` |
+| MacroPay | ⏳ Pendiente | `macropay` |
+
+---
+
+## 🛠️ Tecnologías
+
+- **Runtime:** Node.js v22.x
+- **Framework:** Express
+- **ORM:** Sequelize
+- **Base de datos:** Azure SQL (driver: tedious)
+- **Vistas:** EJS
+- **Pagos:** MercadoPago SDK
+
+---
+
+## 📚 Documentación
+
+| Documento | Descripción |
+|-----------|-------------|
+| [DEPLOY_AZURE.md](docs/DEPLOY_AZURE.md) | Guía de despliegue en Azure App Service |
+| [MUNICIPIO_CONFIG.md](config/MUNICIPIO_CONFIG.md) | Cómo cambiar de municipio |
+| [INTEGRACION_PAGOS.md](docs/INTEGRACION_PAGOS.md) | Flujo de integración con MercadoPago |
+| [QUICK_RESUME.ai.md](docs/ai/QUICK_RESUME.ai.md) | Resumen rápido para desarrolladores |
+
+---
+
+## 🔧 Troubleshooting
+
+### Error de conexión a BD
+
+```
+❌ Error: Faltan variables de entorno de Base de Datos
+```
+**Solución:** Verificar que `.env` tenga `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASS`
+
+### Logo no carga
+
+```
+GET /images/municipio/logo.webp 404
+```
+**Solución:** Verificar estructura en `public/images/{municipio}/`
+
+### Problemas TLS/SSL
+
+Para pruebas locales, en `config/database.config.js`:
+```javascript
+trustServerCertificate: true  // Solo desarrollo, NO producción
+```
+
+### Probar conexión rápida
+
+```bash
+npm run testDB
+# Debe mostrar: ✅ Conectado exitosamente a Azure SQL Database
+```
+
+---
+
+## 👥 Contribuir
+
+1. Abrir issue con bug o feature request
+2. Crear branch con cambios y abrir PR
+
+---
+
+## 📄 Licencia
+
 MIT
 
-Contacto
----------
-Proyecto demo por Dante Marcos Delprato — repositorio: https://github.com/YoElDante/demo-tecnica-portal-de-pagos
+---
+
+## 📧 Contacto
+
+**Dante Marcos Delprato**  
+Repositorio: https://github.com/YoElDante/demo-tecnica-portal-de-pagos
