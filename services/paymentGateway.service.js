@@ -277,7 +277,7 @@ module.exports = {
   createPayment,
   checkPaymentStatus,
   getGatewaysInfo,
-  
+
   // Exportar configuración para debugging
   config: {
     PAYMENT_GATEWAY,
