@@ -1,13 +1,13 @@
 # ============================================================
 # Deploy Portal de Pagos - Demo Alcaldía
 # 
-# Se ejecuta automáticamente en cada push a main
+# Se ejecuta automáticamente en cada push a develop
 # También se puede ejecutar manualmente desde GitHub Actions
 #
 # AUTENTICACIÓN: Publish Profile
 # SECRET REQUERIDO: AZURE_PUBLISH_DEMO
 # APP SERVICE: portal-demo-alcaldia
-# URL: https://portal-demo-alcaldia.azurewebsites.net
+# URL: https://demo.alcaldia.com.ar
 # ============================================================
 
 name: 🧪 Deploy Demo
@@ -15,7 +15,7 @@ name: 🧪 Deploy Demo
 on:
   push:
     branches:
-      - main
+      - develop
   workflow_dispatch:
 
 env:
