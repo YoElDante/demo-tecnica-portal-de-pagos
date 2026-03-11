@@ -9,55 +9,112 @@
 ## 📋 Índice
 
 1. [Resumen de la Arquitectura](#resumen-de-la-arquitectura)
-2. [Estado Actual de Deploys](#estado-actual-de-deploys)
-3. [Convenciones de Nombres](#convenciones-de-nombres)
-4. [Agregar un Nuevo Municipio](#agregar-un-nuevo-municipio)
-5. [Template de Workflow](#template-de-workflow)
-6. [Variables de Entorno en Azure](#variables-de-entorno-en-azure)
-7. [Troubleshooting](#troubleshooting)
+2. [Estrategia de Ramas](#estrategia-de-ramas)
+3. [Estado Actual de Deploys](#estado-actual-de-deploys)
+4. [Convenciones de Nombres](#convenciones-de-nombres)
+5. [Agregar un Nuevo Municipio](#agregar-un-nuevo-municipio)
+6. [Template de Workflow](#template-de-workflow)
+7. [Variables de Entorno en Azure](#variables-de-entorno-en-azure)
+8. [Troubleshooting](#troubleshooting)
 
 ---
 
 ## 📊 Resumen de la Arquitectura
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                    REPOSITORIO ÚNICO                            │
-│              github.com/YoElDante/demo-tecnica-portal-de-pagos  │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│   push a main ──────┬──────────────────────────────────────┐    │
-│                     │                                      │    │
-│                     ▼                                      ▼    │
-│   ┌─────────────────────────────┐   ┌─────────────────────────┐ │
-│   │  deploy-elmanzano.yml       │   │  deploy-demo.yml        │ │
-│   │  Secret: AZURE_PUBLISH_     │   │  Secret: AZURE_PUBLISH_ │ │
-│   │          ELMANZANO          │   │          DEMO           │ │
-│   └─────────────┬───────────────┘   └───────────┬─────────────┘ │
-│                 │                               │               │
-└─────────────────┼───────────────────────────────┼───────────────┘
-                  │                               │
-                  ▼                               ▼
-    ┌─────────────────────────┐     ┌─────────────────────────┐
-    │   AZURE - Cuenta        │     │   AZURE - Cuenta        │
-    │   El Manzano            │     │   Alcaldía (Demo)       │
-    │   ─────────────────     │     │   ─────────────────     │
-    │   App: portal-de-pagos- │     │   App: portal-demo-     │
-    │        elmanzano-cba    │     │        alcaldia         │
-    │   BD: SQL Azure         │     │   BD: SQL Azure         │
-    └─────────────────────────┘     └─────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                           REPOSITORIO ÚNICO                                  │
+│                 github.com/YoElDante/demo-tecnica-portal-de-pagos            │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   RAMA: main                              RAMA: develop                      │
+│   (producción)                            (desarrollo/staging)               │
+│        │                                        │                            │
+│        │ push                                   │ push                       │
+│        ▼                                        ▼                            │
+│   ┌─────────────────────┐              ┌─────────────────────┐               │
+│   │ deploy-elmanzano.yml│              │  deploy-demo.yml    │               │
+│   │ deploy-tinoco.yml   │              │                     │               │
+│   │ deploy-sanjose.yml  │              │                     │               │
+│   │ (futuros)           │              │                     │               │
+│   └─────────┬───────────┘              └──────────┬──────────┘               │
+│             │                                     │                          │
+└─────────────┼─────────────────────────────────────┼──────────────────────────┘
+              │                                     │
+              ▼                                     ▼
+┌─────────────────────────┐          ┌─────────────────────────┐
+│   AZURE - El Manzano    │          │   AZURE - Demo          │
+│   ─────────────────     │          │   ─────────────────     │
+│   App: portal-de-pagos- │          │   App: portal-demo-     │
+│        elmanzano-cba    │          │        alcaldia         │
+│   URL: elmanzano.       │          │   URL: demo.alcaldia    │
+│        alcaldia.com.ar  │          │        .com.ar          │
+│   NODE_ENV: production  │          │   NODE_ENV: development │
+└─────────────────────────┘          └─────────────────────────┘
 ```
 
-**Concepto clave**: Un repositorio → Múltiples deploys → Cada municipio tiene su propia cuenta Azure con BD y App Service independientes.
+**Concepto clave**: 
+- Rama `main` → Producción (municipios reales)
+- Rama `develop` → Desarrollo/Staging (demo para pruebas)
+
+---
+
+## 🌿 Estrategia de Ramas
+
+### Estructura
+
+```
+main (producción)
+│
+│   ← Solo recibe merges de develop cuando el código está probado
+│   ← Dispara deploy a: elmanzano, tinoco, sanjose (producción)
+│
+└── develop (staging)
+      │
+      │   ← Rama principal de trabajo diario
+      │   ← Dispara deploy a: demo.alcaldia.com.ar
+      │
+      ├── feature/nueva-funcionalidad
+      ├── fix/corregir-bug
+      └── refactor/mejorar-codigo
+```
+
+### Flujo de trabajo simplificado
+
+```bash
+# 1. Siempre trabajar desde develop
+git checkout develop
+git pull origin develop
+
+# 2. Crear feature branch (opcional para cambios pequeños)
+git checkout -b feature/mi-cambio
+
+# 3. Trabajar y commitear
+git add . && git commit -m "feat: descripción"
+
+# 4. Mergear a develop y subir → despliega en demo
+git checkout develop
+git merge feature/mi-cambio
+git push origin develop
+
+# 5. Probar en https://demo.alcaldia.com.ar
+
+# 6. Cuando está listo → pasar a producción
+git checkout main
+git merge develop
+git push origin main  # ⚡ Despliega en producción
+```
+
+> 📖 Guía completa: [docs/GUIA_RAMAS.md](../../docs/GUIA_RAMAS.md)
 
 ---
 
 ## ✅ Estado Actual de Deploys
 
-| Workflow | Municipio | App Service | Secret | URL |
-|----------|-----------|-------------|--------|-----|
-| `deploy-elmanzano.yml` | El Manzano | `portal-de-pagos-elmanzano-cba` | `AZURE_PUBLISH_ELMANZANO` | [portal-de-pagos-elmanzano-cba.azurewebsites.net](https://portal-de-pagos-elmanzano-cba.azurewebsites.net) |
-| `deploy-demo.yml` | Demo | `portal-demo-alcaldia` | `AZURE_PUBLISH_DEMO` | [portal-demo-alcaldia.azurewebsites.net](https://portal-demo-alcaldia.azurewebsites.net) |
+| Workflow | Rama | Municipio | App Service | Secret | URL |
+|----------|------|-----------|-------------|--------|-----|
+| `deploy-elmanzano.yml` | `main` | El Manzano | `portal-de-pagos-elmanzano-cba` | `AZURE_PUBLISH_ELMANZANO` | [elmanzano.alcaldia.com.ar](https://elmanzano.alcaldia.com.ar) |
+| `deploy-demo.yml` | `develop` | Demo | `portal-demo-alcaldia` | `AZURE_PUBLISH_DEMO` | [demo.alcaldia.com.ar](https://demo.alcaldia.com.ar) |
 
 ### Secrets configurados en GitHub
 
@@ -68,12 +125,14 @@ Ubicación: https://github.com/YoElDante/demo-tecnica-portal-de-pagos/settings/s
 | `AZURE_PUBLISH_ELMANZANO` | El Manzano | Contenido de `portal-de-pagos-elmanzano-cba.PublishSettings` |
 | `AZURE_PUBLISH_DEMO` | Demo | Contenido de `portal-demo-alcaldia.PublishSettings` |
 
+> ⚠️ **Los secrets NO cambian al usar ramas.** El Publish Profile autentica contra el App Service, independiente de la rama.
+
 ### Pendientes de crear (futuros municipios)
 
-| Municipio | Workflow | Secret |
-|-----------|----------|--------|
-| Tinoco | `deploy-tinoco.yml` | `AZURE_PUBLISH_TINOCO` |
-| San José de las Salinas | `deploy-sanjose.yml` | `AZURE_PUBLISH_SANJOSE` |
+| Municipio | Workflow | Rama | Secret |
+|-----------|----------|------|--------|
+| Tinoco | `deploy-tinoco.yml` | `main` | `AZURE_PUBLISH_TINOCO` |
+| San José de las Salinas | `deploy-sanjose.yml` | `main` | `AZURE_PUBLISH_SANJOSE` |
 
 ---
 
