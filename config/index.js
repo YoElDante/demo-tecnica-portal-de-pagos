@@ -48,11 +48,14 @@ if (!MUNICIPIO) {
 // REGISTRO DE MUNICIPIOS DISPONIBLES
 // ============================================
 // Para agregar un nuevo municipio:
-// 1. Crear municipalidad.config.NUEVO.js (solo datos visuales)
-// 2. Agregar 'nuevo' a la lista de abajo
-// 3. Configurar variables de BD en Azure App Service
+// 1. Copiar config/municipalidad.config.demo.js como municipalidad.config.NUEVO.js
+// 2. Completar los datos del municipio en ese archivo
+// 3. Agregar 'nuevo' a la lista de abajo
+// 4. Crear carpeta public/images/NUEVO/ con los logos
+// 5. Crear envs/.env.NUEVO con las credenciales de BD
+// 6. Configurar variables de BD en Azure App Service para producción
 
-const municipiosDisponibles = ['elmanzano', 'sanjosedelassalinas', 'tinoco'];
+const municipiosDisponibles = ['elmanzano', 'sanjosedelassalinas', 'tinoco', 'demo'];
 
 if (!municipiosDisponibles.includes(MUNICIPIO)) {
   console.error('');
