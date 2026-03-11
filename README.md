@@ -4,7 +4,7 @@
 > Un solo código base para múltiples municipios, configurado via variables de entorno
 
 **Repositorio:** https://github.com/YoElDante/demo-tecnica-portal-de-pagos  
-**Deploy Test en Azure:** https://alcaldiatest-d9d8cafxesa2cybx.brazilsouth-01.azurewebsites.net/
+**Deploy Demo en Azure:** https://demo.alcaldia.com.ar
 
 ---
 

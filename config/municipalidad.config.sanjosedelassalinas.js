@@ -21,10 +21,11 @@ module.exports = {
   telefono: '+54 (3521) 472532',
 
   // Rutas de imágenes/logos (relativas a /public)
+  // Estándar: {municipio}-logo-web, {municipio}-logo-ticket, {municipio}-favicon
   logos: {
-    principal: '/images/sanjosedelassalinas/sanjosedelassalinas.webp',
-    secundario: '/images/common/alcaldiaLogo.webp',
-    favicon: '/images/sanjosedelassalinas/sanjosedelassalinas.ico'
+    web: '/images/sanjosedelassalinas/sanjosedelassalinas-logo-web.webp',
+    ticket: '/images/sanjosedelassalinas/sanjosedelassalinas-logo-web.webp',  // Usa logo-web (crear sanjosedelassalinas-logo-ticket.webp si se necesita uno diferente)
+    favicon: '/images/sanjosedelassalinas/sanjosedelassalinas-favicon.ico'
   },
 
   // Configuración de tickets de pago

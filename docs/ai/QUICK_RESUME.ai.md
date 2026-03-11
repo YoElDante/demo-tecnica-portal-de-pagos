@@ -102,11 +102,14 @@ PAYMENT_GATEWAY=mercadopago   # Pasarela de pago activa
 
 ```
 public/images/
-├── common/              → favicon.ico, alcaldiaLogo.webp, qr_mercado.webp
-├── elmanzano/           → ISOLOGOTIPO-EL_MANZANO.webp, logo_El_Manzano.jpg
-├── sanjosedelassalinas/ → sanjosedelassalinas.webp, sanjosedelassalinas.ico
-└── tinoco/              → tinocoLogo.webp, favicon.ico
+├── common/              → alcaldiaLogo.webp, default-favicon.svg, qr_mercado.webp
+├── demo/                → (usa common por defecto)
+├── elmanzano/           → elmanzano-logo-web.webp, elmanzano-favicon.ico
+├── sanjosedelassalinas/ → sanjosedelassalinas-logo-web.webp, sanjosedelassalinas-favicon.ico
+└── tinoco/              → tinoco-logo-web.webp, tinoco-favicon.ico
 ```
+
+**Estándar de nombres:** `{municipio}-logo-web.webp`, `{municipio}-logo-ticket.webp` (opcional), `{municipio}-favicon.ico`
 
 ---
 

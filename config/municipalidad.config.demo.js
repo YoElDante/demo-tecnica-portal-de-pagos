@@ -56,18 +56,20 @@ module.exports = {
   // ============================================
   // IMÁGENES Y LOGOS
   // Rutas relativas a /public
+  // Estándar: {municipio}-logo-web, {municipio}-logo-ticket, {municipio}-favicon
   // ============================================
   logos: {
     // Logo principal (encabezado del portal)
-    // TODO: Reemplazar con el logo real del municipio
-    principal: '/images/common/alcaldiaLogo.webp',
+    // Para personalizar: crear demo-logo-web.webp en /images/demo/
+    web: '/images/common/alcaldiaLogo.webp',
 
-    // Logo secundario (pie de página, tickets)
-    secundario: '/images/common/alcaldiaLogo.webp',
+    // Logo para tickets/PDF de deuda
+    // Para personalizar: crear demo-logo-ticket.webp en /images/demo/
+    ticket: '/images/common/alcaldiaLogo.webp',
 
     // Favicon (pestaña del navegador)
-    // TODO: Reemplazar con el favicon real del municipio
-    favicon: '/images/common/alcaldiaLogo.webp'
+    // Para personalizar: crear demo-favicon.ico en /images/demo/
+    favicon: '/images/common/default-favicon.svg'
   },
 
   // ============================================

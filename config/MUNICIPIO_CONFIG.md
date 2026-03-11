@@ -130,18 +130,20 @@ Cuando copies el proyecto para un cliente específico:
 
 ```
 public/images/
-├── common/              → Recursos compartidos (alcaldiaLogo.webp, favicon.ico genérico)
-├── elmanzano/           → Logos de El Manzano
-├── sanjosedelassalinas/ → Logos de San José de las Salinas
-└── tinoco/              → Logos de Tinoco
+├── common/              → Recursos compartidos (alcaldiaLogo.webp, default-favicon.svg)
+├── demo/                → Imágenes del entorno demo
+├── elmanzano/           → elmanzano-logo-web.webp, elmanzano-favicon.ico
+├── sanjosedelassalinas/ → sanjosedelassalinas-logo-web.webp, sanjosedelassalinas-favicon.ico
+└── tinoco/              → tinoco-logo-web.webp, tinoco-favicon.ico
 ```
 
 Las rutas se configuran en `municipalidad.config.{municipio}.js`:
 ```javascript
+// Estándar: {municipio}-logo-web, {municipio}-logo-ticket, {municipio}-favicon
 logos: {
-  principal: '/images/elmanzano/ISOLOGOTIPO-EL_MANZANO.webp',
-  secundario: '/images/common/alcaldiaLogo.webp',
-  favicon: '/images/elmanzano/logo_El_Manzano.jpg'
+  web: '/images/elmanzano/elmanzano-logo-web.webp',
+  ticket: '/images/elmanzano/elmanzano-logo-web.webp',  // Usa logo-web si no hay específico
+  favicon: '/images/elmanzano/elmanzano-favicon.ico'
 }
 ```
 
@@ -151,7 +153,7 @@ logos: {
 
 - [ ] Cambiar variable `MUNICIPIO` en `.env`
 - [ ] Verificar que existan los archivos de config (`config/municipalidad.config.{municipio}.js`)
-- [ ] Verificar logos en `public/images/{municipio}/`
+- [ ] Verificar logos en `public/images/{municipio}/` (con nombres estandarizados)
 - [ ] Reiniciar servidor (`npm run dev`)
 - [ ] Probar con un DNI válido de ese municipio
 - [ ] Verificar que el ticket muestre el logo correcto

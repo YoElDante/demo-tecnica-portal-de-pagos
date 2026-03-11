@@ -23,10 +23,11 @@ module.exports = {
   telefono: '+54 (3525) 305210',
 
   // Rutas de imágenes/logos (relativas a /public)
+  // Estándar: {municipio}-logo-web, {municipio}-logo-ticket, {municipio}-favicon
   logos: {
-    principal: '/images/tinoco/tinocoLogo.webp',
-    secundario: '/images/common/alcaldiaLogo.webp',
-    favicon: '/images/tinoco/favicon.ico'
+    web: '/images/tinoco/tinoco-logo-web.webp',
+    ticket: '/images/tinoco/tinoco-logo-web.webp',  // Usa logo-web (crear tinoco-logo-ticket.webp si se necesita uno diferente)
+    favicon: '/images/tinoco/tinoco-favicon.ico'
   },
 
   // Configuración de tickets de pago

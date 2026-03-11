@@ -21,10 +21,11 @@ module.exports = {
   telefono: '+54 (3543) 304251',
 
   // Rutas de imágenes/logos (relativas a /public)
+  // Estándar: {municipio}-logo-web, {municipio}-logo-ticket, {municipio}-favicon
   logos: {
-    principal: '/images/elmanzano/ISOLOGOTIPO-EL_MANZANO.webp',
-    secundario: '/images/common/alcaldiaLogo.webp',
-    favicon: '/images/elmanzano/logo_El_Manzano.jpg'
+    web: '/images/elmanzano/elmanzano-logo-web.webp',
+    ticket: '/images/elmanzano/elmanzano-logo-web.webp',  // Usa logo-web (crear elmanzano-logo-ticket.webp si se necesita uno diferente)
+    favicon: '/images/elmanzano/elmanzano-favicon.ico'
   },
 
   // Configuración de tickets de pago
