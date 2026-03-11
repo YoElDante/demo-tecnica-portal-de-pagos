@@ -65,3 +65,4 @@ envs/
 
 # next.js build output
 .next
+.venv/
