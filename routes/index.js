@@ -12,6 +12,17 @@ const router = express.Router();
 const webController = require('../controllers/web.controller');
 const ticketController = require('../controllers/web.ticket.controller');
 
+// ============================================
+// Health Check (Azure App Service)
+// ============================================
+router.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
 // Página principal
 router.get('/', webController.renderIndex);
 
