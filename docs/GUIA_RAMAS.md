@@ -22,7 +22,7 @@
 main (producción)
 │
 │   ← Solo recibe merges de develop
-│   ← Dispara deploy a: elmanzano.alcaldia.com.ar (y futuros municipios)
+│   ← Dispara deploy a: {municipios}.alcaldia.com.ar (y futuros municipios)
 │
 └── develop (desarrollo/staging)
       │
@@ -38,7 +38,7 @@ main (producción)
 
 | Rama | Propósito | Despliega en | Protección |
 |------|-----------|--------------|------------|
-| `main` | Código de producción estable | elmanzano.alcaldia.com.ar | Solo merges |
+| `main` | Código de producción estable | ´{municipio}.alcaldia.com.ar | Solo merges |
 | `develop` | Desarrollo y pruebas | demo.alcaldia.com.ar | Trabajo activo |
 | `feature/*` | Nuevas funcionalidades | - | Temporal |
 | `fix/*` | Corrección de bugs | - | Temporal |
@@ -72,14 +72,14 @@ main (producción)
 │                                              │   .com.ar     │      │
 │                                              └───────────────┘      │
 │                                                       │             │
-│   4. VALIDAR EN DEMO        5. APROBAR              │             │
-│   ──────────────────        ────────                 │             │
+│   4. VALIDAR EN DEMO        5. APROBAR                │             │
+│   ──────────────────        ──────────                │             │
 │                                                       │             │
-│   Probar en                 merge develop → main     │             │
-│   demo.alcaldia.com.ar      git push origin main     │             │
+│   Probar en                 merge develop → main      │             │
+│   demo.alcaldia.com.ar      git push origin main      │             │
 │                                                       ▼             │
 │                                              ┌───────────────┐      │
-│                                              │  elmanzano.   │      │
+│                                              │ {municipios}. │      │
 │                                              │ alcaldia.com  │      │
 │                                              └───────────────┘      │
 │                                                                     │
