@@ -9,6 +9,7 @@ const debug = require('debug')('minimo-sql:server');
 const http = require('http');
 require('dotenv').config();
 const { sequelize } = require('../models/model.index.js');
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
 /**
  * Get port from environment and store in Express.
@@ -42,7 +43,23 @@ async function startServer() {
     server.on('listening', onListening);
 
   } catch (error) {
-    console.error('❌ Error al conectar con la base de datos:', error);
+    const errorCode = error?.original?.code || error?.parent?.code || error?.code;
+    if (IS_PRODUCTION) {
+      // En producción evitamos filtrar detalles sensibles de infraestructura.
+      console.error('❌ Error de infraestructura al iniciar la aplicación.');
+      console.error(`   Código: ${errorCode || 'UNKNOWN'}`);
+    } else {
+      console.error('❌ Error al conectar con la base de datos:', error?.message || error);
+
+      if (errorCode === 'ELOGIN') {
+        console.error('🔐 Diagnóstico: credenciales inválidas o desactualizadas (DB_USER/DB_PASS).');
+        console.error('   Acción sugerida: verificar credenciales en .env local o App Service Configuration en producción.');
+      } else if (errorCode === 'ESOCKET' || errorCode === 'ETIMEOUT') {
+        console.error('🌐 Diagnóstico: problema de red/firewall hacia Azure SQL.');
+        console.error('   Acción sugerida: validar reglas de firewall y conectividad desde el entorno de ejecución.');
+      }
+    }
+
     process.exit(1);
   }
 }
