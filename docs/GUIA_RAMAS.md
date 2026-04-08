@@ -221,6 +221,7 @@ git push origin main
 | 4 | **Probar en demo antes de main** | Demo es tu staging |
 | 5 | **Commits pequeños y descriptivos** | Facilita rollback si hay problemas |
 | 6 | **Una feature, una rama** | Aísla cambios, facilita revisión |
+| 7 | **`.env` y `envs/` nunca forman parte del merge** | La config real vive fuera del repo |
 
 ### Lo que NUNCA debes hacer
 
@@ -233,6 +234,68 @@ git push origin main  # ❌ PELIGROSO
 # ❌ NUNCA forzar push a main o develop
 git push --force origin main  # ❌ DESTRUYE HISTORIAL
 ```
+
+---
+
+## 🚨 Comandos de Emergencia
+## 🗂️ Integración con el Flujo SDD
+
+Antes de crear una rama para un **cambio funcional relevante**, el flujo correcto es:
+
+```
+[idea] → openspec/changes/<nombre>/ → feature/<nombre> → develop → main
+```
+
+### ¿Cuándo crear un change en openspec?
+
+| Tipo de cambio | Requiere openspec | Requiere feature branch |
+|---|---|---|
+| Nueva funcionalidad que afecta pagos, municipios o seguridad | ✅ Sí | ✅ Sí |
+| Bug fix puntual (1-2 archivos) | ❌ No | ✅ Sí |
+| Mejora de documentación | ❌ No | ❌ No — directo a develop |
+| Refactor sin cambio funcional | ❌ No | ✅ Sí |
+| Alta de nuevo municipio | ✅ Sí | ✅ Sí |
+| Cambio de variables de entorno / config | ❌ No | ✅ Sí |
+
+> Regla de AGENTS.md: *"Antes de implementar una feature relevante, revisar `openspec/specs` y trabajar con `openspec/changes`."*
+
+### Arrancar un cambio funcional paso a paso
+
+```bash
+# 1. Crear el change en openspec PRIMERO
+mkdir -p openspec/changes/nombre-del-cambio
+# → Escribir proposal.md antes de tocar código
+
+# 2. Crear la rama desde develop actualizado
+git checkout develop
+git pull origin develop
+git checkout -b feature/nombre-del-cambio
+
+# 3. Desarrollar con commits atómicos
+git commit -m "feat: descripción puntual"
+
+# 4. Mergear a develop y validar en demo
+git checkout develop
+git merge feature/nombre-del-cambio
+git push origin develop
+# → Validar en https://demo.alcaldia.com.ar
+
+# 5. Cuando todo está aprobado → main
+git checkout main
+git pull origin main
+git merge develop
+git push origin main
+```
+
+### Nombrado de ramas según tipo de change
+
+| Tipo | Prefijo | Ejemplo |
+|------|---------|---------|
+| Funcionalidad nueva | `feature/` | `feature/tasa-interes-configurable` |
+| Bug fix | `fix/` | `fix/calculo-mora-redondeo` |
+| Nuevo municipio | `feature/municipio-` | `feature/municipio-villa-nueva` |
+| Hardening / seguridad | `feature/security-` | `feature/security-helmet-csp` |
+| Documentación | directo a `develop` | — |
 
 ---
 

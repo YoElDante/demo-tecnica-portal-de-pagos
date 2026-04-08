@@ -66,7 +66,7 @@ az webapp create \
 | `DB_USER` | `usuario` | Usuario de BD |
 | `DB_PASS` | `contraseña` | ⚠️ Marcar como "Secreto" |
 | `TASA_INTERES_ANUAL` | `40` | Tasa de interés (%) |
-| `PAYMENT_GATEWAY` | `mercadopago` | Pasarela de pago activa |
+| `PAYMENT_GATEWAY` | `siro` | Pasarela de pago activa |
 | `API_GATEWAY_URL` | `https://api-gateway.azurewebsites.net` | URL del gateway |
 | `FRONTEND_PUBLIC_URL` | `https://portal-pagos-elmanzano.azurewebsites.net` | URL pública |
 | `WEBHOOK_SECRET` | `secreto_seguro` | ⚠️ Marcar como "Secreto" |
@@ -87,7 +87,7 @@ az webapp config appsettings set \
     DB_NAME=nombre_bd \
     DB_USER=usuario \
     TASA_INTERES_ANUAL=40 \
-    PAYMENT_GATEWAY=mercadopago \
+    PAYMENT_GATEWAY=siro \
     API_GATEWAY_URL=https://api-gateway.azurewebsites.net \
     FRONTEND_PUBLIC_URL=https://portal-pagos-elmanzano.azurewebsites.net
 ```
@@ -180,7 +180,7 @@ En los logs deberías ver:
    Database: nombre_bd
    Usuario: usuario
 🏛️  Municipio activo: Municipalidad de El Manzano
-💳 Payment Gateway configurado: MERCADOPAGO
+💳 Payment Gateway configurado: SIRO
 ✅ Conectado exitosamente a Azure SQL Database
 ```
 
@@ -204,6 +204,13 @@ En los logs deberías ver:
 
 1. App Service → **Escalar horizontalmente**
 2. Configurar reglas basadas en CPU o memoria
+
+### Nota sobre `develop` y `.env`
+
+- `develop` se usa para demo/staging.
+- El archivo `.env` local no se versiona porque está ignorado en git.
+- `envs/` tampoco se versiona; la configuración real de demo y producción vive en App Service.
+- Mergear cambios entre `main` y `develop` no debería tocar secretos ni configuración sensible si estos permanecen fuera del repositorio.
 
 ---
 

@@ -159,7 +159,7 @@ EsPago = 1               -- Es un pago
 
 ---
 
-## 6. Proceso de Confirmación de Pago (MercadoPago)
+## 6. Proceso de Confirmación de Pago (Gateway con SIRO)
 
 ### 6.1 Flujo de Actualización
 
@@ -238,9 +238,9 @@ if (yaExiste) {
 
 | Campo | Uso para Idempotencia |
 |-------|----------------------|
-| `NRO_OPERACION` | ID único de pago de MercadoPago |
+| `NRO_OPERACION` | ID único de pago informado por el gateway |
 | `NumeroPago` | Secuencial interno del sistema |
-| `payment_id` | ID devuelto por MercadoPago |
+| `payment_id` | ID devuelto por el gateway / SIRO |
 
 ---
 
@@ -248,7 +248,7 @@ if (yaExiste) {
 
 ### 8.1 Estrategia Recomendada
 
-Usar el `payment_id` de MercadoPago como `NumeroPago` para:
+Usar el `payment_id` del gateway como `NumeroPago` para:
 - Trazabilidad directa con el gateway de pago
 - Unicidad garantizada
 - Simplicidad de implementación
@@ -275,9 +275,9 @@ const nuevoNumeroPago = (ultimoPago || 5000000000) + 1;
 |-------|-------|
 | `Saldo` | 0 |
 | `EsPago` | 1 |
-| `FechaPago` | `date_approved` de MercadoPago |
+| `FechaPago` | `date_approved` informado por el gateway |
 | `NumeroPago` | Secuencial o payment_id |
-| `NRO_OPERACION` | `payment_id` de MercadoPago |
+| `NRO_OPERACION` | `payment_id` del gateway |
 | `Ejercicio` | Año actual (momento del pago) |
 
 ### 9.2 Registro de COBRO (INSERT)

@@ -203,8 +203,8 @@ TASA_INTERES_ANUAL=40
 # ============================================
 # PASARELA DE PAGOS
 # ============================================
-PAYMENT_GATEWAY=mercadopago
-API_GATEWAY_URL=https://api.mercadopago.com
+PAYMENT_GATEWAY=siro
+API_GATEWAY_URL=https://gateway-pagos.alcaldia.com.ar
 FRONTEND_PUBLIC_URL=https://portal-{municipio}.azurewebsites.net
 
 # ============================================
@@ -304,7 +304,7 @@ En el App Service creado:
 | `DB_DIALECT` | `mssql` |
 | `DB_PORT` | `1433` |
 | `TASA_INTERES_ANUAL` | `40` |
-| `PAYMENT_GATEWAY` | `mercadopago` |
+| `PAYMENT_GATEWAY` | `siro` |
 | `FRONTEND_PUBLIC_URL` | `https://portal-{municipio}.azurewebsites.net` |
 
 3. Clic en **Guardar**

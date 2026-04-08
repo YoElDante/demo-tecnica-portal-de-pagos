@@ -13,7 +13,7 @@
 Portal web que permite a contribuyentes:
 - Consultar deudas pendientes por DNI
 - Generar tickets de pago
-- Procesar pagos via MercadoPago (y otras pasarelas futuras)
+- Procesar pagos via SIRO del Banco Roela mediante un gateway intermedio
 
 El sistema soporta **múltiples municipios** con el mismo código, diferenciados por variables de entorno.
 
@@ -79,7 +79,7 @@ npm run dev:sanjose
 ├── services/
 │   ├── deudas.service.js        # Lógica de cálculo de deudas
 │   ├── pagos.service.js         # Gestión de pagos
-│   └── paymentGateway.service.js # Multi-pasarela (MercadoPago, etc.)
+│   └── paymentGateway.service.js # Integración con gateway de pagos
 ├── routes/
 │   ├── index.js                 # Rutas web
 │   └── api/                     # Rutas API REST
@@ -115,7 +115,7 @@ NODE_ENV=development
 TASA_INTERES_ANUAL=40            # Tasa de interés anual (%)
 
 # === PASARELA DE PAGOS ===
-PAYMENT_GATEWAY=mercadopago      # mercadopago | pagotic | siro | macropay
+PAYMENT_GATEWAY=siro             # Activa hoy: SIRO (Banco Roela)
 API_GATEWAY_URL=https://api-gateway.azurewebsites.net
 FRONTEND_PUBLIC_URL=http://localhost:4000
 
@@ -167,14 +167,14 @@ Base: `/api`
 
 ## 💳 Pasarelas de Pago
 
-El sistema soporta múltiples pasarelas via la variable `PAYMENT_GATEWAY`:
+La integración activa hoy es SIRO del Banco Roela. Otras pasarelas quedan como antecedente o capacidad futura del gateway.
 
 | Pasarela | Estado | Variable |
 |----------|--------|----------|
-| MercadoPago | ✅ Activo | `mercadopago` |
-| PagoTic | ⏳ Pendiente | `pagotic` |
-| SIRO | ⏳ Pendiente | `siro` |
-| MacroPay | ⏳ Pendiente | `macropay` |
+| SIRO / Banco Roela | ✅ Activo | `siro` |
+| MercadoPago | 📦 Archivado | `mercadopago` |
+| PagoTic | ⏳ Futuro | `pagotic` |
+| MacroPay | ⏳ Futuro | `macropay` |
 
 ---
 
@@ -185,7 +185,7 @@ El sistema soporta múltiples pasarelas via la variable `PAYMENT_GATEWAY`:
 - **ORM:** Sequelize
 - **Base de datos:** Azure SQL (driver: tedious)
 - **Vistas:** EJS
-- **Pagos:** MercadoPago SDK
+- **Pagos:** SIRO / Banco Roela via gateway externo
 
 ---
 
@@ -193,10 +193,14 @@ El sistema soporta múltiples pasarelas via la variable `PAYMENT_GATEWAY`:
 
 | Documento | Descripción |
 |-----------|-------------|
-| [DEPLOY_AZURE.md](docs/DEPLOY_AZURE.md) | Guía de despliegue en Azure App Service |
-| [MUNICIPIO_CONFIG.md](config/MUNICIPIO_CONFIG.md) | Cómo cambiar de municipio |
-| [INTEGRACION_PAGOS.md](docs/INTEGRACION_PAGOS.md) | Flujo de integración con MercadoPago |
-| [QUICK_RESUME.ai.md](docs/ai/QUICK_RESUME.ai.md) | Resumen rápido para desarrolladores |
+| [docs/README.md](docs/README.md) | Índice maestro de documentación |
+| [AI_CONTEXT.md](docs/AI_CONTEXT.md) | Contexto compacto para desarrolladores y agentes IA |
+| [GUIA_RAMAS.md](docs/GUIA_RAMAS.md) | Estrategia de ramas y flujo de trabajo git |
+| [DEPLOY_AZURE.md](docs/DEPLOY_AZURE.md) | Despliegue en Azure App Service |
+| [CONTRACT-PORTAL-GATEWAY.md](docs/CONTRACT-PORTAL-GATEWAY.md) | Contrato portal ↔ gateway de pagos |
+| [INTEGRACION_PAGOS.md](docs/INTEGRACION_PAGOS.md) | Flujo activo de integración con SIRO |
+| [GUIA_NUEVO_MUNICIPIO.md](docs/GUIA_NUEVO_MUNICIPIO.md) | Alta de un nuevo municipio |
+| [MUNICIPIO_CONFIG.md](config/MUNICIPIO_CONFIG.md) | Variables de configuración por municipio |
 
 ---
 
@@ -234,8 +238,14 @@ npm run testDB
 
 ## 👥 Contribuir
 
-1. Abrir issue con bug o feature request
-2. Crear branch con cambios y abrir PR
+Ver [docs/GUIA_RAMAS.md](docs/GUIA_RAMAS.md) para el flujo completo.
+
+Resumen:
+1. Todo trabajo nuevo parte desde `develop`, nunca desde `main`
+2. Cambios funcionales relevantes requieren un change en `openspec/changes/` antes de la rama
+3. Validar en `demo.alcaldia.com.ar` antes de mergear a `main`
+4. `main` = producción — solo recibe merges aprobados desde `develop`
+5. `.env` y `envs/` no viajan en git; la configuración del demo vive fuera del repositorio
 
 ---
 

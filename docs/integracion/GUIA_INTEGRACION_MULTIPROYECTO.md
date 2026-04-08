@@ -262,115 +262,32 @@ paths:
 
 ## 🌿 Flujo de Trabajo con Git
 
-### Regla de Oro
+El flujo de ramas para este proyecto ya está documentado en detalle en `docs/GUIA_RAMAS.md`.
 
-> **Nunca trabajes directamente en `main`**. Siempre crea una rama de feature.
+### Regla operativa para trabajo multi-proyecto
 
-### Antes de pedirle cambios a la IA
+- Crear una rama equivalente en cada repositorio involucrado.
+- Mantener el contrato de integración alineado antes de implementar.
+- Validar el flujo cruzado en staging antes de mergear a producción.
+- Revisar `git status` y `git diff` en cada repo por separado.
+
+### Secuencia mínima recomendada
 
 ```bash
-# 1. En CADA proyecto que vayas a modificar:
-
-# --- Proyecto 1: Portal ---
+# Portal
 cd demo-portal-de-pago
-git checkout develop          # o main si no tienes develop
-git pull origin develop       # traer últimos cambios
-git checkout -b feature/integracion-api-pagos
-
-# --- Proyecto 2: API ---
-cd ../api-gateway-mp
 git checkout develop
 git pull origin develop
 git checkout -b feature/integracion-portal
-```
 
-### Después de que la IA haga cambios
-
-```bash
-# 2. Revisar qué cambió en cada proyecto:
-
-cd demo-portal-de-pago
-git status                    # ver archivos modificados
-git diff                      # ver cambios línea por línea
-
+# Gateway
 cd ../api-gateway-mp
-git status
-git diff
+git checkout develop
+git pull origin develop
+git checkout -b feature/integracion-api
 ```
 
-### Commitear los cambios
-
-```bash
-# 3. En cada proyecto por separado:
-
-# --- Proyecto 1 ---
-cd demo-portal-de-pago
-git add .
-git commit -m "feat(payment): integrar con API de pagos"
-git push origin feature/integracion-api-pagos
-
-# --- Proyecto 2 ---
-cd ../api-gateway-mp
-git add .
-git commit -m "feat(api): endpoint para recibir preferencias de portal"
-git push origin feature/integracion-portal
-```
-
-### Crear Pull Requests
-
-4. Ir a GitHub y crear un PR de cada feature branch hacia develop/main
-
-### Diagrama del flujo completo
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                        FLUJO DE TRABAJO CORRECTO                            │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│   PORTAL (demo-portal-de-pago)         API (api-gateway-mp)                 │
-│   ────────────────────────────         ────────────────────                 │
-│                                                                             │
-│   main ─────────────────────           main ─────────────────────           │
-│     │                                    │                                  │
-│     └── develop                          └── develop                        │
-│           │                                    │                            │
-│           └── feature/integracion-         └── feature/integracion-         │
-│               api-pagos                        portal                       │
-│               │                                │                            │
-│               │                                │                            │
-│               ▼                                ▼                            │
-│   ┌─────────────────────────────────────────────────────────┐               │
-│   │              IA EDITA ARCHIVOS EN AMBOS                 │               │
-│   │         (los cambios quedan en working tree)            │               │
-│   └─────────────────────────────────────────────────────────┘               │
-│               │                                │                            │
-│               ▼                                ▼                            │
-│           git add .                        git add .                        │
-│           git commit                       git commit                       │
-│           git push                         git push                         │
-│               │                                │                            │
-│               ▼                                ▼                            │
-│           Pull Request                     Pull Request                     │
-│           en GitHub                        en GitHub                        │
-│               │                                │                            │
-│               ▼                                ▼                            │
-│           Merge a develop                  Merge a develop                  │
-│               │                                │                            │
-│               ▼                                ▼                            │
-│           Deploy a staging                 Deploy a staging                 │
-│               │                                │                            │
-│               └────────────┬───────────────────┘                            │
-│                            │                                                │
-│                            ▼                                                │
-│                     PROBAR INTEGRACIÓN                                      │
-│                     EN STAGING                                              │
-│                            │                                                │
-│                            ▼                                                │
-│                     Merge a main                                            │
-│                     Deploy a producción                                     │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
+Para el detalle completo de ramas, merges y emergencias, usar `docs/GUIA_RAMAS.md` como fuente de verdad.
 
 ---
 
