@@ -67,3 +67,6 @@ envs/
 .next
 .venv/
 .local/
+
+# Local AI tooling config
+.gga
