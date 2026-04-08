@@ -247,6 +247,13 @@ Resumen:
 4. `main` = producción — solo recibe merges aprobados desde `develop`
 5. `.env` y `envs/` no viajan en git; la configuración del demo vive fuera del repositorio
 
+### Política de dependencias
+
+- Este proyecto usa versiones exactas en `package.json` (sin `^` ni `~`).
+- En ambientes ya funcionando no se actualizan dependencias por rutina.
+- Solo se actualiza por seguridad o corrección crítica, con validación explícita.
+- Toda dependencia nueva se agrega con versión confiable y estable, fijada de forma exacta.
+
 ---
 
 ## 📄 Licencia

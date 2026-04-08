@@ -28,6 +28,8 @@ Este repositorio implementa un portal web municipal para consultar deudas por DN
 10. Antes de implementar una feature relevante, revisar `openspec/specs` y trabajar con `openspec/changes`.
 11. Todo trabajo nuevo parte desde `develop`. Nunca commitear codigo en `main` directamente.
 12. `.env` y `envs/` no se versionan ni se usan como mecanismo de promocion entre ramas; demo y produccion se configuran por entorno.
+13. Las dependencias npm se declaran con version exacta (sin `^` ni `~`) para evitar actualizaciones no controladas.
+14. No actualizar dependencias en repositorios estables salvo necesidad de seguridad o correccion critica, y siempre con validacion explicita.
 
 ## Convenciones de Dominio
 
@@ -42,6 +44,7 @@ Este repositorio implementa un portal web municipal para consultar deudas por DN
 - No duplicar documentacion existente; enlazarla desde skills o specs.
 - No introducir dependencias nuevas sin justificar impacto operativo.
 - No asumir que todos los municipios comparten mismas credenciales, cuentas de pago o branding.
+- Al agregar dependencias nuevas, fijar una version confiable y estable de forma exacta.
 
 ## Comandos de Trabajo
 
