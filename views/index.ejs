@@ -205,6 +205,19 @@
     <% } %>
   </main>
 
+  <% const whatsappConfig = municipalidad && municipalidad.contactoWhatsapp ? municipalidad.contactoWhatsapp : {}; %>
+  <% const whatsappEnabled = Boolean(whatsappConfig.habilitarBoton); %>
+  <% const whatsappPhone = (whatsappConfig.telefono || '').replace(/\D/g, ''); %>
+  <% const whatsappMessage = encodeURIComponent(whatsappConfig.mensajeInicial || 'Hola, necesito ayuda con el portal de pagos.'); %>
+  <% const whatsappLabel = whatsappConfig.textoBoton || 'Contactanos'; %>
+
+  <% if (whatsappEnabled && whatsappPhone) { %>
+  <a href="https://wa.me/<%= whatsappPhone %>?text=<%= whatsappMessage %>" class="whatsapp-fab" target="_blank" rel="noopener noreferrer" aria-label="Contacto por WhatsApp" title="<%= whatsappLabel %>">
+    <span class="whatsapp-fab__tooltip"><%= whatsappLabel %></span>
+    <img src="/images/common/whatsapp.svg" alt="WhatsApp" class="whatsapp-fab__icon" />
+  </a>
+  <% } %>
+
   <script>
     // Datos del contribuyente desde el servidor
     const contribuyenteData = {

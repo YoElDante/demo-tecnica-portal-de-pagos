@@ -53,6 +53,14 @@ module.exports = {
   // Teléfono de contacto
   telefono: '+54 (351) 000-0000',
 
+  // Contacto WhatsApp (canal opcional por municipio)
+  contactoWhatsapp: {
+    habilitarBoton: false,
+    telefono: '+54 (351) 000-0000',
+    textoBoton: 'Contactanos',
+    mensajeInicial: 'Hola, necesito ayuda con el portal de pagos.'
+  },
+
   // ============================================
   // IMÁGENES Y LOGOS
   // Rutas relativas a /public

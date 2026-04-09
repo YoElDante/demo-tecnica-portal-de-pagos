@@ -22,6 +22,14 @@ module.exports = {
   codigoPostal: 'X5131',
   telefono: '+54 (3525) 305210',
 
+  // Contacto WhatsApp (canal opcional por municipio)
+  contactoWhatsapp: {
+    habilitarBoton: true,
+    telefono: '+54 (3525) 305210',
+    textoBoton: 'Enviar mensajito',
+    mensajeInicial: 'Hola, necesito ayuda con el portal de pagos de Tinoco.'
+  },
+
   // Rutas de imágenes/logos (relativas a /public)
   // Estándar: {municipio}-logo-web, {municipio}-logo-ticket, {municipio}-favicon
   logos: {

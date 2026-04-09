@@ -18,7 +18,15 @@ module.exports = {
   localidad: 'El Manzano',
   provincia: 'Córdoba',
   codigoPostal: 'X5107',
-  telefono: '+54 (3543) 304251',
+  telefono: '+54 (3525) 493225',
+
+  // Contacto WhatsApp (canal opcional por municipio)
+  contactoWhatsapp: {
+    habilitarBoton: true,
+    telefono: '+54 (3543) 304251',
+    textoBoton: 'Contactanos',
+    mensajeInicial: 'Hola, necesito ayuda con el portal de pagos de El Manzano.'
+  },
 
   // Rutas de imágenes/logos (relativas a /public)
   // Estándar: {municipio}-logo-web, {municipio}-logo-ticket, {municipio}-favicon

@@ -20,6 +20,14 @@ module.exports = {
   codigoPostal: 'X5216',
   telefono: '+54 (3521) 472532',
 
+  // Contacto WhatsApp (canal opcional por municipio)
+  contactoWhatsapp: {
+    habilitarBoton: true,
+    telefono: '+54 (3521) 472532',
+    textoBoton: 'Contactanos',
+    mensajeInicial: 'Hola, necesito ayuda con el portal de pagos de San Jose de las Salinas.'
+  },
+
   // Rutas de imágenes/logos (relativas a /public)
   // Estándar: {municipio}-logo-web, {municipio}-logo-ticket, {municipio}-favicon
   logos: {

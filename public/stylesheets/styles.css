@@ -1314,3 +1314,76 @@ footer {
    Para usar el componente de ticket, incluir:
    <link rel="stylesheet" href="/stylesheets/ticket.css">
    ============================================ */
+
+/* ============================================
+   BOTON FLOTANTE WHATSAPP
+   ============================================ */
+.whatsapp-fab {
+    position: fixed;
+    right: 22px;
+    bottom: 22px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #25d366;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.26);
+    z-index: 1000;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-decoration: none;
+}
+
+.whatsapp-fab:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+}
+
+.whatsapp-fab__icon {
+    width: 32px;
+    height: 32px;
+    display: block;
+}
+
+.whatsapp-fab__tooltip {
+    position: absolute;
+    right: 72px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.whatsapp-fab:hover .whatsapp-fab__tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+@media screen and (max-width: 768px) {
+    .whatsapp-fab {
+        width: 56px;
+        height: 56px;
+        right: 16px;
+        bottom: 16px;
+    }
+
+    .whatsapp-fab__icon {
+        width: 30px;
+        height: 30px;
+    }
+
+    .whatsapp-fab__tooltip {
+        display: none;
+    }
+}
