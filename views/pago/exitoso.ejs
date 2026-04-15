@@ -148,6 +148,26 @@
     .result__btn--back:hover {
       background: #148a96;
     }
+
+    .result__btn--print {
+      background: #6c757d;
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.3s;
+      text-decoration: none;
+    }
+
+    .result__btn--print:hover { background: #545b62; }
+
+    @media print {
+      .result__email, .result__actions, .whatsapp-float { display: none !important; }
+      body { background: white; }
+      .result { box-shadow: none; border: 1px solid #ddd; }
+    }
   </style>
 </head>
 
@@ -207,23 +227,15 @@
       </div>
       <% } %>
 
-      <div class="result__email">
-        <h3 class="result__email-title">📧 Recibir comprobante por email</h3>
-        <form class="result__email-form" action="/pago/guardar-email" method="POST">
-          <input type="hidden" name="external_reference" value="<%= external_reference %>">
-
-          <input type="email" name="email" class="result__email-input" placeholder="tu@email.com" value="<%= typeof email_actual !== 'undefined' ? email_actual : '' %>" required>
-
-          <div class="result__checkbox">
-            <input type="checkbox" id="guardar_email" name="guardar_email" checked>
-            <label for="guardar_email">Guardar este email para futuras operaciones</label>
-          </div>
-
-          <button type="submit" class="result__btn--email">📤 Enviar comprobante</button>
-        </form>
-      </div>
-
       <div class="result__actions">
+        <a
+          href="/pagos/comprobante?ref=<%= encodeURIComponent(external_reference) %>"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="result__btn--print"
+        >
+          📄 Descargar comprobante
+        </a>
         <a href="/" class="result__btn--back">🏠 Volver al inicio</a>
       </div>
     </section>
@@ -233,6 +245,8 @@
   <footer class="footer">
     <p class="footer__text">&copy; Power by Alcald+IA. Todos los derechos reservados.</p>
   </footer>
+
+  <%- include('../partials/whatsapp-button') %>
 </body>
 
 </html>

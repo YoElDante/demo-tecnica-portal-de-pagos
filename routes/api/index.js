@@ -10,6 +10,7 @@
 const express = require('express');
 const router = express.Router();
 const { strictLimiter } = require('../../middlewares/rateLimiter');
+const { municipalidad } = require('../../config');
 
 // Importar rutas específicas
 const clientesRoutes = require('./clientes.routes');
@@ -19,7 +20,7 @@ const paymentController = require('../../controllers/payment.controller');
 router.get('/', (req, res) => {
   res.json({
     version: '1.0.0',
-    name: 'API Portal de Pagos Municipal - Demo',
+    name: `API Portal de Pagos Municipal - ${municipalidad.nombre}`,
     description: 'API REST para gestión de clientes, deudas y pagos',
     base_url: '/api',
     endpoints: {
@@ -89,5 +90,9 @@ router.post('/webhook/pago', strictLimiter, paymentController.confirmacion);
 
 // Alias legacy mientras se migra cualquier integración anterior
 router.post('/pagos/confirmacion', strictLimiter, paymentController.confirmacion);
+
+// Consulta de estado de ticket para polling de la vista pendiente
+// GET /api/tickets/estado?ref={externalReference}
+router.get('/tickets/estado', paymentController.obtenerEstadoTicket);
 
 module.exports = router;

@@ -2,7 +2,7 @@
  * Rutas de Pago
  * Maneja redirects del gateway y el inicio del flujo de pago
  * 
- * @author Generado para integración MP
+ * @author Dante Marcos Delprato
  * @version 1.0
  * @date 2025-12-13
  */
@@ -10,6 +10,7 @@
 const express = require('express');
 const router = express.Router();
 const paymentController = require('../controllers/payment.controller');
+const ticketController = require('../controllers/web.ticket.controller');
 
 // ============================================
 // RUTAS PARA EL USUARIO (Vistas)
@@ -45,5 +46,11 @@ router.get('/pendiente', paymentController.pagoPendiente);
  * Vista sin token válido o redirect inconsistente
  */
 router.get('/error-generico', paymentController.pagoErrorGenerico);
+
+/**
+ * GET /pagos/comprobante?ref={externalReference}
+ * Página imprimible con el comprobante de resultado de pago
+ */
+router.get('/comprobante', ticketController.generarComprobantePago);
 
 module.exports = router;

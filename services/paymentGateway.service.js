@@ -3,9 +3,9 @@
  * Maneja la comunicación con múltiples pasarelas de pago
  * 
  * Pasarelas soportadas:
- * - mercadopago: MercadoPago via API Gateway (IMPLEMENTADO)
+ * - siro: SIRO/Red Link via API Gateway (IMPLEMENTADO — activo)
+ * - mercadopago: MercadoPago via API Gateway (IMPLEMENTADO — disponible)
  * - pagotic: PagoTic (PENDIENTE)
- * - siro: SIRO/Red Link (PENDIENTE)
  * - macropay: Macro Click de Pago (PENDIENTE)
  * 
  * @author Equipo de Desarrollo
@@ -21,9 +21,12 @@ const { municipalidad: municipalidadConfig, MUNICIPIO } = require('../config');
 // ============================================
 // CONFIGURACIÓN DESDE VARIABLES DE ENTORNO
 // ============================================
-const PAYMENT_GATEWAY = process.env.PAYMENT_GATEWAY || 'mercadopago';
+if (!process.env.PAYMENT_GATEWAY) {
+  console.warn('⚠️  PAYMENT_GATEWAY no configurado — usando SIRO por defecto. Definir en .env para producción.');
+}
+const PAYMENT_GATEWAY = (process.env.PAYMENT_GATEWAY || 'siro').toLowerCase();
 const API_GATEWAY_URL = process.env.API_GATEWAY_URL || 'http://localhost:3000';
-const MUNICIPIO_ID = process.env.MUNICIPIO_ID || MUNICIPIO;
+const MUNICIPIO_ID = process.env.MUNICIPIO || MUNICIPIO;
 const FRONTEND_PUBLIC_URL = process.env.FRONTEND_PUBLIC_URL || 'http://localhost:4000';
 
 // Log de configuración al iniciar
@@ -230,7 +233,7 @@ const gateways = {
     name: 'SIRO / Red Link',
     createPayment: createSiroPayment,
     status: 'active',
-    requiredEnv: ['API_GATEWAY_URL', 'MUNICIPIO_ID']
+    requiredEnv: ['API_GATEWAY_URL', 'MUNICIPIO']
   },
   macropay: {
     name: 'Macro Click de Pago',

@@ -8,42 +8,24 @@
   <link rel="stylesheet" href="/stylesheets/styles.css">
   <title><%= title %> - Portal de Pagos</title>
   <style>
-    /* ============================================
-       BLOQUE: .result
-       Resultado de operación de pago
-       ============================================ */
     .result {
-      max-width: 600px;
+      max-width: 640px;
       margin: 2rem auto;
       padding: 2rem;
       background: white;
       border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
       text-align: center;
     }
 
-    /* Modificador: Resultado pendiente */
-    .result--pending {
-      border-top: 5px solid #ffc107;
-    }
+    .result--pending { border-top: 5px solid #ffc107; }
 
-    .result__icon {
-      font-size: 4rem;
-      margin-bottom: 1rem;
-    }
+    .result__icon { font-size: 4rem; margin-bottom: 1rem; }
 
-    .result__title {
-      font-size: 1.8rem;
-      color: #856404;
-      margin-bottom: 0.5rem;
-    }
+    .result__title { font-size: 1.8rem; color: #856404; margin-bottom: 0.5rem; }
 
-    .result__subtitle {
-      color: #666;
-      margin-bottom: 2rem;
-    }
+    .result__subtitle { color: #666; margin-bottom: 2rem; }
 
-    /* Elemento: Información del pago */
     .result__info {
       background: #f8f9fa;
       padding: 1.5rem;
@@ -56,24 +38,15 @@
       margin: 0.5rem 0;
       display: flex;
       justify-content: space-between;
+      gap: 1rem;
     }
 
-    .result__info-label {
-      color: #333;
-      font-weight: bold;
-    }
+    .result__info-label { color: #333; font-weight: bold; flex-shrink: 0; }
 
-    .result__info-value {
-      color: #666;
-      font-family: monospace;
-    }
+    .result__info-value { color: #666; font-family: monospace; text-align: right; word-break: break-all; }
 
-    .result__info-value--pending {
-      color: #856404;
-      font-weight: bold;
-    }
+    .result__info-value--pending { color: #856404; font-weight: bold; }
 
-    /* Elemento: Instrucciones */
     .result__instructions {
       background: #fff3cd;
       padding: 1.5rem;
@@ -83,46 +56,58 @@
       border-left: 4px solid #ffc107;
     }
 
-    .result__instructions-title {
-      color: #856404;
-      margin-bottom: 1rem;
-    }
+    .result__instructions-title { color: #856404; margin-bottom: 1rem; font-size: 1rem; font-weight: bold; }
 
-    .result__instructions-text {
-      color: #856404;
-      margin: 0.5rem 0;
-    }
+    .result__instructions-text { color: #856404; margin: 0.5rem 0; font-size: 0.95rem; }
 
-    .result__instructions-list {
-      margin: 1rem 0;
-      padding-left: 1.5rem;
-      color: #856404;
-    }
-
-    .result__instructions-item {
-      margin: 0.5rem 0;
-    }
-
-    /* Elemento: Nota importante */
     .result__note {
       background: #e8f4fd;
-      padding: 1rem;
+      padding: 1rem 1.25rem;
       border-radius: 8px;
       margin: 1rem 0;
       color: #0c5460;
       font-size: 0.9rem;
+      text-align: left;
     }
 
-    .result__note-label {
-      font-weight: bold;
+    .result__note-label { font-weight: bold; }
+
+    .result__note small { display: block; margin-top: 0.4rem; color: #5a8fa5; }
+
+    /* Sección imprimir */
+    .result__print {
+      background: #f0f0f0;
+      padding: 1.25rem 1.5rem;
+      border-radius: 8px;
+      margin: 1.5rem 0;
+      text-align: left;
     }
 
-    .result__note-small {
-      display: block;
-      margin-top: 0.5rem;
+    .result__print-title { color: #333; font-weight: bold; margin-bottom: 0.75rem; }
+
+    /* Sección email */
+    .result__email {
+      background: #e8f5e9;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin: 1.5rem 0;
+      text-align: left;
     }
 
-    /* Elemento: Acciones */
+    .result__email-title { color: #2e7d32; font-weight: bold; margin-bottom: 0.75rem; }
+
+    .result__email-form { display: flex; flex-direction: column; gap: 0.75rem; }
+
+    .result__email-input {
+      padding: 0.75rem;
+      border: 1px solid #c8e6c9;
+      border-radius: 6px;
+      font-size: 1rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    /* Acciones */
     .result__actions {
       display: flex;
       gap: 1rem;
@@ -138,16 +123,74 @@
       padding: 0.8rem 1.5rem;
       border-radius: 6px;
       transition: background 0.3s;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
     }
 
-    .result__btn--back:hover {
-      background: #148a96;
+    .result__btn--back:hover { background: #148a96; }
+
+    .result__btn--print {
+      background: #6c757d;
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.3s;
+      text-decoration: none;
+    }
+
+    .result__btn--print:hover { background: #545b62; }
+
+    .result__btn--email {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.3s;
+    }
+
+    .result__btn--email:hover { background: #218838; }
+
+    /* Polling badge */
+    .result__polling {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      color: #856404;
+      font-size: 0.85rem;
+      margin: 0.5rem 0 1.5rem;
+    }
+
+    .result__polling-dot {
+      width: 8px;
+      height: 8px;
+      background: #ffc107;
+      border-radius: 50%;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.75); }
+    }
+
+    /* Ocultar en impresión el botón y el footer */
+    @media print {
+      .result__actions, .result__email, .result__polling, .whatsapp-float { display: none !important; }
+      body { background: white; }
+      .result { box-shadow: none; border: 1px solid #ddd; }
     }
   </style>
 </head>
 
 <body>
-  <!-- Header -->
   <header class="header">
     <div class="header__logo">
       <img src="<%= municipalidad.logos.web %>" alt="Logo <%= municipalidad.nombre %>" class="header__logo-img">
@@ -160,77 +203,145 @@
     </div>
   </header>
 
-  <!-- Contenido Principal -->
   <main class="main">
     <section class="result result--pending">
       <div class="result__icon">⏳</div>
-      <h1 class="result__title">Pago Pendiente</h1>
-      <p class="result__subtitle">Tu pago está siendo procesado</p>
+      <h1 class="result__title">Pago Pendiente de Confirmación</h1>
+      <p class="result__subtitle">Tu operación fue registrada. Aguardamos la acreditación.</p>
 
+      <div class="result__polling" id="pollingStatus">
+        <span class="result__polling-dot"></span>
+        Verificando estado automáticamente…
+      </div>
+
+      <!-- Datos de la operación -->
       <div class="result__info">
         <p class="result__info-row">
-          <span class="result__info-label">Referencia gateway:</span>
+          <span class="result__info-label">Referencia:</span>
           <span class="result__info-value"><%= external_reference %></span>
         </p>
+        <% if (ticket_number) { %>
         <p class="result__info-row">
-          <span class="result__info-label">Ticket:</span>
-          <span class="result__info-value"><%= ticket_number || 'N/A' %></span>
+          <span class="result__info-label">Nº de ticket:</span>
+          <span class="result__info-value"><%= ticket_number %></span>
         </p>
-        <p class="result__info-row">
-          <span class="result__info-label">ID de operación:</span>
-          <span class="result__info-value"><%= payment_id || 'N/A' %></span>
-        </p>
+        <% } %>
+        <% if (monto_total && Number(monto_total) > 0) { %>
         <p class="result__info-row">
           <span class="result__info-label">Monto total:</span>
-          <span class="result__info-value">$ <%= Number(monto_total || 0).toFixed(2) %></span>
+          <span class="result__info-value">$ <%= Number(monto_total).toFixed(2) %></span>
         </p>
+        <% } %>
         <p class="result__info-row">
           <span class="result__info-label">Estado:</span>
           <span class="result__info-value result__info-value--pending">Pendiente de acreditación</span>
         </p>
       </div>
 
+      <!-- Conceptos -->
       <% if (Array.isArray(conceptos) && conceptos.length > 0) { %>
       <div class="result__info">
-        <p class="result__info-label">Conceptos del ticket</p>
+        <p class="result__info-label" style="margin-bottom:0.75rem;">Conceptos incluidos</p>
         <% conceptos.forEach((concepto) => { %>
         <p class="result__info-row">
-          <span class="result__info-label"><%= concepto.descripcion %></span>
+          <span class="result__info-label" style="font-weight:normal;"><%= concepto.descripcion %></span>
           <span class="result__info-value">$ <%= Number(concepto.importe || 0).toFixed(2) %></span>
         </p>
         <% }) %>
       </div>
       <% } %>
 
+      <!-- Qué significa pendiente -->
       <div class="result__instructions">
-        <h3 class="result__instructions-title">ℹ️ Información importante</h3>
-        <p class="result__instructions-text">Tu pago fue registrado pero está pendiente de confirmación.</p>
-        <% if (mensaje_adicional) { %>
-        <p class="result__instructions-text"><%= mensaje_adicional %></p>
-        <% } %>
-        <p class="result__instructions-text">Esto puede ocurrir cuando:</p>
-        <ul class="result__instructions-list">
-          <li class="result__instructions-item">Elegiste pagar en efectivo (RapiPago, Pago Fácil, etc.)</li>
-          <li class="result__instructions-item">El pago está siendo verificado por el banco</li>
-          <li class="result__instructions-item">Usaste transferencia bancaria</li>
+        <p class="result__instructions-title">ℹ️ ¿Por qué mi pago está pendiente?</p>
+        <p class="result__instructions-text">
+          El pago fue registrado en la pasarela de pagos pero aún no fue confirmado por el banco o el procesador.
+          Esto puede ocurrir cuando:
+        </p>
+        <ul style="margin: 0.75rem 0 0.5rem 1.5rem; color: #856404; font-size: 0.95rem;">
+          <li style="margin:0.4rem 0;">El procesador bancario (SIRO) está verificando la operación</li>
+          <li style="margin:0.4rem 0;">Elegiste pagar por RapiPago, PagoFácil u otra red de cobranza presencial</li>
+          <li style="margin:0.4rem 0;">Realizaste una transferencia bancaria</li>
         </ul>
+        <p class="result__instructions-text">
+          <strong>La deuda permanecerá activa hasta que el pago sea confirmado.</strong>
+          Una vez acreditado, se actualizará automáticamente.
+        </p>
       </div>
 
+      <!-- Nota de referencia -->
       <div class="result__note">
-        <span class="result__note-label">📋 Guardá tu número de operación:</span> <%= external_reference %>
-        <small class="result__note-small">Una vez acreditado el pago, podrás ver el comprobante en este portal.</small>
+        <span class="result__note-label">📋 Guardá esta referencia:</span> <%= external_reference %>
+        <% if (ticket_number) { %> — Ticket: <strong><%= ticket_number %></strong><% } %>
+        <small>
+          Si en las próximas horas no recibís confirmación, presentá este número
+          en la municipalidad o comunicarte con el teléfono
+          <%= municipalidad.telefono %> en horario de atención (días hábiles).
+        </small>
       </div>
 
-      <div class="result__actions">
+<div class="result__actions">
+        <a
+          href="/pagos/comprobante?ref=<%= encodeURIComponent(external_reference) %>"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="result__btn--print"
+        >
+          📄 Descargar comprobante
+        </a>
         <a href="/" class="result__btn--back">🏠 Volver al inicio</a>
       </div>
     </section>
   </main>
 
-  <!-- Footer -->
   <footer class="footer">
     <p class="footer__text">&copy; Power by Alcald+IA. Todos los derechos reservados.</p>
   </footer>
+
+  <%- include('../partials/whatsapp-button') %>
+
+  <script>
+    // Polling: verifica el estado del ticket cada 30 segundos.
+    // Si cambia a APROBADO o RECHAZADO, redirige a la vista correspondiente.
+    (function () {
+      const ref = '<%= external_reference %>';
+      const token = '<%= typeof req !== "undefined" && req.query && req.query.token ? req.query.token : "" %>';
+      const INTERVALO_MS = 30000;
+      let intentos = 0;
+      const MAX_INTENTOS = 20; // 10 minutos
+
+      function verificarEstado() {
+        if (intentos >= MAX_INTENTOS) {
+          document.getElementById('pollingStatus').textContent =
+            'Verificación automática detenida. Refrescá la página si querés seguir chequeando.';
+          return;
+        }
+
+        intentos++;
+
+        fetch('/api/tickets/estado?ref=' + encodeURIComponent(ref))
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            if (data.status === 'APROBADO') {
+              window.location.href = '/pagos/exitoso?ref=' + encodeURIComponent(ref) +
+                (token ? '&token=' + encodeURIComponent(token) : '');
+            } else if (data.status === 'RECHAZADO' || data.status === 'EXPIRADO') {
+              window.location.href = '/pagos/error?ref=' + encodeURIComponent(ref) +
+                (token ? '&token=' + encodeURIComponent(token) : '');
+            }
+            // Si sigue PENDIENTE, no hace nada — el intervalo vuelve a disparar
+          })
+          .catch(function () {
+            // Error de red — no interrumpir el polling
+          });
+      }
+
+      // Primera verificación a los 15s (el webhook suele llegar en ese lapso)
+      setTimeout(verificarEstado, 15000);
+      // Luego cada 30s
+      setInterval(verificarEstado, INTERVALO_MS);
+    })();
+  </script>
 </body>
 
 </html>

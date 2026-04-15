@@ -15,8 +15,11 @@ const gatewayTokenService = require('../services/gatewayToken.service');
 // Configuración centralizada - cambiar municipio en .env (MUNICIPIO=xxx)
 const { municipalidad } = require('../config');
 
-const MUNICIPIO_ID = process.env.MUNICIPIO_ID || process.env.MUNICIPIO || '';
-const GATEWAY_PROVIDER = (process.env.PAYMENT_GATEWAY || 'siro').toUpperCase();
+const MUNICIPIO_ID = process.env.MUNICIPIO || '';
+if (!process.env.PAYMENT_GATEWAY) {
+  console.warn('⚠️  PAYMENT_GATEWAY no configurado — usando SIRO por defecto. Definir en .env para producción.');
+}
+const GATEWAY_PROVIDER = (process.env.PAYMENT_GATEWAY || 'SIRO').toUpperCase();
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
 function normalizarEstado(estado) {
@@ -79,17 +82,19 @@ function construirDetalleTicket(ticket, externalReference, estadoFallback = 'PEN
   const payload = parsePayloadSnapshot(ticket?.payloadSnapshot);
   const conceptos = Array.isArray(payload?.conceptos)
     ? payload.conceptos.map((concepto) => ({
-      descripcion: concepto.detalle || concepto.tipoDescripcion || concepto.descripcion || 'Concepto municipal',
-      importe: Number(concepto.total || concepto.importeNumerico || concepto.importe || 0)
+      // El snapshot guarda los campos de formatearDeuda (Detalle, Total, TipoDescripcion)
+      // con mayúscula inicial — soportamos ambas convenciones
+      descripcion: concepto.Detalle || concepto.TipoDescripcion || concepto.detalle || concepto.tipoDescripcion || concepto.descripcion || 'Concepto municipal',
+      importe: Number(concepto.Total || concepto.total || concepto.importeNumerico || concepto.importe || 0)
     }))
     : [];
 
   return {
-    ticketNumber: ticket?.ticketNumber || 'N/A',
+    ticketNumber: ticket?.ticketNumber || null,
     externalReference: externalReference || ticket?.externalReference || 'N/A',
     estado: normalizarEstado(ticket?.status || estadoFallback),
     montoTotal: Number(ticket?.amountTotal || payload?.montoTotal || 0),
-    idOperacion: ticket?.idOperacion || 'N/A',
+    idOperacion: ticket?.idOperacion || null,
     conceptos
   };
 }
@@ -327,6 +332,10 @@ async function confirmacion(req, res) {
 /**
  * Página de pago exitoso.
  * GET /pagos/exitoso
+ *
+ * Usa el estado del token firmado por el gateway como fuente de verdad
+ * para la vista (el gateway ya confirmó con SIRO antes de redirigir).
+ * El webhook actualiza la BD en background — no bloqueamos la UX esperándolo.
  */
 async function pagoExitoso(req, res) {
   try {
@@ -335,33 +344,37 @@ async function pagoExitoso(req, res) {
     const ticket = await ticketsPagoService.obtenerPorExternalReference(externalReference);
     const detalleTicket = construirDetalleTicket(ticket, externalReference, estado);
 
-    // Si el usuario llega por redirect antes del webhook confirmado,
-    // mostrar estado pendiente para evitar confirmar visualmente un pago aún no impactado en BD.
-    if (!ticket || normalizarEstado(ticket.status) !== 'APROBADO') {
-      return res.render('pago/pendiente', {
-        title: 'Pago Pendiente de Confirmación',
+    // El estado del token es la fuente de verdad: el gateway lo firma después
+    // de confirmar con SIRO. No esperamos a que el webhook actualice la BD.
+    const estadoConfirmado = estado || detalleTicket.estado;
+
+    if (estadoConfirmado === 'APROBADO') {
+      return res.render('pago/exitoso', {
+        title: 'Pago Exitoso',
         municipalidad,
         external_reference: detalleTicket.externalReference,
         ticket_number: detalleTicket.ticketNumber,
         payment_id: detalleTicket.idOperacion,
-        status: 'PENDIENTE',
+        status: 'APROBADO',
         monto_total: detalleTicket.montoTotal,
         conceptos: detalleTicket.conceptos,
-        mensaje_adicional: 'Recibimos tu intento de pago. Estamos esperando confirmación final de la pasarela.'
+        email_actual: ''
       });
     }
 
-    res.render('pago/exitoso', {
-      title: 'Pago Exitoso',
+    // Pago genuinamente pendiente (efectivo, transferencia, SIRO demorado)
+    return res.render('pago/pendiente', {
+      title: 'Pago Pendiente de Confirmación',
       municipalidad,
       external_reference: detalleTicket.externalReference,
       ticket_number: detalleTicket.ticketNumber,
       payment_id: detalleTicket.idOperacion,
-      status: detalleTicket.estado,
+      status: estadoConfirmado,
       monto_total: detalleTicket.montoTotal,
       conceptos: detalleTicket.conceptos,
-      email_actual: ''
+      mensaje_adicional: null
     });
+
   } catch (error) {
     console.warn(`⚠️ Redirect inválido a /pagos/exitoso: ${error.message}`);
     return renderizarErrorGenerico(res);
@@ -425,11 +438,42 @@ function pagoErrorGenerico(_req, res) {
   return renderizarErrorGenerico(res);
 }
 
+/**
+ * Devuelve el estado actual de un ticket por su external_reference.
+ * Usado por el polling de la vista pendiente.
+ * GET /api/tickets/estado?ref={externalReference}
+ */
+async function obtenerEstadoTicket(req, res) {
+  const { ref } = req.query;
+
+  if (!ref) {
+    return res.status(400).json({ error: 'Parámetro ref requerido' });
+  }
+
+  try {
+    const ticket = await ticketsPagoService.obtenerPorExternalReference(ref);
+
+    if (!ticket) {
+      return res.status(404).json({ status: 'PENDIENTE', found: false });
+    }
+
+    return res.json({
+      status: normalizarEstado(ticket.status),
+      found: true,
+      ticket_number: ticket.ticketNumber || null,
+      amount: Number(ticket.amountTotal || 0)
+    });
+  } catch (error) {
+    return res.status(500).json({ status: 'PENDIENTE', error: 'Error consultando estado' });
+  }
+}
+
 module.exports = {
   iniciarPago,
   confirmacion,
   pagoExitoso,
   pagoFallido,
   pagoPendiente,
-  pagoErrorGenerico
+  pagoErrorGenerico,
+  obtenerEstadoTicket
 };

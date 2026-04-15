@@ -314,6 +314,7 @@ function validarDatosTicket(datos) {
 module.exports = {
   prepararDatosTicket,
   validarDatosTicket,
+  procesarConceptos,
   formatearMoneda,
   formatearFecha,
   obtenerFechaEmision,

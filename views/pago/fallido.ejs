@@ -132,6 +132,60 @@
     .result__btn--back:hover {
       background: #148a96;
     }
+
+    .result__btn--print {
+      background: #6c757d;
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.3s;
+      text-decoration: none;
+    }
+
+    .result__btn--print:hover { background: #545b62; }
+
+    .result__email {
+      background: #e8f5e9;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin: 1.5rem 0;
+      text-align: left;
+    }
+
+    .result__email-title { color: #2e7d32; font-weight: bold; margin-bottom: 0.75rem; }
+
+    .result__email-form { display: flex; flex-direction: column; gap: 0.75rem; }
+
+    .result__email-input {
+      padding: 0.75rem;
+      border: 1px solid #c8e6c9;
+      border-radius: 6px;
+      font-size: 1rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .result__btn--email {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.3s;
+    }
+
+    .result__btn--email:hover { background: #218838; }
+
+    @media print {
+      .result__actions, .result__email, .whatsapp-float { display: none !important; }
+      body { background: white; }
+      .result { box-shadow: none; border: 1px solid #ddd; }
+    }
   </style>
 </head>
 
@@ -203,6 +257,14 @@
       </div>
 
       <div class="result__actions">
+        <a
+          href="/pagos/comprobante?ref=<%= encodeURIComponent(external_reference) %>"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="result__btn--print"
+        >
+          📄 Descargar constancia
+        </a>
         <a href="/" class="result__btn--retry">🔄 Reintentar pago</a>
         <a href="/" class="result__btn--back">🏠 Volver al inicio</a>
       </div>
@@ -213,6 +275,8 @@
   <footer class="footer">
     <p class="footer__text">&copy; Power by Alcald+IA. Todos los derechos reservados.</p>
   </footer>
+
+  <%- include('../partials/whatsapp-button') %>
 </body>
 
 </html>

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="<%= municipalidad.logos.favicon %>">
+  <title>Comprobante de Pago - <%= municipalidad.nombreCompleto %></title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 11pt;
+      background: #f5f5f5;
+      color: #333;
+    }
+
+    /* ============================================
+       ACCIONES DE PANTALLA (ocultas al imprimir)
+    ============================================ */
+    .screen-actions {
+      background: #19a8b6;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .screen-actions__title { font-weight: bold; font-size: 1rem; }
+
+    .screen-actions__btn {
+      background: white;
+      color: #19a8b6;
+      border: none;
+      padding: 0.5rem 1.25rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 0.95rem;
+    }
+
+    .screen-actions__btn:hover { background: #e8fafb; }
+
+    .screen-actions__close {
+      color: white;
+      text-decoration: none;
+      font-size: 0.9rem;
+      opacity: 0.85;
+    }
+
+    .screen-actions__close:hover { opacity: 1; }
+
+    /* ============================================
+       COMPROBANTE (página A4)
+    ============================================ */
+    .comprobante {
+      max-width: 800px;
+      margin: 1.5rem auto;
+      background: white;
+      border: 1px solid #ddd;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    }
+
+    /* Header */
+    .comprobante__header {
+      border-bottom: 2px solid #333;
+      padding: 1rem 1.5rem;
+    }
+
+    .comprobante__header-top {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .comprobante__logo img {
+      height: 56px;
+      width: auto;
+    }
+
+    .comprobante__org { flex: 1; }
+
+    .comprobante__org h1 {
+      font-size: 15pt;
+      font-weight: bold;
+      color: #222;
+    }
+
+    .comprobante__org p {
+      font-size: 9pt;
+      color: #555;
+      margin-top: 0.2rem;
+    }
+
+    .comprobante__meta {
+      text-align: right;
+      font-size: 9pt;
+      color: #555;
+      min-width: 160px;
+    }
+
+    .comprobante__meta strong { display: block; font-size: 10pt; color: #333; }
+
+    .comprobante__header-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 9pt;
+      color: #555;
+      padding-top: 0.5rem;
+      border-top: 1px solid #eee;
+      margin-top: 0.5rem;
+      gap: 1rem;
+    }
+
+    .comprobante__contribuyente {
+      font-size: 10pt;
+      padding: 0.75rem 1.5rem;
+      background: #f8f8f8;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      gap: 2rem;
+    }
+
+    .comprobante__contribuyente p { color: #333; }
+
+    /* Título del comprobante */
+    .comprobante__tipo {
+      text-align: center;
+      padding: 0.85rem 1.5rem;
+      font-size: 13pt;
+      font-weight: bold;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .comprobante__tipo--aprobado { background: #e8f5e9; color: #2e7d32; }
+    .comprobante__tipo--pendiente { background: #fff8e1; color: #856404; }
+    .comprobante__tipo--rechazado { background: #fdecea; color: #c62828; }
+
+    /* Tabla de conceptos */
+    .comprobante__body { padding: 1rem 1.5rem; }
+
+    .comprobante__section-title {
+      font-size: 10pt;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 0.5rem;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 0.25rem;
+    }
+
+    .comprobante__table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9pt;
+      margin-bottom: 1rem;
+    }
+
+    .comprobante__table th {
+      background: #333;
+      color: white;
+      padding: 0.4rem 0.5rem;
+      text-align: left;
+      font-weight: bold;
+    }
+
+    .comprobante__table td {
+      padding: 0.35rem 0.5rem;
+      border-bottom: 1px solid #eee;
+    }
+
+    .comprobante__table tr:nth-child(even) td { background: #fafafa; }
+
+    .comprobante__table .col-right { text-align: right; }
+
+    .comprobante__table .row-total td {
+      border-top: 2px solid #333;
+      font-weight: bold;
+      background: #f0f0f0;
+    }
+
+    /* Sección resultado del pago */
+    .comprobante__resultado {
+      margin: 1rem 1.5rem;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #ddd;
+    }
+
+    .comprobante__resultado-header {
+      padding: 0.6rem 1rem;
+      font-weight: bold;
+      font-size: 10pt;
+    }
+
+    .comprobante__resultado-header--aprobado { background: #2e7d32; color: white; }
+    .comprobante__resultado-header--pendiente { background: #856404; color: white; }
+    .comprobante__resultado-header--rechazado { background: #c62828; color: white; }
+
+    .comprobante__resultado-body {
+      padding: 0.75rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      font-size: 9.5pt;
+    }
+
+    .comprobante__resultado-row {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .comprobante__resultado-label { color: #555; width: 160px; flex-shrink: 0; }
+    .comprobante__resultado-value { color: #222; font-weight: bold; word-break: break-all; }
+
+    /* Footer */
+    .comprobante__footer {
+      padding: 0.75rem 1.5rem;
+      border-top: 1px solid #ddd;
+      font-size: 8.5pt;
+      color: #666;
+      background: #fafafa;
+    }
+
+    .comprobante__footer p { margin: 0.2rem 0; }
+
+    /* ============================================
+       IMPRESIÓN
+    ============================================ */
+    @media print {
+      body { background: white; }
+
+      .screen-actions { display: none !important; }
+
+      .comprobante {
+        max-width: 100%;
+        margin: 0;
+        border: none;
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Barra de acciones (solo pantalla) -->
+  <div class="screen-actions">
+    <span class="screen-actions__title">Comprobante de pago — <%= municipalidad.nombreCompleto %></span>
+    <div style="display:flex; gap:1rem; align-items:center;">
+      <button class="screen-actions__btn" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
+      <a class="screen-actions__close" href="javascript:window.close()">✕ Cerrar</a>
+    </div>
+  </div>
+
+  <!-- Comprobante -->
+  <div class="comprobante">
+
+    <!-- Header -->
+    <div class="comprobante__header">
+      <div class="comprobante__header-top">
+        <div class="comprobante__logo">
+          <img src="<%= municipalidad.logos.ticket %>" alt="Logo <%= municipalidad.nombre %>">
+        </div>
+        <div class="comprobante__org">
+          <h1><%= municipalidad.nombreCompleto %></h1>
+          <p><%= municipalidad.ticket.encabezado || 'Sistema de Pago Online' %></p>
+        </div>
+        <div class="comprobante__meta">
+          <strong>Fecha de emisión:</strong>
+          <%= fechaEmision %>
+        </div>
+      </div>
+      <div class="comprobante__header-info">
+        <span><strong>Dirección:</strong> <%= municipalidad.direccion %>, <%= municipalidad.localidad %>, <%= municipalidad.provincia %></span>
+        <span><strong>Tel:</strong> <%= municipalidad.telefono %></span>
+        <span><strong>Web:</strong> <%= municipalidad.web || '' %></span>
+      </div>
+    </div>
+
+    <!-- Contribuyente -->
+    <div class="comprobante__contribuyente">
+      <p><strong>Contribuyente:</strong> <%= contribuyente.nombreCompleto %></p>
+      <p><strong>DNI:</strong> <%= contribuyente.dni %></p>
+    </div>
+
+    <!-- Tipo de comprobante (cambia según estado) -->
+    <div class="comprobante__tipo comprobante__tipo--<%= estadoCss %>">
+      <%
+        const iconoEstado = { aprobado: '✅', pendiente: '⏳', rechazado: '❌' };
+        const labelEstado = { aprobado: 'COMPROBANTE DE PAGO CONFIRMADO', pendiente: 'COMPROBANTE DE PAGO PENDIENTE', rechazado: 'CONSTANCIA DE PAGO RECHAZADO' };
+      %>
+      <%= iconoEstado[estadoCss] %> &nbsp; <%= labelEstado[estadoCss] %>
+    </div>
+
+    <!-- Conceptos -->
+    <div class="comprobante__body">
+      <p class="comprobante__section-title">Conceptos incluidos</p>
+
+      <% if (Array.isArray(conceptos) && conceptos.length > 0) { %>
+      <table class="comprobante__table">
+        <thead>
+          <tr>
+            <th>Detalle</th>
+            <th>Año</th>
+            <th>Cuota</th>
+            <th class="col-right">Importe</th>
+            <th class="col-right">Int/Dto</th>
+            <th class="col-right">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% conceptos.forEach(function(c) { %>
+          <tr>
+            <td><%= c.detalle || c.tipoDescripcion || '-' %></td>
+            <td><%= c.anio || '-' %></td>
+            <td><%= c.cuota || '-' %></td>
+            <td class="col-right">$ <%= c.importe %></td>
+            <td class="col-right">$ <%= c.interes %></td>
+            <td class="col-right"><strong>$ <%= c.total %></strong></td>
+          </tr>
+          <% }) %>
+        </tbody>
+        <tfoot>
+          <tr class="row-total">
+            <td colspan="5" class="col-right">TOTAL:</td>
+            <td class="col-right">$ <%= totalGeneral %></td>
+          </tr>
+        </tfoot>
+      </table>
+      <% } else { %>
+      <p style="color:#888; font-size:9pt; margin-bottom:1rem;">
+        Conceptos no disponibles. Conserve la referencia para consultar en la municipalidad.
+      </p>
+      <% } %>
+    </div>
+
+    <!-- Resultado del pago -->
+    <div class="comprobante__resultado">
+      <div class="comprobante__resultado-header comprobante__resultado-header--<%= estadoCss %>">
+        <%= iconoEstado[estadoCss] %> Resultado de la operación
+      </div>
+      <div class="comprobante__resultado-body">
+        <div class="comprobante__resultado-row">
+          <span class="comprobante__resultado-label">Referencia gateway:</span>
+          <span class="comprobante__resultado-value"><%= externalReference %></span>
+        </div>
+        <% if (ticketNumber) { %>
+        <div class="comprobante__resultado-row">
+          <span class="comprobante__resultado-label">Nº de ticket:</span>
+          <span class="comprobante__resultado-value"><%= ticketNumber %></span>
+        </div>
+        <% } %>
+        <% if (idOperacion) { %>
+        <div class="comprobante__resultado-row">
+          <span class="comprobante__resultado-label">Nº de comprobante:</span>
+          <span class="comprobante__resultado-value"><%= idOperacion %></span>
+        </div>
+        <% } %>
+        <% if (nroOperacion) { %>
+        <div class="comprobante__resultado-row">
+          <span class="comprobante__resultado-label">Nº de operación SIRO:</span>
+          <span class="comprobante__resultado-value"><%= nroOperacion %></span>
+        </div>
+        <% } %>
+        <div class="comprobante__resultado-row">
+          <span class="comprobante__resultado-label">Estado:</span>
+          <span class="comprobante__resultado-value">
+            <% if (estadoCss === 'aprobado') { %>Pago acreditado<% } %>
+            <% if (estadoCss === 'pendiente') { %>Pendiente de acreditación<% } %>
+            <% if (estadoCss === 'rechazado') { %>Rechazado<% } %>
+          </span>
+        </div>
+        <div class="comprobante__resultado-row">
+          <span class="comprobante__resultado-label">Fecha / hora:</span>
+          <span class="comprobante__resultado-value"><%= fechaEmision %></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="comprobante__footer">
+      <% if (estadoCss === 'aprobado') { %>
+      <p><strong>✅ Pago confirmado.</strong> Este comprobante es válido como constancia de pago. Guárdelo para futuros trámites.</p>
+      <% } else if (estadoCss === 'pendiente') { %>
+      <p><strong>⏳ Pago pendiente.</strong> Conserve este comprobante. La deuda permanece activa hasta la acreditación.</p>
+      <p>Si en 24 horas hábiles no recibe confirmación, preséntelo en la municipalidad con su número de referencia.</p>
+      <% } else { %>
+      <p><strong>❌ Pago rechazado.</strong> La operación no fue procesada. Puede reintentar el pago en el portal.</p>
+      <% } %>
+      <p style="margin-top:0.5rem;"><%= municipalidad.ticket.piePagina || '' %></p>
+      <p style="margin-top:0.5rem; color:#aaa;">Generado por Alcald+IA — Sistema de Pagos Municipales</p>
+    </div>
+
+  </div>
+</body>
+
+</html>
