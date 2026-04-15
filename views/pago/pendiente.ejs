@@ -395,7 +395,7 @@
     // Si cambia a APROBADO o RECHAZADO, redirige a la vista correspondiente.
     (function() {
       const ref = '<%= external_reference %>';
-      const token = '<%= typeof req !== "undefined" && req.query && req.query.token ? req.query.token : "" %>';
+      const token = '<%= redirect_token || "" %>';
       const INTERVALO_MS = 30000;
       let intentos = 0;
       const MAX_INTENTOS = 20; // 10 minutos

@@ -179,24 +179,33 @@ async function createSiroPayment(paymentData) {
     { headers: { 'Content-Type': 'application/json' }, timeout: 30000 }
   );
 
-  if (response.data.success) {
-    const { payment_url, external_reference, hash } = response.data.data;
+  const body = response.data || {};
+  const data = body.data || {};
+
+  if (body.success) {
+    const paymentUrl = data.payment_url || data.paymentUrl || body.payment_url || body.paymentUrl;
+    const externalReference = data.external_reference || data.externalReference || body.external_reference || body.externalReference;
+    const hash = data.hash || body.hash || null;
+
+    if (!paymentUrl || !externalReference) {
+      throw new Error('El API Gateway no devolvio payment_url y external_reference');
+    }
 
     console.log('✅ [SIRO] Intención de pago creada:', {
-      external_reference,
+      external_reference: externalReference,
       ticket_number: ticketNumber
     });
 
     return {
       success: true,
       gateway: 'siro',
-      payment_url,
-      external_reference,
+      payment_url: paymentUrl,
+      external_reference: externalReference,
       hash
     };
   }
 
-  throw new Error(response.data.message || 'Error desconocido del API Gateway SIRO');
+  throw new Error(body.message || 'Error desconocido del API Gateway SIRO');
 }
 
 // ============================================

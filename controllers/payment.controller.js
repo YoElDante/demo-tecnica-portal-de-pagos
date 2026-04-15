@@ -78,6 +78,15 @@ function parsePayloadSnapshot(payloadSnapshot) {
   }
 }
 
+function extraerExternalReference(payload = {}) {
+  return payload.external_reference || payload.externalReference || null;
+}
+
+function extraerEstadoWebhook(payload = {}) {
+  const estadoWebhook = payload.estado || payload.status || payload.payment_status;
+  return estadoWebhook || (payload.pago_exitoso ? 'APROBADO' : 'PENDIENTE');
+}
+
 function construirDetalleTicket(ticket, externalReference, estadoFallback = 'PENDIENTE') {
   const payload = parsePayloadSnapshot(ticket?.payloadSnapshot);
   const conceptos = Array.isArray(payload?.conceptos)
@@ -150,17 +159,22 @@ async function iniciarPago(req, res) {
       ticketNumber
     });
 
-    await ticketsPagoService.actualizarConReferencia(ticket.ticketId, resultado.external_reference);
+    const externalReference = resultado.external_reference || resultado.externalReference || null;
+    if (!externalReference) {
+      throw new Error('El gateway no devolvio external_reference para correlacionar el ticket');
+    }
+
+    await ticketsPagoService.actualizarConReferencia(ticket.ticketId, externalReference);
 
     console.log(`🔗 Redirigiendo a ${GATEWAY_PROVIDER}:`, {
-      external_reference: resultado.external_reference,
+      external_reference: externalReference,
       ticketNumber
     });
 
     return res.json({
       success: true,
       redirect_url: resultado.payment_url,
-      external_reference: resultado.external_reference,
+      external_reference: externalReference,
       ticket_number: ticketNumber
     });
 
@@ -183,24 +197,28 @@ async function confirmacion(req, res) {
     const token = gatewayTokenService.obtenerTokenBearer(req.headers.authorization);
     gatewayTokenService.verifyGatewayToken(token);
 
+    const payload = req.body?.data && typeof req.body.data === 'object' ? req.body.data : req.body;
     const {
-      external_reference,
-      estado,
       pago_exitoso,
       importe,
       medio_pago,
       id_operacion,
+      idOperacion,
       fecha_operacion,
+      fechaOperacion,
       nro_comprobante,
+      nroOperacion,
       origen,
-      status,
       payment_id,
+      paymentId,
       transaction_amount,
-      date_approved
-    } = req.body;
+      transactionAmount,
+      date_approved,
+      dateApproved
+    } = payload;
 
-    const estadoNormalizado = normalizarEstado(estado || status || (pago_exitoso ? 'APROBADO' : 'PENDIENTE'));
-    const externalReference = external_reference;
+    const estadoNormalizado = normalizarEstado(extraerEstadoWebhook(payload));
+    const externalReference = extraerExternalReference(payload);
 
     console.log('📥 Confirmación de pago recibida:', {
       external_reference: externalReference,
@@ -225,7 +243,7 @@ async function confirmacion(req, res) {
       });
     }
 
-    const idOperacionNormalizado = id_operacion || payment_id || externalReference;
+    const idOperacionNormalizado = id_operacion || idOperacion || payment_id || paymentId || externalReference;
     const origenNormalizado = origen || 'WEBHOOK_INMEDIATO';
 
     if (ticket.status === 'APROBADO' && estadoNormalizado !== 'APROBADO') {
@@ -254,16 +272,16 @@ async function confirmacion(req, res) {
         externalReference,
         estado: estadoNormalizado,
         idOperacion: idOperacionNormalizado,
-        importe: importe || transaction_amount,
-        fechaOperacion: fecha_operacion || date_approved
+        importe: importe || transaction_amount || transactionAmount,
+        fechaOperacion: fecha_operacion || fechaOperacion || date_approved || dateApproved
       });
 
       await ticketsPagoService.actualizarEstadoDesdeGateway(ticket.ticketId, {
         estado: estadoNormalizado,
         idOperacion: idOperacionNormalizado,
-        nroOperacion: nro_comprobante || null,
+        nroOperacion: nro_comprobante || nroOperacion || null,
         origen: origenNormalizado,
-        fechaOperacion: fecha_operacion || date_approved
+        fechaOperacion: fecha_operacion || fechaOperacion || date_approved || dateApproved
       });
 
       await ticketsPagoService.registrarEventoGateway({
@@ -271,9 +289,9 @@ async function confirmacion(req, res) {
         externalReference,
         estado: estadoNormalizado,
         idOperacion: idOperacionNormalizado,
-        nroOperacion: nro_comprobante || null,
+        nroOperacion: nro_comprobante || nroOperacion || null,
         origen: origenNormalizado,
-        payload: req.body,
+        payload,
         processResult: resultado.already_processed ? 'DUPLICADO' : 'APLICADO'
       });
 
@@ -297,9 +315,9 @@ async function confirmacion(req, res) {
     await ticketsPagoService.actualizarEstadoDesdeGateway(ticket.ticketId, {
       estado: estadoNormalizado,
       idOperacion: idOperacionNormalizado,
-      nroOperacion: nro_comprobante || null,
+      nroOperacion: nro_comprobante || nroOperacion || null,
       origen: origenNormalizado,
-      fechaOperacion: fecha_operacion || null
+      fechaOperacion: fecha_operacion || fechaOperacion || null
     });
 
     await ticketsPagoService.registrarEventoGateway({
@@ -307,9 +325,9 @@ async function confirmacion(req, res) {
       externalReference,
       estado: estadoNormalizado,
       idOperacion: idOperacionNormalizado,
-      nroOperacion: nro_comprobante || null,
+      nroOperacion: nro_comprobante || nroOperacion || null,
       origen: origenNormalizado,
-      payload: req.body,
+      payload,
       processResult: 'APLICADO'
     });
 
@@ -355,6 +373,7 @@ async function pagoExitoso(req, res) {
         external_reference: detalleTicket.externalReference,
         ticket_number: detalleTicket.ticketNumber,
         payment_id: detalleTicket.idOperacion,
+        redirect_token: req.query.token || '',
         status: 'APROBADO',
         monto_total: detalleTicket.montoTotal,
         conceptos: detalleTicket.conceptos,
@@ -369,6 +388,7 @@ async function pagoExitoso(req, res) {
       external_reference: detalleTicket.externalReference,
       ticket_number: detalleTicket.ticketNumber,
       payment_id: detalleTicket.idOperacion,
+      redirect_token: req.query.token || '',
       status: estadoConfirmado,
       monto_total: detalleTicket.montoTotal,
       conceptos: detalleTicket.conceptos,
@@ -397,6 +417,7 @@ async function pagoFallido(req, res) {
       external_reference: detalleTicket.externalReference,
       ticket_number: detalleTicket.ticketNumber,
       payment_id: detalleTicket.idOperacion,
+      redirect_token: req.query.token || '',
       status: detalleTicket.estado,
       monto_total: detalleTicket.montoTotal,
       conceptos: detalleTicket.conceptos
@@ -423,6 +444,7 @@ async function pagoPendiente(req, res) {
       external_reference: detalleTicket.externalReference,
       ticket_number: detalleTicket.ticketNumber,
       payment_id: detalleTicket.idOperacion,
+      redirect_token: req.query.token || '',
       status: detalleTicket.estado,
       monto_total: detalleTicket.montoTotal,
       conceptos: detalleTicket.conceptos,
