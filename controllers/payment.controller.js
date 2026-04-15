@@ -2,7 +2,7 @@
  * Controlador de Pagos
  * Maneja el inicio de pago, redirects firmados y webhook del gateway
  * 
- * @author Generado para integración MP
+ * @author Dante Marcos Delprato
  * @version 1.2
  * @date 2026-01-20
  */
@@ -16,6 +16,8 @@ const gatewayTokenService = require('../services/gatewayToken.service');
 const { municipalidad } = require('../config');
 
 const MUNICIPIO_ID = process.env.MUNICIPIO_ID || process.env.MUNICIPIO || '';
+const GATEWAY_PROVIDER = (process.env.PAYMENT_GATEWAY || 'siro').toUpperCase();
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
 function normalizarEstado(estado) {
   const mapping = {
@@ -97,7 +99,7 @@ function construirDetalleTicket(ticket, externalReference, estadoFallback = 'PEN
  * POST /pagos/iniciar
  * 
  * Recibe los datos del ticket y los envía al API Gateway
- * Luego redirige al usuario a SIRO
+ * Luego redirige al usuario a la pasarela configurada (PAYMENT_GATEWAY)
  */
 async function iniciarPago(req, res) {
   try {
@@ -112,14 +114,15 @@ async function iniciarPago(req, res) {
     if (!conceptos || conceptos.length === 0) {
       return res.status(400).json({ success: false, message: 'No se recibieron conceptos para pagar' });
     }
-    if (!contribuyente || !contribuyente.dni) {
+    if (!contribuyente || !contribuyente.codigo) {
       return res.status(400).json({ success: false, message: 'Los datos del contribuyente son requeridos' });
     }
     if (!montoTotal || Number(montoTotal) <= 0) {
       return res.status(400).json({ success: false, message: 'El monto total debe ser mayor a cero' });
     }
 
-    const cliente = await clientesService.buscarPorDni(contribuyente.dni);
+    // Lookup por Codigo (único, autoincremental) — evita falsos positivos por DNIs duplicados
+    const cliente = await clientesService.obtenerPorCodigo(contribuyente.codigo);
     if (!cliente) {
       return res.status(404).json({ success: false, message: 'Contribuyente no encontrado' });
     }
@@ -128,7 +131,7 @@ async function iniciarPago(req, res) {
     const { ticket, ticketNumber } = await ticketsPagoService.crearTicketConNumeroUnico({
       municipioId: MUNICIPIO_ID.toUpperCase(),
       dni: contribuyente.dni,
-      gatewayProvider: 'SIRO',
+      gatewayProvider: GATEWAY_PROVIDER,
       amountTotal: Number(montoTotal),
       payloadSnapshot: { conceptos, contribuyente: { dni: contribuyente.dni }, montoTotal }
     });
@@ -144,7 +147,7 @@ async function iniciarPago(req, res) {
 
     await ticketsPagoService.actualizarConReferencia(ticket.ticketId, resultado.external_reference);
 
-    console.log('🔗 Redirigiendo a SIRO:', {
+    console.log(`🔗 Redirigiendo a ${GATEWAY_PROVIDER}:`, {
       external_reference: resultado.external_reference,
       ticketNumber
     });
@@ -160,7 +163,7 @@ async function iniciarPago(req, res) {
     console.error('❌ Error al iniciar pago:', error.message);
     return res.status(500).json({
       success: false,
-      message: error.message || 'Error al procesar el pago'
+      message: IS_PRODUCTION ? 'Error al procesar el pago' : error.message
     });
   }
 }
@@ -316,7 +319,7 @@ async function confirmacion(req, res) {
     const statusCode = /token/i.test(error.message) ? 401 : 500;
     return res.status(statusCode).json({
       received: false,
-      message: error.message
+      message: IS_PRODUCTION ? 'Error al procesar la confirmación' : error.message
     });
   }
 }

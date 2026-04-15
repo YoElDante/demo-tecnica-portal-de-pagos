@@ -227,7 +227,10 @@
 
   <script>
     // Datos del contribuyente desde el servidor
+    // codigo: identificador único (autoincremental, nunca se repite)
+    // dni: solo para referencia/display, puede tener duplicados en BDs antiguas
     const contribuyenteData = {
+      codigo: '<%= cliente ? cliente.Codigo : "" %>',
       dni: '<%= cliente ? (cliente.DOCUMENTO || "").trim() : "" %>',
       nombre: '<%= cliente ? (cliente.Nombre + " " + cliente.Apellido).trim() : "" %>',
       email: '<%= cliente ? (cliente.Email || "") : "" %>'
@@ -291,8 +294,7 @@
       }
 
       const totalElement = document.getElementById('total-final');
-      const totalText = totalElement?.textContent.replace(/[^\d,.-]/g, '').replace(',', '.') || '0';
-      const montoTotal = parseFloat(totalText);
+      const montoTotal = extraerNumero(totalElement?.textContent || '0');
 
       if (montoTotal <= 0) {
         alert('El monto total debe ser mayor a cero.');
