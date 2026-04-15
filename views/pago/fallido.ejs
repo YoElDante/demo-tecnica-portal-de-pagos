@@ -145,7 +145,9 @@
       text-decoration: none;
     }
 
-    .result__btn--print:hover { background: #545b62; }
+    .result__btn--print:hover {
+      background: #545b62;
+    }
 
     .result__email {
       background: #e8f5e9;
@@ -155,9 +157,17 @@
       text-align: left;
     }
 
-    .result__email-title { color: #2e7d32; font-weight: bold; margin-bottom: 0.75rem; }
+    .result__email-title {
+      color: #2e7d32;
+      font-weight: bold;
+      margin-bottom: 0.75rem;
+    }
 
-    .result__email-form { display: flex; flex-direction: column; gap: 0.75rem; }
+    .result__email-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
 
     .result__email-input {
       padding: 0.75rem;
@@ -179,12 +189,26 @@
       transition: background 0.3s;
     }
 
-    .result__btn--email:hover { background: #218838; }
+    .result__btn--email:hover {
+      background: #218838;
+    }
 
     @media print {
-      .result__actions, .result__email, .whatsapp-float { display: none !important; }
-      body { background: white; }
-      .result { box-shadow: none; border: 1px solid #ddd; }
+
+      .result__actions,
+      .result__email,
+      .whatsapp-float {
+        display: none !important;
+      }
+
+      body {
+        background: white;
+      }
+
+      .result {
+        box-shadow: none;
+        border: 1px solid #ddd;
+      }
     }
   </style>
 </head>
@@ -204,7 +228,23 @@
   </header>
 
   <!-- Contenido Principal -->
-  <main class="main">
+  <main class="main main--result">
+    <div class="page-bars page-bars--left">
+      <div class="page-bar"></div>
+      <div class="page-bar"></div>
+      <div class="page-bar"></div>
+      <div class="page-bar"></div>
+    </div>
+    <div class="page-bars page-bars--right">
+      <div class="page-bar"></div>
+      <div class="page-bar"></div>
+      <div class="page-bar"></div>
+      <div class="page-bar"></div>
+    </div>
+    <div class="page-dots page-dots--tl"></div>
+    <div class="page-dots page-dots--br"></div>
+    <div class="page-circle page-circle--1"></div>
+    <div class="page-circle page-circle--2"></div>
     <section class="result result--failed">
       <div class="result__icon">❌</div>
       <h1 class="result__title">Pago Rechazado</h1>
@@ -257,12 +297,7 @@
       </div>
 
       <div class="result__actions">
-        <a
-          href="/pagos/comprobante?ref=<%= encodeURIComponent(external_reference) %>"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="result__btn--print"
-        >
+        <a href="/pagos/comprobante?ref=<%= encodeURIComponent(external_reference) %>" target="_blank" rel="noopener noreferrer" class="result__btn--print">
           📄 Descargar constancia
         </a>
         <a href="/" class="result__btn--retry">🔄 Reintentar pago</a>

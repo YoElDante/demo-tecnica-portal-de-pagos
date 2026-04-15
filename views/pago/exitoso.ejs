@@ -161,12 +161,26 @@
       text-decoration: none;
     }
 
-    .result__btn--print:hover { background: #545b62; }
+    .result__btn--print:hover {
+      background: #545b62;
+    }
 
     @media print {
-      .result__email, .result__actions, .whatsapp-float { display: none !important; }
-      body { background: white; }
-      .result { box-shadow: none; border: 1px solid #ddd; }
+
+      .result__email,
+      .result__actions,
+      .whatsapp-float {
+        display: none !important;
+      }
+
+      body {
+        background: white;
+      }
+
+      .result {
+        box-shadow: none;
+        border: 1px solid #ddd;
+      }
     }
   </style>
 </head>
@@ -186,7 +200,23 @@
   </header>
 
   <!-- Contenido Principal -->
-  <main class="main">
+  <main class="main main--result">
+    <div class="page-bars page-bars--left">
+      <div class="page-bar"></div>
+      <div class="page-bar"></div>
+      <div class="page-bar"></div>
+      <div class="page-bar"></div>
+    </div>
+    <div class="page-bars page-bars--right">
+      <div class="page-bar"></div>
+      <div class="page-bar"></div>
+      <div class="page-bar"></div>
+      <div class="page-bar"></div>
+    </div>
+    <div class="page-dots page-dots--tl"></div>
+    <div class="page-dots page-dots--br"></div>
+    <div class="page-circle page-circle--1"></div>
+    <div class="page-circle page-circle--2"></div>
     <section class="result result--success">
       <div class="result__icon">✅</div>
       <h1 class="result__title">¡Pago Exitoso!</h1>
@@ -228,12 +258,7 @@
       <% } %>
 
       <div class="result__actions">
-        <a
-          href="/pagos/comprobante?ref=<%= encodeURIComponent(external_reference) %>"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="result__btn--print"
-        >
+        <a href="/pagos/comprobante?ref=<%= encodeURIComponent(external_reference) %>" target="_blank" rel="noopener noreferrer" class="result__btn--print">
           📄 Descargar comprobante
         </a>
         <a href="/" class="result__btn--back">🏠 Volver al inicio</a>

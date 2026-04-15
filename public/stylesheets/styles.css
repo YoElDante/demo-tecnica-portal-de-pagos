@@ -1387,3 +1387,142 @@ footer {
         display: none;
     }
 }
+
+/* ============================================
+   PÁGINAS DE RESULTADO DE PAGO
+   .main--result: fondo con identidad visual
+   usada en exitoso, fallido, pendiente, error-generico
+   ============================================ */
+.main--result {
+    background: linear-gradient(135deg, var(--azul-oscuro) 0%, #005a6e 50%, var(--turquesa) 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Barras decorativas laterales */
+.page-bars {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.page-bars--left {
+    left: 0;
+    padding-left: 15px;
+    align-items: flex-start;
+}
+
+.page-bars--right {
+    right: 0;
+    padding-right: 15px;
+    align-items: flex-end;
+}
+
+.page-bar {
+    height: 5px;
+    border-radius: 3px;
+}
+
+.page-bars--left .page-bar {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.7), rgba(0, 168, 181, 0.4));
+    transform: skewY(-15deg);
+}
+
+.page-bars--right .page-bar {
+    background: linear-gradient(90deg, rgba(0, 168, 181, 0.4), rgba(255, 255, 255, 0.7));
+    transform: skewY(15deg);
+}
+
+.page-bar:nth-child(1) {
+    width: 70px;
+    opacity: 0.9;
+}
+
+.page-bar:nth-child(2) {
+    width: 90px;
+    opacity: 0.7;
+}
+
+.page-bar:nth-child(3) {
+    width: 55px;
+    opacity: 0.5;
+}
+
+.page-bar:nth-child(4) {
+    width: 80px;
+    opacity: 0.6;
+}
+
+/* Puntos decorativos */
+.page-dots {
+    position: absolute;
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.25) 2px, transparent 2px);
+    background-size: 15px 15px;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.page-dots--tl {
+    width: 100px;
+    height: 100px;
+    top: 12%;
+    left: 7%;
+}
+
+.page-dots--br {
+    width: 120px;
+    height: 120px;
+    bottom: 15%;
+    right: 7%;
+}
+
+/* Círculos decorativos */
+.page-circle {
+    position: absolute;
+    border-radius: 50%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.page-circle--1 {
+    width: 300px;
+    height: 300px;
+    top: -80px;
+    right: -80px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.page-circle--2 {
+    width: 200px;
+    height: 200px;
+    bottom: 5%;
+    left: -60px;
+    border: 2px solid rgba(0, 168, 181, 0.15);
+}
+
+/* El .result flota sobre las decoraciones */
+.main--result .result {
+    position: relative;
+    z-index: 1;
+}
+
+@media (max-width: 768px) {
+    .page-bars {
+        display: none;
+    }
+
+    .page-circle {
+        display: none;
+    }
+
+    .page-dots {
+        opacity: 0.12;
+    }
+}

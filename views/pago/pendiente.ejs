@@ -14,17 +14,29 @@
       padding: 2rem;
       background: white;
       border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
       text-align: center;
     }
 
-    .result--pending { border-top: 5px solid #ffc107; }
+    .result--pending {
+      border-top: 5px solid #ffc107;
+    }
 
-    .result__icon { font-size: 4rem; margin-bottom: 1rem; }
+    .result__icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
 
-    .result__title { font-size: 1.8rem; color: #856404; margin-bottom: 0.5rem; }
+    .result__title {
+      font-size: 1.8rem;
+      color: #856404;
+      margin-bottom: 0.5rem;
+    }
 
-    .result__subtitle { color: #666; margin-bottom: 2rem; }
+    .result__subtitle {
+      color: #666;
+      margin-bottom: 2rem;
+    }
 
     .result__info {
       background: #f8f9fa;
@@ -41,11 +53,23 @@
       gap: 1rem;
     }
 
-    .result__info-label { color: #333; font-weight: bold; flex-shrink: 0; }
+    .result__info-label {
+      color: #333;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
 
-    .result__info-value { color: #666; font-family: monospace; text-align: right; word-break: break-all; }
+    .result__info-value {
+      color: #666;
+      font-family: monospace;
+      text-align: right;
+      word-break: break-all;
+    }
 
-    .result__info-value--pending { color: #856404; font-weight: bold; }
+    .result__info-value--pending {
+      color: #856404;
+      font-weight: bold;
+    }
 
     .result__instructions {
       background: #fff3cd;
@@ -56,9 +80,18 @@
       border-left: 4px solid #ffc107;
     }
 
-    .result__instructions-title { color: #856404; margin-bottom: 1rem; font-size: 1rem; font-weight: bold; }
+    .result__instructions-title {
+      color: #856404;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+      font-weight: bold;
+    }
 
-    .result__instructions-text { color: #856404; margin: 0.5rem 0; font-size: 0.95rem; }
+    .result__instructions-text {
+      color: #856404;
+      margin: 0.5rem 0;
+      font-size: 0.95rem;
+    }
 
     .result__note {
       background: #e8f4fd;
@@ -70,9 +103,15 @@
       text-align: left;
     }
 
-    .result__note-label { font-weight: bold; }
+    .result__note-label {
+      font-weight: bold;
+    }
 
-    .result__note small { display: block; margin-top: 0.4rem; color: #5a8fa5; }
+    .result__note small {
+      display: block;
+      margin-top: 0.4rem;
+      color: #5a8fa5;
+    }
 
     /* Sección imprimir */
     .result__print {
@@ -83,7 +122,11 @@
       text-align: left;
     }
 
-    .result__print-title { color: #333; font-weight: bold; margin-bottom: 0.75rem; }
+    .result__print-title {
+      color: #333;
+      font-weight: bold;
+      margin-bottom: 0.75rem;
+    }
 
     /* Sección email */
     .result__email {
@@ -94,9 +137,17 @@
       text-align: left;
     }
 
-    .result__email-title { color: #2e7d32; font-weight: bold; margin-bottom: 0.75rem; }
+    .result__email-title {
+      color: #2e7d32;
+      font-weight: bold;
+      margin-bottom: 0.75rem;
+    }
 
-    .result__email-form { display: flex; flex-direction: column; gap: 0.75rem; }
+    .result__email-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
 
     .result__email-input {
       padding: 0.75rem;
@@ -128,7 +179,9 @@
       font-size: 1rem;
     }
 
-    .result__btn--back:hover { background: #148a96; }
+    .result__btn--back:hover {
+      background: #148a96;
+    }
 
     .result__btn--print {
       background: #6c757d;
@@ -142,7 +195,9 @@
       text-decoration: none;
     }
 
-    .result__btn--print:hover { background: #545b62; }
+    .result__btn--print:hover {
+      background: #545b62;
+    }
 
     .result__btn--email {
       background: #28a745;
@@ -155,7 +210,9 @@
       transition: background 0.3s;
     }
 
-    .result__btn--email:hover { background: #218838; }
+    .result__btn--email:hover {
+      background: #218838;
+    }
 
     /* Polling badge */
     .result__polling {
@@ -177,15 +234,37 @@
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.75); }
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.4;
+        transform: scale(0.75);
+      }
     }
 
     /* Ocultar en impresión el botón y el footer */
     @media print {
-      .result__actions, .result__email, .result__polling, .whatsapp-float { display: none !important; }
-      body { background: white; }
-      .result { box-shadow: none; border: 1px solid #ddd; }
+
+      .result__actions,
+      .result__email,
+      .result__polling,
+      .whatsapp-float {
+        display: none !important;
+      }
+
+      body {
+        background: white;
+      }
+
+      .result {
+        box-shadow: none;
+        border: 1px solid #ddd;
+      }
     }
   </style>
 </head>
@@ -203,7 +282,23 @@
     </div>
   </header>
 
-  <main class="main">
+  <main class="main main--result">
+    <div class="page-bars page-bars--left">
+      <div class="page-bar"></div>
+      <div class="page-bar"></div>
+      <div class="page-bar"></div>
+      <div class="page-bar"></div>
+    </div>
+    <div class="page-bars page-bars--right">
+      <div class="page-bar"></div>
+      <div class="page-bar"></div>
+      <div class="page-bar"></div>
+      <div class="page-bar"></div>
+    </div>
+    <div class="page-dots page-dots--tl"></div>
+    <div class="page-dots page-dots--br"></div>
+    <div class="page-circle page-circle--1"></div>
+    <div class="page-circle page-circle--2"></div>
     <section class="result result--pending">
       <div class="result__icon">⏳</div>
       <h1 class="result__title">Pago Pendiente de Confirmación</h1>
@@ -280,13 +375,8 @@
         </small>
       </div>
 
-<div class="result__actions">
-        <a
-          href="/pagos/comprobante?ref=<%= encodeURIComponent(external_reference) %>"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="result__btn--print"
-        >
+      <div class="result__actions">
+        <a href="/pagos/comprobante?ref=<%= encodeURIComponent(external_reference) %>" target="_blank" rel="noopener noreferrer" class="result__btn--print">
           📄 Descargar comprobante
         </a>
         <a href="/" class="result__btn--back">🏠 Volver al inicio</a>
@@ -303,7 +393,7 @@
   <script>
     // Polling: verifica el estado del ticket cada 30 segundos.
     // Si cambia a APROBADO o RECHAZADO, redirige a la vista correspondiente.
-    (function () {
+    (function() {
       const ref = '<%= external_reference %>';
       const token = '<%= typeof req !== "undefined" && req.query && req.query.token ? req.query.token : "" %>';
       const INTERVALO_MS = 30000;
@@ -320,8 +410,10 @@
         intentos++;
 
         fetch('/api/tickets/estado?ref=' + encodeURIComponent(ref))
-          .then(function (res) { return res.json(); })
-          .then(function (data) {
+          .then(function(res) {
+            return res.json();
+          })
+          .then(function(data) {
             if (data.status === 'APROBADO') {
               window.location.href = '/pagos/exitoso?ref=' + encodeURIComponent(ref) +
                 (token ? '&token=' + encodeURIComponent(token) : '');
@@ -331,7 +423,7 @@
             }
             // Si sigue PENDIENTE, no hace nada — el intervalo vuelve a disparar
           })
-          .catch(function () {
+          .catch(function() {
             // Error de red — no interrumpir el polling
           });
       }
