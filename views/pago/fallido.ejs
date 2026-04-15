@@ -158,14 +158,38 @@
 
       <div class="result__info">
         <p class="result__info-row">
-          <span class="result__info-label">Número de operación:</span>
+          <span class="result__info-label">Referencia gateway:</span>
           <span class="result__info-value"><%= external_reference %></span>
+        </p>
+        <p class="result__info-row">
+          <span class="result__info-label">Ticket:</span>
+          <span class="result__info-value"><%= ticket_number || 'N/A' %></span>
+        </p>
+        <p class="result__info-row">
+          <span class="result__info-label">ID de operación:</span>
+          <span class="result__info-value"><%= payment_id || 'N/A' %></span>
+        </p>
+        <p class="result__info-row">
+          <span class="result__info-label">Monto total:</span>
+          <span class="result__info-value">$ <%= Number(monto_total || 0).toFixed(2) %></span>
         </p>
         <p class="result__info-row">
           <span class="result__info-label">Estado:</span>
           <span class="result__info-value result__info-value--failed">Rechazado</span>
         </p>
       </div>
+
+      <% if (Array.isArray(conceptos) && conceptos.length > 0) { %>
+      <div class="result__info">
+        <p class="result__info-label">Conceptos del ticket</p>
+        <% conceptos.forEach((concepto) => { %>
+        <p class="result__info-row">
+          <span class="result__info-label"><%= concepto.descripcion %></span>
+          <span class="result__info-value">$ <%= Number(concepto.importe || 0).toFixed(2) %></span>
+        </p>
+        <% }) %>
+      </div>
+      <% } %>
 
       <div class="result__reasons">
         <h3 class="result__reasons-title">⚠️ Posibles motivos del rechazo:</h3>

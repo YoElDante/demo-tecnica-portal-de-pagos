@@ -9,6 +9,7 @@
 
 const express = require('express');
 const router = express.Router();
+const { strictLimiter } = require('../../middlewares/rateLimiter');
 
 // Importar rutas específicas
 const clientesRoutes = require('./clientes.routes');
@@ -63,18 +64,18 @@ router.get('/', (req, res) => {
       pagos: {
         confirmacion: {
           method: 'POST',
-          path: '/api/pagos/confirmacion',
-          descripcion: 'Recibe confirmación de pago desde API Gateway (webhook interno)',
+          path: '/api/webhook/pago',
+          descripcion: 'Recibe confirmación de pago desde API Gateway (webhook firmado)',
           nota: 'Solo debe ser llamado por el API Gateway, no por el frontend'
         }
       }
     },
     rutas_web: {
       nota: 'Estas rutas no son API, son vistas del portal',
-      iniciarPago: 'POST /pago/iniciar',
-      pagoExitoso: 'GET /pago/exitoso',
-      pagoFallido: 'GET /pago/fallido',
-      pagoPendiente: 'GET /pago/pendiente'
+      iniciarPago: 'POST /pagos/iniciar',
+      pagoExitoso: 'GET /pagos/exitoso',
+      pagoFallido: 'GET /pagos/error',
+      pagoPendiente: 'GET /pagos/pendiente'
     },
     documentation: 'Ver /docs/INTEGRACION_PAGOS.md'
   });
@@ -83,7 +84,10 @@ router.get('/', (req, res) => {
 // Montar rutas
 router.use('/clientes', clientesRoutes);
 
-// Ruta para recibir confirmaciones de pago del API Gateway
-router.post('/pagos/confirmacion', paymentController.confirmacion);
+// Ruta canónica para recibir confirmaciones de pago del API Gateway
+router.post('/webhook/pago', strictLimiter, paymentController.confirmacion);
+
+// Alias legacy mientras se migra cualquier integración anterior
+router.post('/pagos/confirmacion', strictLimiter, paymentController.confirmacion);
 
 module.exports = router;

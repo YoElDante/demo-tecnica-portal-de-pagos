@@ -227,6 +227,7 @@ exports.formatearDeuda = (deuda) => {
     Fecha: deuda.Fecha || '',
     FechaVto: deuda.FechaVto || '',
     Detalle: `${deuda.Detalle || ''} ${deuda.Dominio || ''}`.trim(),
+    IdBien: deuda.ID_BIEN || '-',
     Cuota: deuda.NRO_CUOTA || '',
     Anio: deuda.ANO_CUOTA || '',
     Tipo: deuda.TIPO_BIEN || '',

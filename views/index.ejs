@@ -102,7 +102,7 @@
               <th style="text-align: center;">
                 <input type="checkbox" id="checkbox-todos" class="deudas__checkbox" checked>
               </th>
-              <th colspan="7" style="text-align: left; padding-left: 1rem;">
+              <th colspan="8" style="text-align: left; padding-left: 1rem;">
                 <label for="checkbox-todos">
                   Seleccionar/Deseleccionar Todo
                 </label>
@@ -112,6 +112,7 @@
               <th style="width: 50px;">Elija</th>
               <th>Fecha Vto</th>
               <th>Detalle</th>
+              <th>ID_BIEN</th>
               <th>Cuota</th>
               <th>Año</th>
               <th>Importe H.</th>
@@ -123,7 +124,7 @@
           <tbody>
             <% if ((deudas || []).length === 0) { %>
             <tr>
-              <td colspan="8" class="deudas__empty">No tiene deudas pendientes.</td>
+              <td colspan="9" class="deudas__empty">No tiene deudas pendientes.</td>
             </tr>
             <% } %>
             <% (deudas || []).forEach((deuda, index) => { %>
@@ -131,8 +132,18 @@
               <td style="text-align: center;">
                 <input type="checkbox" class="deudas__checkbox" data-total="<%= deuda.Total %>" data-idtrans="<%= deuda.IdTrans %>" checked>
               </td>
-              <td><%= deuda.FechaVto ? new Date(deuda.FechaVto).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '-' %></td>
-              <td><span class="deudas__type-icon"><%= deuda.TipoIcono %></span><%= deuda.TipoDescripcion %><% if (deuda.Detalle) { %> - <%= deuda.Detalle %><% } %></td>
+              <td>
+                <%= deuda.FechaVto
+                  ? new Intl.DateTimeFormat('es-AR', {
+                    timeZone: process.env.APP_TIMEZONE || 'America/Argentina/Cordoba',
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                  }).format(new Date(deuda.FechaVto))
+                  : '-' %>
+              </td>
+              <td><%= deuda.Detalle || '-' %></td>
+              <td><%= deuda.IdBien || '-' %></td>
               <td><%= deuda.Cuota || '-' %></td>
               <td><%= deuda.Anio || '-' %></td>
               <td>$ <%= deuda.Importe.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
@@ -146,7 +157,7 @@
 
           <tfoot>
             <tr class="deudas__row--total">
-              <td colspan="7" style="text-align: right;"><strong>Total a Pagar:</strong></td>
+              <td colspan="8" style="text-align: right;"><strong>Total a Pagar:</strong></td>
               <td><strong id="total-final" class="deudas__total">$ <%= totalGeneral ? totalGeneral.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00' %></strong></td>
             </tr>
           </tfoot>

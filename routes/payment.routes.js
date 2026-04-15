@@ -1,6 +1,6 @@
 /**
  * Rutas de Pago
- * Maneja todas las rutas relacionadas con el proceso de pago
+ * Maneja redirects del gateway y el inicio del flujo de pago
  * 
  * @author Generado para integración MP
  * @version 1.0
@@ -16,27 +16,34 @@ const paymentController = require('../controllers/payment.controller');
 // ============================================
 
 /**
- * POST /pago/iniciar
+ * POST /pagos/iniciar
  * Inicia el proceso de pago, llama al API Gateway y devuelve URL de redirección
  */
 router.post('/iniciar', paymentController.iniciarPago);
 
 /**
- * GET /pago/exitoso
- * Página de pago exitoso (redirigido desde MercadoPago)
+ * GET /pagos/exitoso
+ * Página de pago exitoso (redirigido desde el gateway)
  */
 router.get('/exitoso', paymentController.pagoExitoso);
 
 /**
- * GET /pago/fallido
- * Página de pago fallido (redirigido desde MercadoPago)
+ * GET /pagos/error
+ * Página de pago rechazado o inválido (redirigido desde el gateway)
  */
+router.get('/error', paymentController.pagoFallido);
 router.get('/fallido', paymentController.pagoFallido);
 
 /**
- * GET /pago/pendiente
- * Página de pago pendiente (redirigido desde MercadoPago)
+ * GET /pagos/pendiente
+ * Página de pago pendiente (redirigido desde el gateway)
  */
 router.get('/pendiente', paymentController.pagoPendiente);
+
+/**
+ * GET /pagos/error-generico
+ * Vista sin token válido o redirect inconsistente
+ */
+router.get('/error-generico', paymentController.pagoErrorGenerico);
 
 module.exports = router;

@@ -11,14 +11,22 @@ const { ClientesCtaCte, sequelize } = require('../models/model.index');
 const { Op } = require('sequelize');
 
 /**
- * Verifica si un pago ya fue procesado (idempotencia)
- * @param {string} paymentId - ID del pago de MercadoPago
+ * Verifica si una operación ya fue procesada contablemente (idempotencia)
+ * @param {string|string[]} operationRefs - Identificador/es operativos de pago
  * @returns {Promise<boolean>} true si ya existe, false si no
  */
-const verificarPagoExistente = async (paymentId) => {
+const verificarPagoExistente = async (operationRefs) => {
+  const referencias = (Array.isArray(operationRefs) ? operationRefs : [operationRefs])
+    .filter(Boolean)
+    .map((value) => String(value));
+
+  if (referencias.length === 0) {
+    return false;
+  }
+
   const existe = await ClientesCtaCte.findOne({
     where: {
-      NRO_OPERACION: paymentId.toString(),
+      NRO_OPERACION: { [Op.in]: referencias },
       CodMovim: 'D' // Buscar en registros de cobro
     },
     raw: true
@@ -51,20 +59,25 @@ const generarDetallePago = (deuda) => {
 };
 
 /**
- * Genera el número de pago basado en payment_id de MercadoPago
- * @param {string|number} paymentId - ID del pago de MercadoPago
+ * Genera el número de pago a partir de un identificador operativo.
+ * Si no encuentra dígitos en la referencia, usa un fallback temporal.
+ * @param {string|number} paymentId - Identificador del pago
  * @returns {number} Número de pago (últimos 9 dígitos)
  */
 const generarNumeroPago = (paymentId) => {
-  const paymentStr = paymentId.toString();
-  // Usar los últimos 9 dígitos para evitar overflow de INT
-  return parseInt(paymentStr.slice(-9)) || parseInt(paymentStr);
+  const digitsOnly = String(paymentId || '').replace(/\D/g, '');
+
+  if (digitsOnly.length > 0) {
+    return parseInt(digitsOnly.slice(-9), 10);
+  }
+
+  return parseInt(String(Date.now()).slice(-9), 10);
 };
 
 /**
  * Actualiza una deuda como pagada
  * @param {number} idTrans - ID de la transacción a actualizar
- * @param {Object} datosPago - Datos del pago de MercadoPago
+ * @param {Object} datosPago - Datos del pago ya normalizados
  * @param {number} numeroPago - Número secuencial de pago
  * @param {Object} transaction - Transacción de Sequelize
  */
@@ -88,7 +101,7 @@ const actualizarDeudaComoPagada = async (idTrans, datosPago, numeroPago, transac
 /**
  * Crea el registro de cobro (contrapartida contable)
  * @param {Object} deudaOriginal - Registro de deuda original
- * @param {Object} datosPago - Datos del pago de MercadoPago
+ * @param {Object} datosPago - Datos del pago ya normalizados
  * @param {number} numeroPago - Número secuencial de pago
  * @param {number} montoCobrado - Monto efectivamente cobrado (con intereses)
  * @param {Object} transaction - Transacción de Sequelize
@@ -131,7 +144,6 @@ const crearRegistroCobro = async (deudaOriginal, datosPago, numeroPago, montoCob
  * @returns {Promise<Object>} Resultado de la operación
  */
 const confirmarPago = async (datosPago) => {
-  // Validar datos requeridos
   if (!datosPago.payment_id) {
     throw new Error('payment_id es requerido');
   }
@@ -143,7 +155,6 @@ const confirmarPago = async (datosPago) => {
   const { payment_id, status, metadata, transaction_amount } = datosPago;
   const conceptosIds = metadata.conceptos_ids;
 
-  // Solo procesar pagos aprobados
   if (status !== 'approved') {
     console.log(`[Pagos] Pago ${payment_id} con estado ${status}, no se procesa`);
     return {
@@ -153,7 +164,6 @@ const confirmarPago = async (datosPago) => {
     };
   }
 
-  // Verificar idempotencia
   const yaExiste = await verificarPagoExistente(payment_id);
   if (yaExiste) {
     console.log(`[Pagos] Pago ${payment_id} ya fue procesado anteriormente`);
@@ -165,24 +175,17 @@ const confirmarPago = async (datosPago) => {
     };
   }
 
-  // Generar número de pago único
   const numeroPago = generarNumeroPago(payment_id);
-
-  // Procesar en transacción
   const transaction = await sequelize.transaction();
 
   try {
     const resultados = [];
     const cantidadConceptos = conceptosIds.length;
-    
-    // Calcular monto por concepto (dividir equitativamente si hay varios)
-    // Nota: En producción, cada concepto debería tener su monto específico
     const montoPorConcepto = transaction_amount / cantidadConceptos;
 
     for (const idTrans of conceptosIds) {
-      // Obtener deuda original
       const deuda = await obtenerDeudaPorId(idTrans);
-      
+
       if (!deuda) {
         console.warn(`[Pagos] Deuda con IdTrans ${idTrans} no encontrada`);
         resultados.push({
@@ -193,7 +196,6 @@ const confirmarPago = async (datosPago) => {
         continue;
       }
 
-      // Verificar que la deuda no esté ya pagada
       if (deuda.Saldo === 0 && deuda.EsPago === 1) {
         console.warn(`[Pagos] Deuda ${idTrans} ya está pagada`);
         resultados.push({
@@ -204,10 +206,7 @@ const confirmarPago = async (datosPago) => {
         continue;
       }
 
-      // 1. Actualizar deuda como pagada
       await actualizarDeudaComoPagada(idTrans, datosPago, numeroPago, transaction);
-
-      // 2. Crear registro de cobro
       await crearRegistroCobro(deuda, datosPago, numeroPago, montoPorConcepto, transaction);
 
       resultados.push({
@@ -221,7 +220,7 @@ const confirmarPago = async (datosPago) => {
 
     await transaction.commit();
 
-    const exitosos = resultados.filter(r => r.success).length;
+    const exitosos = resultados.filter((resultado) => resultado.success).length;
     console.log(`[Pagos] Pago ${payment_id} procesado: ${exitosos}/${cantidadConceptos} conceptos actualizados`);
 
     return {
@@ -242,6 +241,154 @@ const confirmarPago = async (datosPago) => {
 };
 
 /**
+ * Extrae los conceptos persistidos dentro del snapshot del ticket.
+ * @param {Object} ticket - Registro de TicketsPago
+ * @returns {Array<Object>}
+ */
+const extraerConceptosDesdeTicket = (ticket) => {
+  if (!ticket?.payloadSnapshot) {
+    return [];
+  }
+
+  try {
+    const snapshot = JSON.parse(ticket.payloadSnapshot);
+    return Array.isArray(snapshot?.conceptos) ? snapshot.conceptos : [];
+  } catch (error) {
+    throw new Error('El payload_snapshot del ticket no contiene un JSON válido');
+  }
+};
+
+/**
+ * Confirma un pago proveniente del API Gateway usando el snapshot del ticket.
+ * @param {Object} datosPago - Datos recibidos desde el gateway
+ * @param {Object} datosPago.ticket - Registro TicketsPago asociado
+ * @param {string} datosPago.externalReference - Referencia del gateway
+ * @param {string} datosPago.estado - Estado normalizado (APROBADO, RECHAZADO, etc.)
+ * @param {string} [datosPago.idOperacion] - ID operativo de la pasarela
+ * @param {number} [datosPago.importe] - Importe informado por el gateway
+ * @param {string|Date} [datosPago.fechaOperacion] - Fecha informada por el gateway
+ * @returns {Promise<Object>} Resultado de la operación
+ */
+const confirmarPagoGateway = async (datosPago) => {
+  const {
+    ticket,
+    externalReference,
+    estado,
+    idOperacion,
+    importe,
+    fechaOperacion
+  } = datosPago;
+
+  if (!ticket) {
+    throw new Error('ticket es requerido');
+  }
+
+  if (estado !== 'APROBADO') {
+    return {
+      received: true,
+      processed: false,
+      reason: `Estado del pago: ${estado}`
+    };
+  }
+
+  const conceptos = extraerConceptosDesdeTicket(ticket);
+  if (conceptos.length === 0) {
+    throw new Error('El ticket no tiene conceptos asociados para aplicar el cobro');
+  }
+
+  const operationReference = idOperacion || externalReference;
+  const referenciasIdempotencia = [operationReference, externalReference].filter(Boolean);
+
+  const yaExiste = await verificarPagoExistente(referenciasIdempotencia);
+  if (yaExiste) {
+    return {
+      received: true,
+      processed: false,
+      already_processed: true,
+      reason: 'Pago ya procesado anteriormente'
+    };
+  }
+
+  const numeroPago = generarNumeroPago(operationReference);
+  const transaction = await sequelize.transaction();
+
+  try {
+    const resultados = [];
+    const cantidadConceptos = conceptos.length;
+    const montoTotal = Number(importe || ticket.amountTotal || 0);
+    const montoPorConcepto = cantidadConceptos > 0 ? montoTotal / cantidadConceptos : 0;
+
+    for (const concepto of conceptos) {
+      const idTrans = Number(concepto.IdTrans || concepto.id);
+
+      if (!Number.isInteger(idTrans) || idTrans <= 0) {
+        resultados.push({
+          IdTrans: concepto.IdTrans || concepto.id || null,
+          success: false,
+          error: 'Concepto sin IdTrans válido en el snapshot del ticket'
+        });
+        continue;
+      }
+
+      const deuda = await obtenerDeudaPorId(idTrans);
+
+      if (!deuda) {
+        resultados.push({
+          IdTrans: idTrans,
+          success: false,
+          error: 'Deuda no encontrada'
+        });
+        continue;
+      }
+
+      if (deuda.Saldo === 0 && deuda.EsPago === 1) {
+        resultados.push({
+          IdTrans: idTrans,
+          success: false,
+          error: 'Deuda ya pagada'
+        });
+        continue;
+      }
+
+      const montoCobrado = Number(
+        concepto.Total || concepto.total || concepto.importeNumerico || concepto.importe || montoPorConcepto
+      );
+
+      const contextoPago = {
+        payment_id: operationReference,
+        date_approved: fechaOperacion
+      };
+
+      await actualizarDeudaComoPagada(idTrans, contextoPago, numeroPago, transaction);
+      await crearRegistroCobro(deuda, contextoPago, numeroPago, montoCobrado, transaction);
+
+      resultados.push({
+        IdTrans: idTrans,
+        success: true,
+        detalle: generarDetallePago(deuda)
+      });
+    }
+
+    await transaction.commit();
+
+    const exitosos = resultados.filter((resultado) => resultado.success).length;
+
+    return {
+      received: true,
+      processed: true,
+      external_reference: externalReference,
+      numero_pago: numeroPago,
+      conceptos_procesados: exitosos,
+      conceptos_total: cantidadConceptos,
+      resultados
+    };
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
+};
+
+/**
  * Obtiene el historial de pagos de un cliente
  * @param {string} codigo - Código del cliente
  * @returns {Promise<Array>} Array de pagos realizados
@@ -250,7 +397,7 @@ const obtenerHistorialPagos = async (codigo) => {
   return await ClientesCtaCte.findAll({
     where: {
       Codigo: codigo.trim(),
-      CodMovim: 'D', // Solo cobros
+      CodMovim: 'D',
       EsPago: 1
     },
     attributes: [
@@ -271,6 +418,7 @@ const obtenerHistorialPagos = async (codigo) => {
 };
 
 module.exports = {
+  confirmarPagoGateway,
   confirmarPago,
   verificarPagoExistente,
   obtenerDeudaPorId,

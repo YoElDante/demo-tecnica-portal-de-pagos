@@ -1,5 +1,29 @@
 # Portal de Pagos Municipal - AGENTS
 
+## Entrada Rapida Para Orquestador Multi-Repo
+
+Si este repositorio se analiza desde un agente de nivel superior que coordina Portal + Gateway, usar esta ruta minima antes de explorar el resto del proyecto.
+
+### Objetivo
+
+- Reducir consumo de tokens.
+- Evitar lectura completa innecesaria.
+- Enfocar rapido en contrato de integracion, app settings y ticket_number.
+
+### Ruta Minima de Lectura (orden obligatorio)
+
+1. `docs/integracion/CHECKLIST_APPSETTINGS_Y_ORQUESTADOR_TICKETS.md`
+2. `docs/CONTRACT-PORTAL-GATEWAY.md`
+3. `openspec/changes/ticket-payment-tracking/proposal.md`
+4. `openspec/changes/ticket-payment-tracking/design.md`
+5. `openspec/changes/ticket-payment-tracking/tasks.md`
+
+### Regla de Economia de Contexto
+
+- No leer todo `docs/` ni todo `openspec/` al inicio.
+- Ir al codigo solo despues de cerrar contrato y tareas del cambio.
+- Si la tarea es de conexion portal-gateway o numeracion de ticket, priorizar siempre la ruta minima.
+
 ## Objetivo del Proyecto
 
 Este repositorio implementa un portal web municipal para consultar deudas por DNI, generar tickets de pago y procesar pagos mediante una pasarela externa. El mismo codigo base debe soportar multiples municipios, diferenciados por configuracion y variables de entorno.

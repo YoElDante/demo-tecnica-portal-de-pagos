@@ -15,14 +15,18 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const { apiLimiter } = require('./middlewares/rateLimiter');
 const { requestLogger, responseLogger, errorLogger } = require('./middlewares/logger');
+const { startTicketsMaintenance } = require('./services/ticketsMaintenance.service');
 
 
 // Importar rutas
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const apiRouter = require('./routes/api/index'); // API
-const paymentRouter = require('./routes/payment.routes'); // Pagos MercadoPago
+const paymentRouter = require('./routes/payment.routes'); // Pagos y redirects del gateway
 const app = express();
+
+// Mantenimiento automatico de tickets (expiracion + purga no pagados)
+startTicketsMaintenance();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -55,7 +59,7 @@ app.use(responseLogger);
 // Rutas
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use('/pago', paymentRouter); // Rutas de pago MercadoPago
+app.use(['/pago', '/pagos'], paymentRouter); // Compatibilidad legacy + contrato nuevo
 
 // Rutas API con limitador de tasa
 app.use('/api', apiLimiter);

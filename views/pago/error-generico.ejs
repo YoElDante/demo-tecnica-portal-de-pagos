@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="<%= municipalidad.logos.favicon %>">
+  <link rel="stylesheet" href="/stylesheets/styles.css">
+  <title><%= title %> - Portal de Pagos</title>
+  <style>
+    .result {
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      border-top: 5px solid #6c757d;
+    }
+
+    .result__icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+
+    .result__title {
+      font-size: 1.8rem;
+      color: #495057;
+      margin-bottom: 0.5rem;
+    }
+
+    .result__subtitle {
+      color: #666;
+      margin-bottom: 1.5rem;
+    }
+
+    .result__info {
+      background: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin: 1.5rem 0;
+      text-align: left;
+    }
+
+    .result__actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .result__btn {
+      background: #19a8b6;
+      color: white;
+      text-decoration: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 6px;
+      transition: background 0.3s;
+    }
+
+    .result__btn:hover {
+      background: #148a96;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="header">
+    <div class="header__logo">
+      <img src="<%= municipalidad.logos.web %>" alt="Logo <%= municipalidad.nombre %>" class="header__logo-img">
+    </div>
+    <div class="header__title">
+      <h2>Portal de Pago<br><%= municipalidad.nombreCompleto %></h2>
+    </div>
+    <div class="header__icon">
+      <img src="/images/common/alcaldiaLogo.webp" alt="Logo Alcald+IA" class="header__icon-img">
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="result">
+      <div class="result__icon">⚠️</div>
+      <h1 class="result__title">No pudimos validar el resultado del pago</h1>
+      <p class="result__subtitle">La vista solicitada no tiene un token válido emitido por el gateway.</p>
+
+      <div class="result__info">
+        <p>Si acabás de pagar, esperá unos minutos y volvé a ingresar desde el enlace entregado por la plataforma o consultá al municipio con tu número de referencia.</p>
+      </div>
+
+      <div class="result__actions">
+        <a href="/" class="result__btn">Volver al inicio</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p class="footer__text">&copy; Power by Alcald+IA. Todos los derechos reservados.</p>
+  </footer>
+</body>
+
+</html>

@@ -114,18 +114,86 @@ async function createPagoTicPayment(paymentData) {
 }
 
 // ============================================
-// GATEWAY: SIRO / RED LINK (PLACEHOLDER)
+// GATEWAY: SIRO / RED LINK (via API Gateway)
 // ============================================
 /**
- * Crea un pago usando SIRO/Red Link
- * @private
- * @todo Implementar cuando se tenga la documentación de SIRO
+ * Crea una intención de pago en SIRO via el API Gateway.
+ *
+ * El portal envía el payload según el contrato definido en
+ * docs/CONTRACT-PORTAL-GATEWAY.md. El gateway se encarga de:
+ * - Autenticarse con SIRO
+ * - Formatear el nro_comprobante a 20 chars
+ * - Generar la URL de pago y retornarla al portal
+ *
+ * @param {Object} paymentData
+ * @param {Object} paymentData.contribuyente        - Datos del contribuyente
+ * @param {string} paymentData.contribuyente.codigo - Código en la BD municipal (SIRO: codigo_contribuyente)
+ * @param {string} paymentData.contribuyente.dni    - DNI (fallback si no hay codigo)
+ * @param {Array}  paymentData.conceptos            - Conceptos seleccionados
+ * @param {number} paymentData.montoTotal           - Suma total de todos los conceptos
+ * @param {string} paymentData.ticketNumber         - Número de ticket generado por el portal
+ * @returns {Promise<{ payment_url, external_reference, hash }>}
  */
 async function createSiroPayment(paymentData) {
-  // TODO: Implementar integración con SIRO
-  // Requiere: CONVENIO, CUIT, CERTIFICADO, etc.
-  console.warn('⚠️ [SIRO] Gateway no implementado aún');
-  throw new Error('Pasarela SIRO no implementada. Contacte al administrador.');
+  const { contribuyente, conceptos, montoTotal, ticketNumber } = paymentData;
+
+  const limpiarConceptoSiro = (valor) => String(valor || '')
+    .replace(/[^A-Za-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  // Construir una descripción general para SIRO (campo Concepto, visible al pagador)
+  const tiposUnicos = [...new Set(
+    conceptos.map(c => limpiarConceptoSiro(c.detalle || c.tipoDescripcion || 'Concepto municipal')).slice(0, 3)
+  )];
+  const concepto = limpiarConceptoSiro(tiposUnicos.join(' ')).substring(0, 200) || 'Pago municipal';
+
+  const requestBody = {
+    municipio_id: MUNICIPIO_ID,
+    codigo_contribuyente: contribuyente.codigo || contribuyente.dni,
+    importe: Number(montoTotal),
+    concepto,
+    nro_comprobante: ticketNumber, // El gateway lo formatea a 20 chars para SIRO
+    metadata: {
+      conceptos: conceptos.map(c => ({
+        descripcion: c.detalle || c.tipoDescripcion || 'Concepto municipal',
+        importe: Number(c.total || c.importeNumerico || 0)
+      })),
+      ticket_number: ticketNumber
+    }
+  };
+
+  console.log('📤 [SIRO] Enviando solicitud al API Gateway:', {
+    url: `${API_GATEWAY_URL}/api/pagos`,
+    municipio: requestBody.municipio_id,
+    importe: requestBody.importe,
+    nro_ticket: ticketNumber
+  });
+
+  const response = await axios.post(
+    `${API_GATEWAY_URL}/api/pagos`,
+    requestBody,
+    { headers: { 'Content-Type': 'application/json' }, timeout: 30000 }
+  );
+
+  if (response.data.success) {
+    const { payment_url, external_reference, hash } = response.data.data;
+
+    console.log('✅ [SIRO] Intención de pago creada:', {
+      external_reference,
+      ticket_number: ticketNumber
+    });
+
+    return {
+      success: true,
+      gateway: 'siro',
+      payment_url,
+      external_reference,
+      hash
+    };
+  }
+
+  throw new Error(response.data.message || 'Error desconocido del API Gateway SIRO');
 }
 
 // ============================================
@@ -161,8 +229,8 @@ const gateways = {
   siro: {
     name: 'SIRO / Red Link',
     createPayment: createSiroPayment,
-    status: 'pending',
-    requiredEnv: ['SIRO_CONVENIO', 'SIRO_CUIT']
+    status: 'active',
+    requiredEnv: ['API_GATEWAY_URL', 'MUNICIPIO_ID']
   },
   macropay: {
     name: 'Macro Click de Pago',

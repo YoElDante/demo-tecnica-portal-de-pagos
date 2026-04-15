@@ -11,10 +11,14 @@
 const { sequelize } = require('../config');
 const ClienteModel = require('./Cliente');
 const ClientesCtaCteModel = require('./ClientesCtasCtes');
+const TicketsPagoModel = require('./TicketsPago');
+const TicketPagoEventosModel = require('./TicketPagoEventos');
 
 // Inicializar modelos
 const Cliente = ClienteModel(sequelize);
 const ClientesCtaCte = ClientesCtaCteModel(sequelize);
+const TicketsPago = TicketsPagoModel(sequelize);
+const TicketPagoEventos = TicketPagoEventosModel(sequelize);
 
 // Definir relaciones entre modelos
 Cliente.hasMany(ClientesCtaCte, {
@@ -29,9 +33,23 @@ ClientesCtaCte.belongsTo(Cliente, {
   as: 'cliente'
 });
 
+TicketsPago.hasMany(TicketPagoEventos, {
+  foreignKey: 'ticketId',
+  sourceKey: 'ticketId',
+  as: 'eventos'
+});
+
+TicketPagoEventos.belongsTo(TicketsPago, {
+  foreignKey: 'ticketId',
+  targetKey: 'ticketId',
+  as: 'ticket'
+});
+
 // Exportar sequelize y los modelos
 module.exports = {
   sequelize,
   Cliente,
-  ClientesCtaCte
+  ClientesCtaCte,
+  TicketsPago,
+  TicketPagoEventos
 };

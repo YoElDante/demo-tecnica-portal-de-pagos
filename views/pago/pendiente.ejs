@@ -169,8 +169,20 @@
 
       <div class="result__info">
         <p class="result__info-row">
-          <span class="result__info-label">Número de operación:</span>
+          <span class="result__info-label">Referencia gateway:</span>
           <span class="result__info-value"><%= external_reference %></span>
+        </p>
+        <p class="result__info-row">
+          <span class="result__info-label">Ticket:</span>
+          <span class="result__info-value"><%= ticket_number || 'N/A' %></span>
+        </p>
+        <p class="result__info-row">
+          <span class="result__info-label">ID de operación:</span>
+          <span class="result__info-value"><%= payment_id || 'N/A' %></span>
+        </p>
+        <p class="result__info-row">
+          <span class="result__info-label">Monto total:</span>
+          <span class="result__info-value">$ <%= Number(monto_total || 0).toFixed(2) %></span>
         </p>
         <p class="result__info-row">
           <span class="result__info-label">Estado:</span>
@@ -178,9 +190,24 @@
         </p>
       </div>
 
+      <% if (Array.isArray(conceptos) && conceptos.length > 0) { %>
+      <div class="result__info">
+        <p class="result__info-label">Conceptos del ticket</p>
+        <% conceptos.forEach((concepto) => { %>
+        <p class="result__info-row">
+          <span class="result__info-label"><%= concepto.descripcion %></span>
+          <span class="result__info-value">$ <%= Number(concepto.importe || 0).toFixed(2) %></span>
+        </p>
+        <% }) %>
+      </div>
+      <% } %>
+
       <div class="result__instructions">
         <h3 class="result__instructions-title">ℹ️ Información importante</h3>
         <p class="result__instructions-text">Tu pago fue registrado pero está pendiente de confirmación.</p>
+        <% if (mensaje_adicional) { %>
+        <p class="result__instructions-text"><%= mensaje_adicional %></p>
+        <% } %>
         <p class="result__instructions-text">Esto puede ocurrir cuando:</p>
         <ul class="result__instructions-list">
           <li class="result__instructions-item">Elegiste pagar en efectivo (RapiPago, Pago Fácil, etc.)</li>

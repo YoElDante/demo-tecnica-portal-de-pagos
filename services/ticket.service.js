@@ -8,6 +8,94 @@
 
 // Configuración centralizada - cambiar municipio en .env (MUNICIPIO=xxx)
 const { municipalidad: municipalidadConfig } = require('../config');
+const APP_TIMEZONE = process.env.APP_TIMEZONE || 'America/Argentina/Cordoba';
+
+// ============================================
+// GENERACIÓN DE NÚMERO DE TICKET
+// ============================================
+
+/**
+ * Argentina no usa horario de verano: siempre UTC-3.
+ * Usamos este offset para derivar la fecha local argentina a partir de UTC.
+ */
+const ARGENTINA_OFFSET_MS = 3 * 60 * 60 * 1000;
+
+/**
+ * Retorna la fecha argentina actual como string 'YYYYMMDD'.
+ * Se usa como prefijo de fecha en el número de ticket.
+ * @returns {string} Fecha local argentina, ej: '20260413'
+ */
+function obtenerFechaArgentina() {
+  const argNow = new Date(Date.now() - ARGENTINA_OFFSET_MS);
+  const y = argNow.getUTCFullYear();
+  const m = String(argNow.getUTCMonth() + 1).padStart(2, '0');
+  const d = String(argNow.getUTCDate()).padStart(2, '0');
+  return `${y}${m}${d}`;
+}
+
+/**
+ * Dado un string 'YYYYMMDD' (fecha Argentina), devuelve los límites UTC
+ * del día completo en Argentina (medianoche a medianoche argentina = 03:00 a 02:59 UTC).
+ * @param {string} fechaStr - Fecha Argentina 'YYYYMMDD'
+ * @returns {{ inicioUTC: Date, finUTC: Date }}
+ */
+function obtenerRangoUTCDelDia(fechaStr) {
+  const y = fechaStr.slice(0, 4);
+  const m = fechaStr.slice(4, 6);
+  const d = fechaStr.slice(6, 8);
+  return {
+    inicioUTC: new Date(`${y}-${m}-${d}T00:00:00.000-03:00`),
+    finUTC:    new Date(`${y}-${m}-${d}T23:59:59.999-03:00`)
+  };
+}
+
+/**
+ * Cuenta cuántos tickets existen hoy (día Argentina) para el municipio dado.
+ * La consulta usa el campo issued_at_utc para filtrar por rango UTC del día.
+ * @param {string} municipioId - Ej: 'ELMANZANO'
+ * @param {string} fechaStr    - Fecha Argentina 'YYYYMMDD'
+ * @returns {Promise<number>}
+ */
+async function contarTicketsHoy(municipioId, fechaStr) {
+  const { TicketsPago } = require('../models/model.index');
+  const { Op } = require('sequelize');
+  const { inicioUTC, finUTC } = obtenerRangoUTCDelDia(fechaStr);
+  return TicketsPago.count({
+    where: {
+      municipioId,
+      issuedAtUtc: { [Op.between]: [inicioUTC, finUTC] }
+    }
+  });
+}
+
+/**
+ * Genera el próximo número de ticket para el municipio.
+ *
+ * Formato: {MUNICIPIO_ID}-{YYYYMMDD}-{NNNNN}
+ * Ejemplo: ELMANZANO-20260413-00001
+ *
+ * El secuencial se obtiene contando tickets del día actual y sumando 1.
+ * En caso de colisión por concurrencia, el llamador debe reintentar.
+ *
+ * @param {string} municipioId - ID del municipio en mayúsculas (ej: 'ELMANZANO')
+ * @returns {Promise<{ ticketNumber: string, fechaStr: string }>}
+ */
+async function generarNumeroTicket(municipioId) {
+  const fechaStr = obtenerFechaArgentina();
+  const count = await contarTicketsHoy(municipioId, fechaStr);
+  const seq = String(count + 1).padStart(5, '0');
+  const ticketNumber = `${municipioId.toUpperCase()}-${fechaStr}-${seq}`;
+  return { ticketNumber, fechaStr };
+}
+
+function formatearFechaConZona(date) {
+  return new Intl.DateTimeFormat('es-AR', {
+    timeZone: APP_TIMEZONE,
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  }).format(date);
+}
 
 /**
  * Formatea un número como moneda argentina
@@ -37,13 +125,19 @@ function formatearFecha(fecha) {
     }
     // Detectar si viene en formato ISO o similar (yyyy-mm-dd)
     if (/^\d{4}-\d{2}-\d{2}/.test(fecha.trim())) {
-      const date = new Date(fecha);
-      if (!isNaN(date.getTime())) {
-        return date.toLocaleDateString('es-AR', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric'
-        });
+      // Si la fecha viene sin hora (YYYY-MM-DD), construirla como fecha local
+      // para evitar corrimientos por UTC al formatear en servidores cloud.
+      const onlyDateMatch = fecha.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (onlyDateMatch) {
+        const year = Number(onlyDateMatch[1]);
+        const month = Number(onlyDateMatch[2]) - 1;
+        const day = Number(onlyDateMatch[3]);
+        return formatearFechaConZona(new Date(year, month, day, 12, 0, 0));
+      }
+
+      const isoDate = new Date(fecha);
+      if (!isNaN(isoDate.getTime())) {
+        return formatearFechaConZona(isoDate);
       }
     }
     // Otros formatos de string: devolver como está
@@ -53,11 +147,7 @@ function formatearFecha(fecha) {
   // Si es un objeto Date
   const date = new Date(fecha);
   if (isNaN(date.getTime())) return '-';
-  return date.toLocaleDateString('es-AR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  });
+  return formatearFechaConZona(date);
 }
 
 /**
@@ -66,13 +156,14 @@ function formatearFecha(fecha) {
  */
 function obtenerFechaEmision() {
   const ahora = new Date();
-  return ahora.toLocaleString('es-AR', {
+  return new Intl.DateTimeFormat('es-AR', {
+    timeZone: APP_TIMEZONE,
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit'
-  });
+  }).format(ahora);
 }
 
 /**
@@ -108,6 +199,7 @@ function procesarConceptos(conceptos) {
         fechaVto: formatearFecha(concepto.fechaVto || concepto.FechaVto),
         tipoDescripcion: concepto.tipoDescripcion || concepto.TipoDescripcion || 'Concepto',
         detalle: concepto.detalle || concepto.Detalle || '',
+        idBien: concepto.idBien || concepto.ID_BIEN || '-',
         cuota: concepto.cuota || concepto.Cuota || '-',
         anio: concepto.anio || concepto.Anio || '-',
         importe: formatearMoneda(importe),
@@ -224,5 +316,9 @@ module.exports = {
   validarDatosTicket,
   formatearMoneda,
   formatearFecha,
-  obtenerFechaEmision
+  obtenerFechaEmision,
+  // Generación de número de ticket
+  generarNumeroTicket,
+  obtenerFechaArgentina,
+  obtenerRangoUTCDelDia
 };

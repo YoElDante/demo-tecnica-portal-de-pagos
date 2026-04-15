@@ -2,6 +2,10 @@
 
 Usa `AGENTS.md` como fuente principal de reglas globales del proyecto.
 
+## Prioridad Para Agente Superior (Portal + Gateway)
+
+Si la tarea viene de un orquestador multi-repo, iniciar en la seccion `Entrada Rapida Para Orquestador Multi-Repo` de `AGENTS.md` y seguir su ruta minima de lectura antes de explorar archivos adicionales.
+
 ## Prioridades
 
 1. Respetar el modelo multi-municipio.

@@ -159,9 +159,9 @@ Base: `/api`
 |------|-------------|
 | `GET /` | Formulario de búsqueda por DNI |
 | `POST /buscar` | Procesar búsqueda |
-| `GET /pago/exitoso` | Confirmación de pago exitoso |
-| `GET /pago/pendiente` | Pago pendiente de confirmación |
-| `GET /pago/fallido` | Error en el pago |
+| `GET /pagos/exitoso` | Confirmación de pago exitoso |
+| `GET /pagos/pendiente` | Pago pendiente de confirmación |
+| `GET /pagos/fallido` | Error en el pago |
 
 ---
 
@@ -201,6 +201,7 @@ La integración activa hoy es SIRO del Banco Roela. Otras pasarelas quedan como 
 | [INTEGRACION_PAGOS.md](docs/INTEGRACION_PAGOS.md) | Flujo activo de integración con SIRO |
 | [GUIA_NUEVO_MUNICIPIO.md](docs/GUIA_NUEVO_MUNICIPIO.md) | Alta de un nuevo municipio |
 | [MUNICIPIO_CONFIG.md](config/MUNICIPIO_CONFIG.md) | Variables de configuración por municipio |
+| [REDIRECT-WEBHOOK-DESIGN.md](docs/integracion/REDIRECT-WEBHOOK-DESIGN.md) | Decisiones finales redirect/webhook y render por ticket BD |
 
 ---
 

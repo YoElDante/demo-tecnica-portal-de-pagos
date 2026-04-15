@@ -320,36 +320,56 @@
   overflow-wrap: anywhere;
 }
 
-/* Columna: Cuota (3ra) */
+/* Columna: ID_BIEN (3ra) */
 .ticket__table th:nth-child(3),
 .ticket__table td:nth-child(3) {
+  width: 72px;
+  min-width: 68px;
+  max-width: 80px;
+  text-align: center;
+  white-space: nowrap;
+  padding-left: 0.9rem;
+}
+
+/* Columna: Cuota (4ta) */
+.ticket__table th:nth-child(4),
+.ticket__table td:nth-child(4) {
   text-align: right !important;
   width: 40px;
   min-width: 36px;
   max-width: 46px;
   white-space: nowrap;
+  padding-left: 0.7rem;
 }
 
-/* Columna: Año (4ta) */
-.ticket__table th:nth-child(4),
-.ticket__table td:nth-child(4) {
+/* Columna: Año (5ta) */
+.ticket__table th:nth-child(5),
+.ticket__table td:nth-child(5) {
   width: 42px;
   min-width: 38px;
   max-width: 48px;
   text-align: center;
   white-space: nowrap;
+  padding-left: 0.4rem;
 }
 
-/* Columnas numéricas: Importe, Int/Dto, Total (5, 6, 7) */
-.ticket__table th:nth-child(5),
-.ticket__table td:nth-child(5),
+/* Columnas numéricas: Importe, Int/Dto (6, 7) */
 .ticket__table th:nth-child(6),
 .ticket__table td:nth-child(6),
 .ticket__table th:nth-child(7),
 .ticket__table td:nth-child(7) {
-  width: 72px;
-  min-width: 70px;
-  max-width: 80px;
+  width: 70px;
+  min-width: 68px;
+  max-width: 78px;
+  white-space: nowrap;
+}
+
+/* Columna Total (8) con más aire para importes largos */
+.ticket__table th:nth-child(8),
+.ticket__table td:nth-child(8) {
+  width: 84px;
+  min-width: 80px;
+  max-width: 96px;
   white-space: nowrap;
 }
 
@@ -568,7 +588,7 @@
   }
 
   .ticket__table {
-    min-width: 680px;
+    min-width: 710px;
   }
 
   /* Columna Fecha Vto. - más compacta */
@@ -584,13 +604,51 @@
   .ticket__table th:nth-child(2),
   .ticket__table td:nth-child(2) {
     padding-left: 1.5rem;
-    max-width: 180px;
-    width: 180px;
+    max-width: 135px;
+    width: 135px;
   }
 
   .ticket__detalle {
-    max-width: 170px;
+    max-width: 125px;
     padding-left: 0.5rem;
+  }
+
+  .ticket__table th:nth-child(3),
+  .ticket__table td:nth-child(3) {
+    width: 68px;
+    min-width: 64px;
+    max-width: 74px;
+    padding-left: 0.8rem;
+  }
+
+  .ticket__table th:nth-child(4),
+  .ticket__table td:nth-child(4) {
+    width: 49px;
+    min-width: 45px;
+    max-width: 55px;
+  }
+
+  .ticket__table th:nth-child(5),
+  .ticket__table td:nth-child(5) {
+    width: 44px;
+    min-width: 40px;
+    max-width: 50px;
+  }
+
+  .ticket__table th:nth-child(6),
+  .ticket__table td:nth-child(6),
+  .ticket__table th:nth-child(7),
+  .ticket__table td:nth-child(7) {
+    width: 87px;
+    min-width: 83px;
+    max-width: 93px;
+  }
+
+  .ticket__table th:nth-child(8),
+  .ticket__table td:nth-child(8) {
+    width: 99px;
+    min-width: 95px;
+    max-width: 107px;
   }
 
   /* Sombras laterales para indicar scroll */
@@ -671,29 +729,64 @@
   .ticket__table th:nth-child(2),
   .ticket__table td:nth-child(2) {
     padding-left: 1rem;
-    max-width: 160px;
-    width: 160px;
+    max-width: 120px;
+    width: 120px;
   }
 
   .ticket__detalle {
-    max-width: 150px;
+    max-width: 110px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     font-size: clamp(0.65rem, 1.5vw, 0.8rem);
   }
 
-  /* Columnas numéricas - compactas con nowrap */
+  .ticket__table th:nth-child(3),
+  .ticket__table td:nth-child(3) {
+    width: 66px;
+    min-width: 62px;
+    max-width: 74px;
+    padding-left: 0.8rem;
+  }
+
+  .ticket__table th:nth-child(4),
+  .ticket__table td:nth-child(4) {
+    width: 46px;
+    min-width: 42px;
+    max-width: 52px;
+  }
+
   .ticket__table th:nth-child(5),
-  .ticket__table td:nth-child(5),
+  .ticket__table td:nth-child(5) {
+    width: 44px;
+    min-width: 40px;
+    max-width: 50px;
+  }
+
+  /* Columnas numéricas - compactas con nowrap */
+  .ticket__table th:nth-child(6),
+  .ticket__table td:nth-child(6),
+  .ticket__table th:nth-child(7),
+  .ticket__table td:nth-child(7),
+  .ticket__table th:nth-child(8),
+  .ticket__table td:nth-child(8) {
+    white-space: nowrap;
+  }
+
   .ticket__table th:nth-child(6),
   .ticket__table td:nth-child(6),
   .ticket__table th:nth-child(7),
   .ticket__table td:nth-child(7) {
-    width: 75px;
-    min-width: 70px;
-    max-width: 80px;
-    white-space: nowrap;
+    width: 86px;
+    min-width: 81px;
+    max-width: 91px;
+  }
+
+  .ticket__table th:nth-child(8),
+  .ticket__table td:nth-child(8) {
+    width: 99px;
+    min-width: 94px;
+    max-width: 107px;
   }
 
   /* Fila subtotal/total - letra más pequeña */
@@ -756,26 +849,54 @@
   .ticket__table td:nth-child(2) {
     padding-left: 0.5rem;
     width: auto;
-    max-width: 200px;
+    max-width: 150px;
   }
 
   .ticket__detalle {
-    max-width: 190px;
+    max-width: 140px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
-  /* Columnas numéricas - distribuir espacio equitativamente */
+  .ticket__table th:nth-child(3),
+  .ticket__table td:nth-child(3) {
+    width: 68px;
+    min-width: 64px;
+    max-width: 76px;
+    padding-left: 0.85rem;
+  }
+
+  .ticket__table th:nth-child(4),
+  .ticket__table td:nth-child(4) {
+    width: 48px;
+    min-width: 44px;
+    max-width: 54px;
+  }
+
   .ticket__table th:nth-child(5),
-  .ticket__table td:nth-child(5),
+  .ticket__table td:nth-child(5) {
+    width: 46px;
+    min-width: 42px;
+    max-width: 52px;
+  }
+
+  /* Columnas numéricas - distribuir espacio equitativamente */
   .ticket__table th:nth-child(6),
   .ticket__table td:nth-child(6),
   .ticket__table th:nth-child(7),
   .ticket__table td:nth-child(7) {
-    width: 90px;
-    min-width: 85px;
-    max-width: 100px;
+    width: 104px;
+    min-width: 99px;
+    max-width: 114px;
+    white-space: nowrap;
+  }
+
+  .ticket__table th:nth-child(8),
+  .ticket__table td:nth-child(8) {
+    width: 116px;
+    min-width: 110px;
+    max-width: 126px;
     white-space: nowrap;
   }
 
@@ -836,42 +957,58 @@
   .ticket__table th:nth-child(2),
   .ticket__table td:nth-child(2) {
     padding-left: 0.5rem;
-    max-width: 220px;
+    max-width: 165px;
     width: auto;
   }
 
   .ticket__detalle {
-    max-width: 210px;
+    max-width: 155px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
-  /* Columnas Cuota y Año */
+  /* Columna ID_BIEN */
   .ticket__table th:nth-child(3),
   .ticket__table td:nth-child(3) {
-    width: 50px;
-    min-width: 45px;
-    max-width: 56px;
+    width: 72px;
+    min-width: 68px;
+    max-width: 80px;
+    padding-left: 0.9rem;
   }
 
+  /* Columna Cuota */
   .ticket__table th:nth-child(4),
   .ticket__table td:nth-child(4) {
-    width: 52px;
-    min-width: 48px;
-    max-width: 58px;
+    width: 51px;
+    min-width: 47px;
+    max-width: 57px;
+  }
+
+  /* Columna Año */
+  .ticket__table th:nth-child(5),
+  .ticket__table td:nth-child(5) {
+    width: 48px;
+    min-width: 44px;
+    max-width: 54px;
   }
 
   /* Columnas numéricas - más espacio para valores grandes */
-  .ticket__table th:nth-child(5),
-  .ticket__table td:nth-child(5),
   .ticket__table th:nth-child(6),
   .ticket__table td:nth-child(6),
   .ticket__table th:nth-child(7),
   .ticket__table td:nth-child(7) {
-    width: 100px;
-    min-width: 95px;
-    max-width: 110px;
+    width: 107px;
+    min-width: 103px;
+    max-width: 115px;
+    white-space: nowrap;
+  }
+
+  .ticket__table th:nth-child(8),
+  .ticket__table td:nth-child(8) {
+    width: 123px;
+    min-width: 117px;
+    max-width: 135px;
     white-space: nowrap;
   }
 
@@ -1415,12 +1552,12 @@
   .ticket-table th:nth-child(2),
   .ticket-table td:nth-child(2) {
     padding-left: 1.5rem;
-    max-width: 180px;
-    width: 180px;
+    max-width: 142px;
+    width: 142px;
   }
 
   .ticket-detalle {
-    max-width: 170px;
+    max-width: 132px;
     padding-left: 0.5rem;
   }
 
@@ -1500,12 +1637,12 @@
   .ticket-table th:nth-child(2),
   .ticket-table td:nth-child(2) {
     padding-left: 1rem;
-    max-width: 160px;
-    width: 160px;
+    max-width: 126px;
+    width: 126px;
   }
 
   .ticket-detalle {
-    max-width: 150px;
+    max-width: 116px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1519,9 +1656,9 @@
   .ticket-table td:nth-child(6),
   .ticket-table th:nth-child(7),
   .ticket-table td:nth-child(7) {
-    width: 75px;
-    min-width: 70px;
-    max-width: 80px;
+    width: 86px;
+    min-width: 81px;
+    max-width: 91px;
     white-space: nowrap;
   }
 
@@ -1585,11 +1722,11 @@
   .ticket-table td:nth-child(2) {
     padding-left: 0.5rem;
     width: auto;
-    max-width: 200px;
+    max-width: 158px;
   }
 
   .ticket-detalle {
-    max-width: 190px;
+    max-width: 148px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1602,9 +1739,9 @@
   .ticket-table td:nth-child(6),
   .ticket-table th:nth-child(7),
   .ticket-table td:nth-child(7) {
-    width: 90px;
-    min-width: 85px;
-    max-width: 100px;
+    width: 104px;
+    min-width: 99px;
+    max-width: 114px;
     white-space: nowrap;
   }
 
@@ -1665,12 +1802,12 @@
   .ticket-table th:nth-child(2),
   .ticket-table td:nth-child(2) {
     padding-left: 0.5rem;
-    max-width: 220px;
+    max-width: 174px;
     width: auto;
   }
 
   .ticket-detalle {
-    max-width: 210px;
+    max-width: 164px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1683,9 +1820,9 @@
   .ticket-table td:nth-child(6),
   .ticket-table th:nth-child(7),
   .ticket-table td:nth-child(7) {
-    width: 100px;
-    min-width: 95px;
-    max-width: 110px;
+    width: 115px;
+    min-width: 110px;
+    max-width: 125px;
     white-space: nowrap;
   }
 

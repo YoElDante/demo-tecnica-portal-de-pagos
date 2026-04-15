@@ -78,6 +78,7 @@
           <tr>
             <th>Fecha Vto.</th>
             <th>Detalle</th>
+            <th>ID_BIEN</th>
             <th>Cuota</th>
             <th>Año</th>
             <th class="ticket__col--right">Importe</th>
@@ -90,8 +91,9 @@
           <tr>
             <td><%= concepto.fechaVto %></td>
             <td class="ticket__detalle">
-              <%= concepto.tipoDescripcion %><% if (concepto.detalle) { %> - <%= concepto.detalle %><% } %>
+              <%= concepto.detalle || concepto.tipoDescripcion || '-' %>
             </td>
+            <td><%= concepto.idBien || '-' %></td>
             <td><%= concepto.cuota || '-' %></td>
             <td><%= concepto.anio || '-' %></td>
             <td class="ticket__col--right">$ <%= concepto.importe %></td>
@@ -104,14 +106,14 @@
         </tbody>
         <tfoot>
           <tr class="ticket__row--subtotal">
-            <td colspan="4" class="ticket__col--right"><strong>Subtotal Pág. <%= pagina + 1 %>:</strong></td>
+            <td colspan="5" class="ticket__col--right"><strong>Subtotal Pág. <%= pagina + 1 %>:</strong></td>
             <td class="ticket__col--right"><strong>$ <%= subtotalImportePagina.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></strong></td>
             <td class="ticket__col--right <%= subtotalInteresPagina < 0 ? 'ticket__value--discount' : 'ticket__value--interest' %>"><strong><%= subtotalInteresPagina < 0 ? '-' : '' %>$ <%= Math.abs(subtotalInteresPagina).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></strong></td>
             <td class="ticket__col--right"><strong>$ <%= subtotalTotalPagina.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></strong></td>
           </tr>
           <% if (esUltimaPagina) { %>
           <tr class="ticket__row--total">
-            <td colspan="7" style="text-align: center;"><strong>TOTAL A PAGAR: $ <%= totalGeneral %></strong></td>
+            <td colspan="8" style="text-align: center;"><strong>TOTAL A PAGAR: $ <%= totalGeneral %></strong></td>
           </tr>
           <% } %>
         </tfoot>

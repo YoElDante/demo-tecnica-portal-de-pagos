@@ -14,6 +14,7 @@ Si es tu primera vez en el proyecto, lee primero `docs/AI_CONTEXT.md`. Ese archi
 - Ver el esquema multi-municipio actual: `docs/PLAN_CONFIGURACION_MULTIAMBIENTE.md`
 - Revisar flujo de ramas: `docs/GUIA_RAMAS.md`
 - Coordinar portal + gateway: `docs/integracion/GUIA_INTEGRACION_MULTIPROYECTO.md`
+- Configurar app settings + brief al orquestador: `docs/integracion/CHECKLIST_APPSETTINGS_Y_ORQUESTADOR_TICKETS.md`
 
 ## Mapa por categoria
 
@@ -41,6 +42,7 @@ Si es tu primera vez en el proyecto, lee primero `docs/AI_CONTEXT.md`. Ese archi
 | Documento | Uso |
 |-----------|-----|
 | `integracion/GUIA_INTEGRACION_MULTIPROYECTO.md` | Trabajo coordinado entre repos y contratos |
+| `integracion/CHECKLIST_APPSETTINGS_Y_ORQUESTADOR_TICKETS.md` | Checklist operativo Azure + brief para orquestador de ticket_number |
 
 ### Historico
 

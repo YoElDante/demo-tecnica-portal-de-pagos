@@ -111,12 +111,12 @@ function recopilarConceptosSeleccionados() {
       // Extraer datos de cada celda
       const concepto = {
         fechaVto: celdas[1]?.textContent.trim() || '',
-        tipoDescripcion: extraerTextoDetalle(celdas[2]),
-        detalle: extraerDetalleAdicional(celdas[2]),
-        cuota: celdas[3]?.textContent.trim() || '',
-        anio: celdas[4]?.textContent.trim() || '',
-        importe: extraerNumero(celdas[5]?.textContent || '0'),
-        interes: extraerNumeroConSigno(celdas[6]),
+        detalle: extraerTextoDetalle(celdas[2]),
+        idBien: celdas[3]?.textContent.trim() || '-',
+        cuota: celdas[4]?.textContent.trim() || '',
+        anio: celdas[5]?.textContent.trim() || '',
+        importe: extraerNumero(celdas[6]?.textContent || '0'),
+        interes: extraerNumeroConSigno(celdas[7]),
         total: parseFloat(cb.dataset.total || '0')
       };
 
@@ -124,11 +124,13 @@ function recopilarConceptosSeleccionados() {
     }
   });
 
-  // Ordenar por tipo (alfabético) y luego por fecha descendente
+  // Ordenar por ID_BIEN (ascendente) y luego por fecha descendente
   conceptos.sort((a, b) => {
-    // Primero por tipo de descripción (alfabético)
-    const tipoComparacion = a.tipoDescripcion.localeCompare(b.tipoDescripcion);
-    if (tipoComparacion !== 0) return tipoComparacion;
+    // Primero por ID_BIEN (si no tiene, al final)
+    const idBienA = (a.idBien || '').toString();
+    const idBienB = (b.idBien || '').toString();
+    const idBienComparacion = idBienA.localeCompare(idBienB);
+    if (idBienComparacion !== 0) return idBienComparacion;
 
     // Luego por fecha descendente (más reciente primero)
     const fechaA = parsearFechaParaOrden(a.fechaVto);
@@ -149,18 +151,6 @@ function extraerTextoDetalle(celda) {
   const textoCompleto = celda.textContent.trim();
   // Remover emoji/icono si existe y tomar solo el texto descriptivo
   return textoCompleto.replace(/^[^\w\s]+\s*/, '').split(' - ')[0].trim();
-}
-
-/**
- * Extrae el detalle adicional después del guión
- * @param {HTMLElement} celda - Celda de la tabla
- * @returns {string} Detalle adicional
- */
-function extraerDetalleAdicional(celda) {
-  if (!celda) return '';
-  const textoCompleto = celda.textContent.trim();
-  const partes = textoCompleto.split(' - ');
-  return partes.length > 1 ? partes.slice(1).join(' - ').trim() : '';
 }
 
 /**
@@ -313,7 +303,11 @@ async function descargarPDF() {
 
     // Obtener datos para el nombre del archivo
     const contribuyente = obtenerDatosContribuyente();
-    const fecha = new Date().toISOString().split('T')[0];
+    const ahora = new Date();
+    const yyyy = ahora.getFullYear();
+    const mm = String(ahora.getMonth() + 1).padStart(2, '0');
+    const dd = String(ahora.getDate()).padStart(2, '0');
+    const fecha = `${yyyy}-${mm}-${dd}`;
     const nombreArchivo = `ticket-pago-${contribuyente.dni}-${fecha}.pdf`;
 
     // Configuración para jsPDF
@@ -453,7 +447,7 @@ async function descargarPDF() {
       const tabla = pagina.querySelector('.ticket__table');
       if (tabla) {
         // Anchos de columnas (en mm) - ajustados para A4 con más espacio
-        const colWidths = [20, 60, 14, 14, 26, 26, 26]; // Total: 186mm
+        const colWidths = [18, 52, 20, 12, 12, 24, 24, 24]; // Total: 186mm
         const colX = [margin];
         for (let c = 0; c < colWidths.length - 1; c++) {
           colX.push(colX[c] + colWidths[c]);
@@ -465,10 +459,10 @@ async function descargarPDF() {
         pdf.setFontSize(9);
         pdf.setFont('helvetica', 'bold');
 
-        const headers = ['Fecha Vto.', 'Detalle', 'Cuota', 'Año', 'Importe', 'Int/Dto', 'Total'];
+        const headers = ['Fecha Vto.', 'Detalle', 'ID_BIEN', 'Cuota', 'Año', 'Importe', 'Int/Dto', 'Total'];
         headers.forEach((header, idx) => {
-          const align = idx >= 4 ? 'right' : (idx === 0 ? 'left' : 'left');
-          const xPos = idx >= 4 ? colX[idx] + colWidths[idx] - 1 : colX[idx] + 1;
+          const align = idx >= 5 ? 'right' : 'left';
+          const xPos = idx >= 5 ? colX[idx] + colWidths[idx] - 1 : colX[idx] + 1;
           pdf.text(header, xPos, y + 5, { align: align === 'right' ? 'right' : 'left' });
         });
         y += 8;
@@ -505,7 +499,7 @@ async function descargarPDF() {
             if (idx === 1) {
               // Detalle con wrap
               pdf.text(detalleLines, colX[idx] + 1, y + 4);
-            } else if (idx >= 4) {
+            } else if (idx >= 5) {
               // Columnas numéricas alineadas a la derecha
               pdf.text(texto, colX[idx] + colWidths[idx] - 1, y + 4, { align: 'right' });
             } else {
@@ -540,14 +534,14 @@ async function descargarPDF() {
           } else if (celdas.length >= 3) {
             // Fila de subtotales
             const label = celdas[0].textContent.trim();
-            pdf.text(label, colX[3] + colWidths[3], y + 4, { align: 'right' });
+            pdf.text(label, colX[4] + colWidths[4], y + 4, { align: 'right' });
 
             // Subtotal Importe
-            pdf.text(celdas[1].textContent.trim(), colX[4] + colWidths[4] - 1, y + 4, { align: 'right' });
+            pdf.text(celdas[1].textContent.trim(), colX[5] + colWidths[5] - 1, y + 4, { align: 'right' });
             // Subtotal Int/Dto
-            pdf.text(celdas[2].textContent.trim(), colX[5] + colWidths[5] - 1, y + 4, { align: 'right' });
+            pdf.text(celdas[2].textContent.trim(), colX[6] + colWidths[6] - 1, y + 4, { align: 'right' });
             // Subtotal Total
-            pdf.text(celdas[3].textContent.trim(), colX[6] + colWidths[6] - 1, y + 4, { align: 'right' });
+            pdf.text(celdas[3].textContent.trim(), colX[7] + colWidths[7] - 1, y + 4, { align: 'right' });
             y += 6;
           }
         });
