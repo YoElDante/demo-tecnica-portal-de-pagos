@@ -1,7 +1,7 @@
 # ============================================================
 # Deploy Portal de Pagos - Demo Alcaldía
 # 
-# Se ejecuta automáticamente en cada push a develop
+# Se ejecuta automáticamente en cada push a main
 # También se puede ejecutar manualmente desde GitHub Actions
 #
 # AUTENTICACIÓN: Publish Profile
@@ -15,7 +15,7 @@ name: 🧪 Deploy Demo
 on:
   push:
     branches:
-      - develop
+      - main
   workflow_dispatch:
 
 env:
