@@ -85,7 +85,7 @@ function construirDetalleTicket(ticket, externalReference, estadoFallback = 'PEN
       // El snapshot guarda los campos de formatearDeuda (Detalle, Total, TipoDescripcion)
       // con mayúscula inicial — soportamos ambas convenciones
       descripcion: concepto.Detalle || concepto.TipoDescripcion || concepto.detalle || concepto.tipoDescripcion || concepto.descripcion || 'Concepto municipal',
-      importe: Number(concepto.Total || concepto.total || concepto.importeNumerico || concepto.importe || 0)
+      importe: Number(concepto.Total || concepto.total || concepto.importeNumerico || concepto.importe || concepto.monto || 0)
     }))
     : [];
 
