@@ -175,8 +175,8 @@
       <button class="btn btn--ticket btn--download" id="btn-descargar-pdf" disabled>
         💾 Descargar PDF
       </button>
-      <button class="btn btn--qr" id="generate-qr" onclick="mostrarQR()">
-        📱 Generar QR
+      <button class="btn btn--qr" id="btn-ir-a-pagar" onclick="iniciarPago()">
+        💳 Ir a Pagar
       </button>
     </section>
 
@@ -190,8 +190,8 @@
       <button class="btn btn--ticket btn--download" id="btn-descargar-pdf-bottom">
         💾 Descargar PDF
       </button>
-      <button class="btn btn--qr" id="generate-qr-bottom" onclick="mostrarQR()">
-        📱 Generar QR
+      <button class="btn btn--qr" id="btn-ir-a-pagar-bottom" onclick="iniciarPago()">
+        💳 Ir a Pagar
       </button>
       <button class="btn btn--ticket btn--back" id="btn-volver-arriba" onclick="volverArriba()">
         ⬆️ Volver Arriba
@@ -199,13 +199,9 @@
     </section>
     <% } %>
 
-    <!-- Contenedor del código QR y botón de pago -->
+    <!-- Contenedor de estado de pago (loading) -->
     <div class="qr" id="qr-container" style="display:none;">
-      <img class="qr__image" id="qr-image" src="/images/common/qr_mercado.webp" alt="QR Code" />
-      <button id="pay-button" class="btn btn--ticket btn--pay" onclick="iniciarPagoMercadoPago()">
-        💳 Ir a Pagar con MercadoPago
-      </button>
-      <p id="pago-loading" class="qr__loading" style="display:none;">⏳ Procesando pago...</p>
+      <p id="pago-loading" class="qr__loading">⏳ Procesando pago, por favor espere...</p>
     </div>
 
     <!-- Botón Generar QR (se oculta después de generarlo) -->
@@ -232,29 +228,10 @@
   <script>
     // Datos del contribuyente desde el servidor
     const contribuyenteData = {
-      dni: '<%= cliente ? cliente.Codigo : "" %>',
+      dni: '<%= cliente ? (cliente.DOCUMENTO || "").trim() : "" %>',
       nombre: '<%= cliente ? (cliente.Nombre + " " + cliente.Apellido).trim() : "" %>',
       email: '<%= cliente ? (cliente.Email || "") : "" %>'
     };
-
-    function mostrarQR() {
-      const qrContainer = document.getElementById('qr-container');
-      const qrImage = document.getElementById('qr-image');
-      const payButton = document.getElementById('pay-button');
-
-      // Mostrar contenedor con QR y botón de pagar
-      qrContainer.style.display = 'flex';
-      qrImage.style.display = 'block';
-      payButton.style.display = 'block';
-
-      // Scroll suave al QR
-      setTimeout(() => {
-        qrContainer.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center'
-        });
-      }, 100);
-    }
 
     /**
      * Recopila los IDs de transacción de las deudas seleccionadas
@@ -276,71 +253,6 @@
     }
 
     /**
-     * Inicia el proceso de pago con MercadoPago
-     */
-    async function iniciarPagoMercadoPago() {
-      const payButton = document.getElementById('pay-button');
-      const loadingMsg = document.getElementById('pago-loading');
-
-      // Recopilar conceptos seleccionados
-      const conceptosIds = recopilarIdTransSeleccionados();
-
-      if (conceptosIds.length === 0) {
-        alert('Por favor, seleccione al menos un concepto para pagar.');
-        return;
-      }
-
-      // Obtener el total desde la UI
-      const totalElement = document.getElementById('total-final');
-      const totalText = totalElement?.textContent.replace(/[^\d,.-]/g, '').replace(',', '.') || '0';
-      const montoTotal = parseFloat(totalText);
-
-      if (montoTotal <= 0) {
-        alert('El monto total debe ser mayor a cero.');
-        return;
-      }
-
-      // Recopilar conceptos con detalle para el API
-      const conceptos = recopilarConceptosParaPago();
-
-      // Mostrar loading
-      payButton.disabled = true;
-      payButton.style.display = 'none';
-      loadingMsg.style.display = 'block';
-
-      try {
-        const response = await fetch('/pago/iniciar', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            contribuyente: contribuyenteData,
-            conceptos: conceptos,
-            montoTotal: montoTotal
-          })
-        });
-
-        const data = await response.json();
-
-        if (data.success && data.redirect_url) {
-          // Redirigir a MercadoPago
-          window.location.href = data.redirect_url;
-        } else {
-          throw new Error(data.message || 'Error al iniciar el pago');
-        }
-      } catch (error) {
-        console.error('Error al iniciar pago:', error);
-        alert('Error al procesar el pago: ' + error.message);
-
-        // Restaurar botón
-        payButton.disabled = false;
-        payButton.style.display = 'block';
-        loadingMsg.style.display = 'none';
-      }
-    }
-
-    /**
      * Recopila los conceptos seleccionados con formato para el API
      * @returns {Array} Array de conceptos para enviar al backend
      */
@@ -354,27 +266,79 @@
           const celdas = fila.querySelectorAll('td');
           const idTrans = parseInt(cb.dataset.idtrans);
           const total = parseFloat(cb.dataset.total || '0');
-
-          // Extraer descripción del concepto
           const detalleCell = celdas[2];
           const descripcion = detalleCell ? detalleCell.textContent.trim() : 'Concepto';
 
-          conceptos.push({
-            id: idTrans,
-            descripcion: descripcion,
-            monto: total
-          });
+          conceptos.push({ id: idTrans, descripcion, monto: total });
         }
       });
 
       return conceptos;
     }
 
-    function volverArriba() {
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
+    /**
+     * Inicia el proceso de pago contra el gateway configurado (SIRO)
+     */
+    async function iniciarPago() {
+      const botonesIds = ['btn-ir-a-pagar', 'btn-ir-a-pagar-bottom'];
+      const loadingContainer = document.getElementById('qr-container');
+      const loadingMsg = document.getElementById('pago-loading');
+
+      const conceptosIds = recopilarIdTransSeleccionados();
+      if (conceptosIds.length === 0) {
+        alert('Por favor, seleccione al menos un concepto para pagar.');
+        return;
+      }
+
+      const totalElement = document.getElementById('total-final');
+      const totalText = totalElement?.textContent.replace(/[^\d,.-]/g, '').replace(',', '.') || '0';
+      const montoTotal = parseFloat(totalText);
+
+      if (montoTotal <= 0) {
+        alert('El monto total debe ser mayor a cero.');
+        return;
+      }
+
+      const conceptos = recopilarConceptosParaPago();
+
+      // Deshabilitar botones y mostrar loading
+      botonesIds.forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) { btn.disabled = true; btn.textContent = '⏳ Procesando...'; }
       });
+      loadingContainer.style.display = 'flex';
+      loadingMsg.style.display = 'block';
+      setTimeout(() => loadingContainer.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+
+      try {
+        const response = await fetch('/pago/iniciar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contribuyente: contribuyenteData, conceptos, montoTotal })
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.redirect_url) {
+          window.location.href = data.redirect_url;
+        } else {
+          throw new Error(data.message || 'Error al iniciar el pago');
+        }
+      } catch (error) {
+        console.error('Error al iniciar pago:', error);
+        alert('Error al procesar el pago: ' + error.message);
+
+        // Restaurar botones
+        botonesIds.forEach(id => {
+          const btn = document.getElementById(id);
+          if (btn) { btn.disabled = false; btn.innerHTML = '💳 Ir a Pagar'; }
+        });
+        loadingContainer.style.display = 'none';
+      }
+    }
+
+    function volverArriba() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   </script>
 

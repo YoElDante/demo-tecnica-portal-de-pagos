@@ -55,7 +55,7 @@ if (!MUNICIPIO) {
 // 5. Crear envs/.env.NUEVO con las credenciales de BD
 // 6. Configurar variables de BD en Azure App Service para producción
 
-const municipiosDisponibles = ['elmanzano', 'sanjosedelassalinas', 'tinoco', 'demo'];
+const municipiosDisponibles = ['elmanzano', 'sanjosedelassalinas', 'tinoco', 'demo', 'calchinoeste'];
 
 if (!municipiosDisponibles.includes(MUNICIPIO)) {
   console.error('');
@@ -79,10 +79,30 @@ if (!municipiosDisponibles.includes(MUNICIPIO)) {
 // Las credenciales vienen de variables de entorno
 const sequelize = require('./database.config');
 
-// Datos del municipio: archivo específico según MUNICIPIO
-const municipalidad = require(`./municipalidad.config.${MUNICIPIO}`);
+// ============================================
+// DEMO_MUNICIPIO: override visual para demos
+// ============================================
+// Si MUNICIPIO=demo y DEMO_MUNICIPIO está definido, carga el branding
+// del municipio objetivo sin cambiar las credenciales de base de datos.
+//
+// Uso en Azure App Service (env vars):
+//   MUNICIPIO=demo          ← controla las credenciales de BD (no cambia)
+//   DEMO_MUNICIPIO=calchinoeste  ← controla el branding visual
 
-console.log(`🏛️  Municipio activo: ${municipalidad.nombreCompleto || MUNICIPIO}`);
+let municipioVisual = MUNICIPIO;
+
+if (MUNICIPIO === 'demo') {
+  const demoTarget = process.env.DEMO_MUNICIPIO;
+  if (demoTarget && municipiosDisponibles.includes(demoTarget)) {
+    municipioVisual = demoTarget;
+    console.log(`🎭 Modo demo: cargando branding de "${demoTarget}"`);
+  }
+}
+
+// Datos del municipio: archivo específico según municipio visual activo
+const municipalidad = require(`./municipalidad.config.${municipioVisual}`);
+
+console.log(`🏛️  Municipio activo: ${municipalidad.nombreCompleto || municipioVisual}`);
 
 // ============================================
 // EXPORTS

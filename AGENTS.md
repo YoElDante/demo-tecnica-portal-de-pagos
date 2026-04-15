@@ -50,7 +50,7 @@ Este repositorio implementa un portal web municipal para consultar deudas por DN
 8. Los tickets tienen validez limitada porque los intereses cambian diariamente.
 9. Todo cambio nuevo debe respetar el modelo multi-municipio y no hardcodear nombres, logos o URLs.
 10. Antes de implementar una feature relevante, revisar `openspec/specs` y trabajar con `openspec/changes`.
-11. Todo trabajo nuevo parte desde `develop`. Nunca commitear codigo en `main` directamente.
+11. La rama principal de trabajo es `main`. La rama `develop` fue eliminada. Todo cambio se commitea directamente en `main`, que es la rama de produccion.
 12. `.env` y `envs/` no se versionan ni se usan como mecanismo de promocion entre ramas; demo y produccion se configuran por entorno.
 13. Las dependencias npm se declaran con version exacta (sin `^` ni `~`) para evitar actualizaciones no controladas.
 14. No actualizar dependencias en repositorios estables salvo necesidad de seguridad o correccion critica, y siempre con validacion explicita.
@@ -110,9 +110,8 @@ npm run testDB
 1. Revisar el PRD y la spec relevante en `openspec/specs`.
 2. Si el cambio no existe, crear un nuevo directorio en `openspec/changes/<nombre-del-cambio>/`.
 3. Definir `proposal.md`, `design.md` y `tasks.md` antes de implementar.
-4. Crear rama `feature/<nombre-del-cambio>` desde `develop` actualizado.
-5. Implementar respetando las reglas globales y las skills aplicables.
-6. Mergear a `develop`, validar en demo, luego mergear a `main` para produccion.
+4. Implementar en `main` respetando las reglas globales y las skills aplicables.
+5. Validar en demo antes de asumir que produccion esta correcta.
 7. Actualizar la documentacion de producto si cambia comportamiento funcional.
 
 Ver flujo completo en `docs/GUIA_RAMAS.md`.
