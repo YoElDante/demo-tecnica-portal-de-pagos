@@ -416,15 +416,15 @@
           })
           .then(function(data) {
             if (data.status === 'APROBADO') {
-              const credencial = code
-                ? '&code=' + encodeURIComponent(code)
-                : (token ? '&token=' + encodeURIComponent(token) : '');
+              const credencial = code ?
+                '&code=' + encodeURIComponent(code) :
+                (token ? '&token=' + encodeURIComponent(token) : '');
               window.location.href = '/pagos/exitoso?ref=' + encodeURIComponent(ref) +
                 credencial;
             } else if (data.status === 'RECHAZADO' || data.status === 'EXPIRADO') {
-              const credencial = code
-                ? '&code=' + encodeURIComponent(code)
-                : (token ? '&token=' + encodeURIComponent(token) : '');
+              const credencial = code ?
+                '&code=' + encodeURIComponent(code) :
+                (token ? '&token=' + encodeURIComponent(token) : '');
               window.location.href = '/pagos/error?ref=' + encodeURIComponent(ref) +
                 credencial;
             }
