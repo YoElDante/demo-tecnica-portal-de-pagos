@@ -128,16 +128,16 @@ const crearRegistroCobro = async (deudaOriginal, datosPago, numeroPago, montoCob
     NRO_CUOTA: deudaOriginal.NRO_CUOTA,
     ID_BIEN: deudaOriginal.ID_BIEN,
     Ejercicio: ejercicioActual,
-    CuentaContable: deudaOriginal.CuentaContable || '1101'
+    CuentaContable: deudaOriginal.CuentaContable
   }, { transaction });
 };
 
 /**
- * Confirma un pago de MercadoPago y actualiza la base de datos
- * @param {Object} datosPago - Datos recibidos del webhook
- * @param {string} datosPago.payment_id - ID del pago en MercadoPago
+ * Confirma un pago recibido via webhook y actualiza la base de datos
+ * @param {Object} datosPago - Datos normalizados recibidos del gateway
+ * @param {string} datosPago.payment_id - Identificador operativo del pago
  * @param {string} datosPago.status - Estado del pago (approved, rejected, pending)
- * @param {string} datosPago.external_reference - Referencia externa
+ * @param {string} datosPago.external_reference - Referencia externa del ticket
  * @param {number} datosPago.transaction_amount - Monto total de la transacción
  * @param {string} datosPago.date_approved - Fecha de aprobación
  * @param {Object} datosPago.metadata - Metadata con conceptos_ids
@@ -259,6 +259,24 @@ const extraerConceptosDesdeTicket = (ticket) => {
 };
 
 /**
+ * Extrae los créditos a favor persistidos dentro del snapshot del ticket.
+ * @param {Object} ticket - Registro de TicketsPago
+ * @returns {Array<Object>}
+ */
+const extraerCreditosDesdeTicket = (ticket) => {
+  if (!ticket?.payloadSnapshot) {
+    return [];
+  }
+
+  try {
+    const snapshot = JSON.parse(ticket.payloadSnapshot);
+    return Array.isArray(snapshot?.creditosAplicados) ? snapshot.creditosAplicados : [];
+  } catch (error) {
+    throw new Error('El payload_snapshot del ticket no contiene un JSON válido');
+  }
+};
+
+/**
  * Confirma un pago proveniente del API Gateway usando el snapshot del ticket.
  * @param {Object} datosPago - Datos recibidos desde el gateway
  * @param {Object} datosPago.ticket - Registro TicketsPago asociado
@@ -292,6 +310,7 @@ const confirmarPagoGateway = async (datosPago) => {
   }
 
   const conceptos = extraerConceptosDesdeTicket(ticket);
+  const creditosAplicados = extraerCreditosDesdeTicket(ticket);
   if (conceptos.length === 0) {
     throw new Error('El ticket no tiene conceptos asociados para aplicar el cobro');
   }
@@ -314,6 +333,7 @@ const confirmarPagoGateway = async (datosPago) => {
 
   try {
     const resultados = [];
+    const resultadosCreditos = [];
     const cantidadConceptos = conceptos.length;
     const montoTotal = Number(importe || ticket.amountTotal || 0);
     const montoPorConcepto = cantidadConceptos > 0 ? montoTotal / cantidadConceptos : 0;
@@ -369,9 +389,64 @@ const confirmarPagoGateway = async (datosPago) => {
       });
     }
 
+    for (const credito of creditosAplicados) {
+      const idTransCredito = Number(credito?.IdTrans || credito?.id);
+
+      if (!Number.isInteger(idTransCredito) || idTransCredito <= 0) {
+        resultadosCreditos.push({
+          IdTrans: credito?.IdTrans || credito?.id || null,
+          success: false,
+          error: 'Crédito sin IdTrans válido en el snapshot del ticket'
+        });
+        continue;
+      }
+
+      const deudaCredito = await obtenerDeudaPorId(idTransCredito);
+
+      if (!deudaCredito) {
+        resultadosCreditos.push({
+          IdTrans: idTransCredito,
+          success: false,
+          error: 'Crédito no encontrado'
+        });
+        continue;
+      }
+
+      if (deudaCredito.Saldo === 0 && deudaCredito.EsPago === 1) {
+        resultadosCreditos.push({
+          IdTrans: idTransCredito,
+          success: false,
+          error: 'Crédito ya conciliado'
+        });
+        continue;
+      }
+
+      const saldoCredito = Number(deudaCredito.Saldo || deudaCredito.Importe || 0);
+      if (!(saldoCredito < 0)) {
+        resultadosCreditos.push({
+          IdTrans: idTransCredito,
+          success: false,
+          error: 'El movimiento no corresponde a crédito a favor'
+        });
+        continue;
+      }
+
+      await actualizarDeudaComoPagada(idTransCredito, {
+        payment_id: `${operationReference}-CRED`,
+        date_approved: fechaOperacion
+      }, numeroPago, transaction);
+
+      resultadosCreditos.push({
+        IdTrans: idTransCredito,
+        success: true,
+        detalle: deudaCredito.Detalle || 'Crédito a favor conciliado'
+      });
+    }
+
     await transaction.commit();
 
     const exitosos = resultados.filter((resultado) => resultado.success).length;
+    const creditosLimpiados = resultadosCreditos.filter((resultado) => resultado.success).length;
 
     return {
       received: true,
@@ -380,7 +455,10 @@ const confirmarPagoGateway = async (datosPago) => {
       numero_pago: numeroPago,
       conceptos_procesados: exitosos,
       conceptos_total: cantidadConceptos,
-      resultados
+      creditos_limpiados: creditosLimpiados,
+      creditos_total: creditosAplicados.length,
+      resultados,
+      resultados_creditos: resultadosCreditos
     };
   } catch (error) {
     await transaction.rollback();

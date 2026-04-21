@@ -91,6 +91,57 @@ Criterio de aceptacion:
 - Auditoria de horario en ART (America/Argentina/Cordoba) consistente entre portal y gateway.
 ```
 
+## 4.1) Update Dev Local (2026-04-18) - Handoff para IA Superior
+
+Usar este bloque para alinear contrato portal-gateway en desarrollo local segun decisiones cerradas:
+
+```text
+Estado actual (dev local):
+- Portal local: http://localhost:4000 (HTTP, no HTTPS por defecto).
+- Gateway local: http://localhost:3000.
+
+Decisiones confirmadas:
+1) Logging de desarrollo:
+   - Se unifico logger en portal con niveles error|warn|info|debug|trace.
+   - En NODE_ENV=development el nivel por defecto es trace.
+   - Se removio `LOG_LEVEL=trace` inline del script npm por compatibilidad Windows; el default sigue activo desde el logger.
+
+2) Contrato de create payment (portal -> gateway):
+   - Endpoint: POST /api/pagos (gateway).
+   - Para SIRO, el portal ahora envia callback en ambas convenciones:
+     - callback_url = http://localhost:4000/api/pagos/confirmacion
+     - callbackUrl  = http://localhost:4000/api/pagos/confirmacion
+   - Motivo: compatibilidad entre versiones del gateway (snake_case vs camelCase).
+
+3) Fuente de verdad del pago:
+   - Se mantiene sin cambios: webhook server-to-server del gateway al portal.
+   - Redirect de usuario NO confirma pago contable.
+
+4) Hallazgo de interoperabilidad:
+   - Si el gateway responde `callbackUrl no configurada — PUBLIC_URL es requerido`, revisar su .env local.
+   - El gateway puede estar usando fallback interno PUBLIC_URL cuando no toma callback del body.
+
+5) Config dev del portal:
+   - API_GATEWAY_URL debe ser valor unico (sin `|`) -> http://localhost:3000
+   - FRONTEND_PUBLIC_URL debe ser valor unico (sin `|`) -> http://localhost:4000
+
+Pendiente a validar en orquestacion multi-repo:
+- Confirmar en gateway cual campo es canonico para callback (callback_url o callbackUrl).
+- Acordar fallback oficial con PUBLIC_URL para evitar errores 500 en dev.
+- Cerrar contrato versionado de request/response para SIRO y siguientes pasarelas.
+```
+
+### Archivos que debe leer la IA superior (orden recomendado)
+
+1. `docs/integracion/CHECKLIST_APPSETTINGS_Y_ORQUESTADOR_TICKETS.md` (este update).
+2. `docs/CONTRACT-PORTAL-GATEWAY.md`.
+3. `docs/INTEGRACION_PAGOS.md`.
+4. `services/paymentGateway.service.js`.
+5. `routes/api/index.js`.
+6. `controllers/payment.controller.js`.
+7. `envs/.env.demo`.
+8. `README.md` (secciones Logging en Desarrollo e Integracion Local Portal + Gateway).
+
 ## 5) Checklist de Cierre
 
 1. App Settings aplicadas en todos los municipios.

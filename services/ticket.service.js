@@ -10,6 +10,56 @@
 const { municipalidad: municipalidadConfig } = require('../config');
 const APP_TIMEZONE = process.env.APP_TIMEZONE || 'America/Argentina/Cordoba';
 
+function obtenerPrimerValor(...valores) {
+  for (const valor of valores) {
+    if (valor !== undefined && valor !== null && String(valor).trim() !== '') {
+      return valor;
+    }
+  }
+
+  return null;
+}
+
+function obtenerNumeroSeguro(...valores) {
+  for (const valor of valores) {
+    if (valor === undefined || valor === null || valor === '') {
+      continue;
+    }
+
+    const numero = Number(valor);
+    if (!Number.isNaN(numero)) {
+      return numero;
+    }
+  }
+
+  return 0;
+}
+
+function formatearPeriodo(concepto) {
+  const cuota = obtenerPrimerValor(concepto.cuota, concepto.Cuota, concepto.NRO_CUOTA, concepto.CuotaPlan);
+  const anio = obtenerPrimerValor(concepto.anio, concepto.Anio, concepto.ANO_CUOTA);
+
+  if (cuota && anio) {
+    return `${cuota}/${anio}`;
+  }
+
+  const fechaBase = obtenerPrimerValor(concepto.fecha, concepto.Fecha, concepto.fechaVto, concepto.FechaVto);
+  if (!fechaBase) {
+    return '-';
+  }
+
+  const fecha = new Date(fechaBase);
+  if (Number.isNaN(fecha.getTime())) {
+    return '-';
+  }
+
+  return new Intl.DateTimeFormat('es-AR', {
+    timeZone: APP_TIMEZONE,
+    month: '2-digit',
+    year: 'numeric'
+  }).format(fecha);
+}
+
 // ============================================
 // GENERACIÓN DE NÚMERO DE TICKET
 // ============================================
@@ -45,7 +95,7 @@ function obtenerRangoUTCDelDia(fechaStr) {
   const d = fechaStr.slice(6, 8);
   return {
     inicioUTC: new Date(`${y}-${m}-${d}T00:00:00.000-03:00`),
-    finUTC:    new Date(`${y}-${m}-${d}T23:59:59.999-03:00`)
+    finUTC: new Date(`${y}-${m}-${d}T23:59:59.999-03:00`)
   };
 }
 
@@ -177,12 +227,12 @@ function procesarConceptos(conceptos) {
     .filter(concepto => {
       // Debe tener al menos un valor numérico válido
       if (!concepto) return false;
-      const total = concepto.total ?? concepto.Total;
+      const total = concepto.total ?? concepto.Total ?? concepto.monto ?? concepto.Monto;
       const importe = concepto.importe ?? concepto.Importe;
       // Si todos son undefined/null/0 y no hay descripción, descartar
       if (
         (!total && !importe) &&
-        !(concepto.tipoDescripcion || concepto.TipoDescripcion)
+        !(concepto.tipoDescripcion || concepto.TipoDescripcion || concepto.detalle || concepto.Detalle || concepto.descripcion)
       ) {
         return false;
       }
@@ -191,17 +241,32 @@ function procesarConceptos(conceptos) {
       return true;
     })
     .map(concepto => {
-      const interes = parseFloat(concepto.interes || concepto.Interes || 0);
-      const importe = parseFloat(concepto.importe || concepto.Importe || 0);
-      const total = parseFloat(concepto.total || concepto.Total || 0);
+      const interes = obtenerNumeroSeguro(concepto.interes, concepto.Interes);
+      const importeOriginal = obtenerPrimerValor(concepto.importe, concepto.Importe);
+      const totalOriginal = obtenerPrimerValor(concepto.total, concepto.Total, concepto.monto, concepto.Monto);
+      const total = obtenerNumeroSeguro(totalOriginal);
+      const importe = importeOriginal !== null
+        ? obtenerNumeroSeguro(importeOriginal)
+        : total;
+
+      const detalle = obtenerPrimerValor(concepto.detalle, concepto.Detalle, concepto.descripcion) || '';
+      const tipoDescripcion = obtenerPrimerValor(concepto.tipoDescripcion, concepto.TipoDescripcion) || 'Concepto';
+      const fechaGeneracion = formatearFecha(obtenerPrimerValor(concepto.fecha, concepto.Fecha));
+      const fechaVto = formatearFecha(obtenerPrimerValor(concepto.fechaVto, concepto.FechaVto));
+      const periodo = formatearPeriodo(concepto);
 
       return {
-        fechaVto: formatearFecha(concepto.fechaVto || concepto.FechaVto),
-        tipoDescripcion: concepto.tipoDescripcion || concepto.TipoDescripcion || 'Concepto',
-        detalle: concepto.detalle || concepto.Detalle || '',
-        idBien: concepto.idBien || concepto.ID_BIEN || '-',
-        cuota: concepto.cuota || concepto.Cuota || '-',
-        anio: concepto.anio || concepto.Anio || '-',
+        idTrans: obtenerPrimerValor(concepto.IdTrans, concepto.id, concepto.ID_TRANS),
+        fecha: fechaGeneracion,
+        fechaGeneracion,
+        fechaVto,
+        periodo,
+        tipoDescripcion,
+        detalle,
+        descripcionCompleta: detalle || tipoDescripcion,
+        idBien: obtenerPrimerValor(concepto.idBien, concepto.IdBien, concepto.ID_BIEN) || '-',
+        cuota: obtenerPrimerValor(concepto.cuota, concepto.Cuota, concepto.NRO_CUOTA) || '-',
+        anio: obtenerPrimerValor(concepto.anio, concepto.Anio, concepto.ANO_CUOTA) || '-',
         importe: formatearMoneda(importe),
         importeNumerico: importe, // Para cálculos
         // Si interés < 0 es descuento: mostrar con signo negativo
@@ -213,6 +278,46 @@ function procesarConceptos(conceptos) {
         totalNumerico: total // Para cálculos
       };
     });
+}
+
+async function reconstruirConceptosPersistidos(conceptos) {
+  const conceptosBase = Array.isArray(conceptos) ? conceptos : [];
+  const ids = [...new Set(
+    conceptosBase
+      .map((concepto) => Number(obtenerPrimerValor(concepto?.IdTrans, concepto?.id, concepto?.ID_TRANS)))
+      .filter((id) => Number.isInteger(id) && id > 0)
+  )];
+
+  let metadataPorId = new Map();
+
+  if (ids.length > 0) {
+    const deudasService = require('./deudas.service');
+    const deudas = await deudasService.obtenerDeudasPorIds(ids);
+    metadataPorId = new Map(deudas.map((deuda) => [Number(deuda.IdTrans), deuda]));
+  }
+
+  const conceptosEnriquecidos = conceptosBase.map((concepto) => {
+    const idTrans = Number(obtenerPrimerValor(concepto?.IdTrans, concepto?.id, concepto?.ID_TRANS));
+    const metadata = Number.isInteger(idTrans) ? metadataPorId.get(idTrans) : null;
+
+    return {
+      ...(metadata || {}),
+      ...(concepto || {}),
+      IdTrans: Number.isInteger(idTrans) ? idTrans : obtenerPrimerValor(metadata?.IdTrans, concepto?.IdTrans, concepto?.id),
+      Detalle: obtenerPrimerValor(concepto?.Detalle, concepto?.detalle, concepto?.descripcion, metadata?.Detalle),
+      TipoDescripcion: obtenerPrimerValor(concepto?.TipoDescripcion, concepto?.tipoDescripcion, metadata?.TipoDescripcion),
+      IdBien: obtenerPrimerValor(concepto?.IdBien, concepto?.idBien, metadata?.IdBien),
+      Anio: obtenerPrimerValor(concepto?.Anio, concepto?.anio, metadata?.Anio),
+      Cuota: obtenerPrimerValor(concepto?.Cuota, concepto?.cuota, metadata?.Cuota),
+      Fecha: obtenerPrimerValor(concepto?.Fecha, concepto?.fecha, metadata?.Fecha),
+      FechaVto: obtenerPrimerValor(concepto?.FechaVto, concepto?.fechaVto, metadata?.FechaVto),
+      Importe: obtenerPrimerValor(concepto?.Importe, concepto?.importe, metadata?.Importe, concepto?.monto),
+      Interes: obtenerPrimerValor(concepto?.Interes, concepto?.interes, metadata?.Interes),
+      Total: obtenerPrimerValor(concepto?.Total, concepto?.total, concepto?.monto, metadata?.Total)
+    };
+  });
+
+  return procesarConceptos(conceptosEnriquecidos);
 }
 
 /**
@@ -315,6 +420,7 @@ module.exports = {
   prepararDatosTicket,
   validarDatosTicket,
   procesarConceptos,
+  reconstruirConceptosPersistidos,
   formatearMoneda,
   formatearFecha,
   obtenerFechaEmision,

@@ -16,15 +16,35 @@ function obtenerCheckboxesConceptosMarcados() {
   return Array.from(document.querySelectorAll('.deudas__checkbox[data-idtrans]:checked'));
 }
 
+function obtenerCreditoAutomaticoVisible() {
+  const filasVisibles = document.querySelectorAll('tbody tr[data-total-deuda]:not([style*="display: none"])');
+  let totalCredito = 0;
+
+  filasVisibles.forEach((fila) => {
+    const totalFila = parseFloat(fila.getAttribute('data-total-deuda') || '0');
+    if (totalFila < 0) {
+      totalCredito += totalFila;
+    }
+  });
+
+  return totalCredito;
+}
+
 function actualizarTotal() {
   const checkboxes = obtenerCheckboxesConceptosMarcados();
-  let total = 0;
+  let totalPositivosSeleccionados = 0;
 
   checkboxes.forEach(cb => {
     // Ignorar filas ocultas
     if (cb.closest('tr') && cb.closest('tr').style.display === 'none') return;
-    total += parseFloat(cb.dataset.total || '0');
+
+    const montoConcepto = parseFloat(cb.dataset.total || '0');
+    if (montoConcepto > 0) {
+      totalPositivosSeleccionados += montoConcepto;
+    }
   });
+
+  const total = totalPositivosSeleccionados + obtenerCreditoAutomaticoVisible();
 
   const totalElement = document.getElementById('total-final');
   if (totalElement) {
@@ -57,7 +77,7 @@ function toggleTodos() {
   const filasVisibles = document.querySelectorAll('tbody tr[data-tipo]:not([style*="display: none"])');
   filasVisibles.forEach(fila => {
     const cb = fila.querySelector('.deudas__checkbox');
-    if (cb) cb.checked = checkboxTodos.checked;
+    if (cb && !cb.disabled) cb.checked = checkboxTodos.checked;
   });
   actualizarTotal();
 }
@@ -120,7 +140,9 @@ function recopilarConceptosSeleccionados() {
         total: parseFloat(cb.dataset.total || '0')
       };
 
-      conceptos.push(concepto);
+      if (concepto.total > 0) {
+        conceptos.push(concepto);
+      }
     }
   });
 

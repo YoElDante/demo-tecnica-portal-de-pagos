@@ -12,6 +12,8 @@ const pagosService = require('../services/pagos.service');
 const ticketsPagoService = require('../services/ticketsPago.service');
 const clientesService = require('../services/clientes.service');
 const gatewayTokenService = require('../services/gatewayToken.service');
+const ticketService = require('../services/ticket.service');
+const deudasService = require('../services/deudas.service');
 // Configuración centralizada - cambiar municipio en .env (MUNICIPIO=xxx)
 const { municipalidad } = require('../config');
 
@@ -21,6 +23,7 @@ if (!process.env.PAYMENT_GATEWAY) {
 }
 const GATEWAY_PROVIDER = (process.env.PAYMENT_GATEWAY || 'SIRO').toUpperCase();
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+const PAYMENT_REDIRECT_DEBUG = process.env.PAYMENT_REDIRECT_DEBUG === 'true' || !IS_PRODUCTION;
 
 function normalizarEstado(estado) {
   const mapping = {
@@ -43,12 +46,64 @@ function renderizarErrorGenerico(res) {
   });
 }
 
-function validarRedirectSeguro(req) {
+function normalizarCadena(valor) {
+  if (valor === null || valor === undefined) {
+    return null;
+  }
+
+  const texto = String(valor).trim();
+  return texto.length > 0 ? texto : null;
+}
+
+function extraerExternalReferenceRedirect(decoded = {}, query = {}) {
+  return normalizarCadena(
+    decoded?.ref
+    || decoded?.external_reference
+    || decoded?.externalReference
+    || query?.ref
+    || query?.external_reference
+    || query?.externalReference
+  );
+}
+
+function extraerEstadoRedirect(decoded = {}, query = {}) {
+  return normalizarCadena(
+    decoded?.estado
+    || decoded?.status
+    || decoded?.payment_status
+    || query?.status
+    || query?.estado
+  );
+}
+
+async function validarRedirectSeguro(req) {
+  const refRecibida = normalizarCadena(req.query.ref || req.query.external_reference || req.query.externalReference);
+  const code = normalizarCadena(req.query.code);
+
+  if (code) {
+    const exchanged = await paymentGatewayService.exchangeRedirectCode({
+      code,
+      externalReference: refRecibida,
+      consume: false
+    });
+
+    if (exchanged?.municipio_id && MUNICIPIO_ID && exchanged.municipio_id.toUpperCase() !== MUNICIPIO_ID.toUpperCase()) {
+      throw new Error('El redirect code pertenece a otro municipio');
+    }
+
+    return {
+      externalReference: normalizarCadena(exchanged.external_reference) || refRecibida || 'N/A',
+      estado: normalizarEstado(exchanged.estado),
+      redirectCode: code,
+      redirectToken: null
+    };
+  }
+
   const token = req.query.token;
   const decoded = gatewayTokenService.verifyGatewayToken(token);
-  const refRecibida = req.query.ref || req.query.external_reference || null;
+  const refToken = normalizarCadena(decoded?.ref || decoded?.external_reference || decoded?.externalReference);
 
-  if (decoded?.ref && refRecibida && decoded.ref !== refRecibida) {
+  if (refToken && refRecibida && refToken !== refRecibida) {
     throw new Error('La referencia del redirect no coincide con el token firmado');
   }
 
@@ -57,8 +112,10 @@ function validarRedirectSeguro(req) {
   }
 
   return {
-    externalReference: decoded?.ref || refRecibida || 'N/A',
-    estado: normalizarEstado(decoded?.estado || req.query.status)
+    externalReference: extraerExternalReferenceRedirect(decoded, req.query) || 'N/A',
+    estado: normalizarEstado(extraerEstadoRedirect(decoded, req.query)),
+    redirectCode: null,
+    redirectToken: token || ''
   };
 }
 
@@ -87,22 +144,24 @@ function extraerEstadoWebhook(payload = {}) {
   return estadoWebhook || (payload.pago_exitoso ? 'APROBADO' : 'PENDIENTE');
 }
 
-function construirDetalleTicket(ticket, externalReference, estadoFallback = 'PENDIENTE') {
+async function construirDetalleTicket(ticket, externalReference, estadoFallback = 'PENDIENTE') {
   const payload = parsePayloadSnapshot(ticket?.payloadSnapshot);
   const conceptos = Array.isArray(payload?.conceptos)
-    ? payload.conceptos.map((concepto) => ({
-      // El snapshot guarda los campos de formatearDeuda (Detalle, Total, TipoDescripcion)
-      // con mayúscula inicial — soportamos ambas convenciones
-      descripcion: concepto.Detalle || concepto.TipoDescripcion || concepto.detalle || concepto.tipoDescripcion || concepto.descripcion || 'Concepto municipal',
-      importe: Number(concepto.Total || concepto.total || concepto.importeNumerico || concepto.importe || concepto.monto || 0)
-    }))
+    ? await ticketService.reconstruirConceptosPersistidos(payload.conceptos)
     : [];
+
+  const montoTotal = Number(
+    ticket?.amountTotal
+    || payload?.montoTotal
+    || conceptos.reduce((acc, concepto) => acc + Number(concepto.totalNumerico || 0), 0)
+  );
 
   return {
     ticketNumber: ticket?.ticketNumber || null,
     externalReference: externalReference || ticket?.externalReference || 'N/A',
     estado: normalizarEstado(ticket?.status || estadoFallback),
-    montoTotal: Number(ticket?.amountTotal || payload?.montoTotal || 0),
+    montoTotal,
+    montoTotalDisplay: ticketService.formatearMoneda(montoTotal),
     idOperacion: ticket?.idOperacion || null,
     conceptos
   };
@@ -117,7 +176,7 @@ function construirDetalleTicket(ticket, externalReference, estadoFallback = 'PEN
  */
 async function iniciarPago(req, res) {
   try {
-    const { conceptos, contribuyente, montoTotal } = req.body;
+    const { conceptos, contribuyente, montoTotal, creditosAplicados } = req.body;
 
     console.log('🛒 Iniciando proceso de pago:', {
       contribuyente_dni: contribuyente?.dni,
@@ -142,20 +201,97 @@ async function iniciarPago(req, res) {
     }
     const codigoContribuyente = cliente.Codigo;
 
+    const deudasCliente = await deudasService.obtenerDeudasPorCodigo(codigoContribuyente);
+    const deudasPorId = new Map(deudasCliente.map((deuda) => [Number(deuda.IdTrans), deuda]));
+    const conceptosEnriquecidos = conceptos.map((concepto) => {
+      const idTrans = Number(concepto.IdTrans || concepto.id);
+      const deuda = Number.isInteger(idTrans) ? deudasPorId.get(idTrans) : null;
+
+      return {
+        ...(deuda || {}),
+        ...(concepto || {}),
+        IdTrans: Number.isInteger(idTrans) ? idTrans : null,
+        Detalle: concepto.Detalle || concepto.detalle || concepto.descripcion || deuda?.Detalle || 'Concepto municipal',
+        TipoDescripcion: concepto.TipoDescripcion || concepto.tipoDescripcion || deuda?.TipoDescripcion || 'Concepto municipal',
+        IdBien: concepto.IdBien || concepto.idBien || deuda?.IdBien || '-',
+        Cuota: concepto.Cuota || concepto.cuota || deuda?.Cuota || '-',
+        Anio: concepto.Anio || concepto.anio || deuda?.Anio || '-',
+        Fecha: concepto.Fecha || concepto.fecha || deuda?.Fecha || '',
+        FechaVto: concepto.FechaVto || concepto.fechaVto || deuda?.FechaVto || '',
+        Importe: concepto.Importe || concepto.importe || concepto.monto || deuda?.Importe || 0,
+        Interes: concepto.Interes || concepto.interes || deuda?.Interes || 0,
+        Total: concepto.Total || concepto.total || concepto.monto || deuda?.Total || 0
+      };
+    });
+
+    const conceptosPositivos = conceptosEnriquecidos.filter((concepto) => Number(concepto.Total || concepto.total || 0) > 0);
+
+    if (conceptosPositivos.length === 0) {
+      return res.status(400).json({ success: false, message: 'Debe seleccionar al menos un concepto con saldo positivo para pagar' });
+    }
+
+    const creditosInput = Array.isArray(creditosAplicados) ? creditosAplicados : [];
+    const creditosIds = [...new Set(
+      creditosInput
+        .map((credito) => Number(credito?.id || credito?.IdTrans))
+        .filter((id) => Number.isInteger(id) && id > 0)
+    )];
+
+    let creditosNormalizados = [];
+    if (creditosIds.length > 0) {
+      const creditosDesdeBd = await deudasService.obtenerDeudasPorIds(creditosIds);
+      creditosNormalizados = creditosDesdeBd
+        .filter((credito) => Number(credito.Total || credito.Importe || 0) < 0)
+        .map((credito) => ({
+          IdTrans: credito.IdTrans,
+          Detalle: credito.Detalle || 'Crédito a favor',
+          TipoDescripcion: credito.TipoDescripcion || 'Crédito a favor',
+          IdBien: credito.IdBien || '-',
+          Cuota: credito.Cuota || '-',
+          Anio: credito.Anio || '-',
+          Fecha: credito.Fecha || '',
+          FechaVto: credito.FechaVto || '',
+          Importe: Number(credito.Importe || 0),
+          Interes: 0,
+          Total: Number(credito.Total || 0)
+        }));
+    }
+
+    const totalPositivos = conceptosPositivos.reduce((acc, concepto) => acc + Number(concepto.Total || 0), 0);
+    const totalCreditos = creditosNormalizados.reduce((acc, credito) => acc + Number(credito.Total || 0), 0);
+    const montoNeto = Number((totalPositivos + totalCreditos).toFixed(2));
+
+    if (montoNeto <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'El saldo neto a pagar es menor o igual a cero. Existe crédito a favor del contribuyente.'
+      });
+    }
+
+    const nombreCompleto = `${cliente.Nombre || ''} ${cliente.Apellido || ''}`.trim();
+
     const { ticket, ticketNumber } = await ticketsPagoService.crearTicketConNumeroUnico({
       municipioId: MUNICIPIO_ID.toUpperCase(),
       dni: contribuyente.dni,
       gatewayProvider: GATEWAY_PROVIDER,
-      amountTotal: Number(montoTotal),
-      payloadSnapshot: { conceptos, contribuyente: { dni: contribuyente.dni }, montoTotal }
+      amountTotal: montoNeto,
+      payloadSnapshot: {
+        conceptos: conceptosPositivos,
+        creditosAplicados: creditosNormalizados,
+        contribuyente: { dni: contribuyente.dni, nombreCompleto },
+        montoTotal: montoNeto,
+        montoPositivos: totalPositivos,
+        montoCreditos: totalCreditos,
+        montoSolicitadoFrontend: Number(montoTotal || 0)
+      }
     });
 
     console.log('🎫 Ticket creado en BD:', { ticketNumber, ticketId: ticket.ticketId });
 
     const resultado = await paymentGatewayService.createPayment({
       contribuyente: { ...contribuyente, codigo: codigoContribuyente },
-      conceptos,
-      montoTotal,
+      conceptos: conceptosPositivos,
+      montoTotal: montoNeto,
       ticketNumber
     });
 
@@ -175,7 +311,9 @@ async function iniciarPago(req, res) {
       success: true,
       redirect_url: resultado.payment_url,
       external_reference: externalReference,
-      ticket_number: ticketNumber
+      ticket_number: ticketNumber,
+      monto_neto: montoNeto,
+      credito_aplicado: totalCreditos
     });
 
   } catch (error) {
@@ -267,14 +405,33 @@ async function confirmacion(req, res) {
     }
 
     if (estadoNormalizado === 'APROBADO') {
-      const resultado = await pagosService.confirmarPagoGateway({
-        ticket,
-        externalReference,
-        estado: estadoNormalizado,
-        idOperacion: idOperacionNormalizado,
-        importe: importe || transaction_amount || transactionAmount,
-        fechaOperacion: fecha_operacion || fechaOperacion || date_approved || dateApproved
-      });
+      let resultado;
+      let contabilizacionError = null;
+
+      try {
+        resultado = await pagosService.confirmarPagoGateway({
+          ticket,
+          externalReference,
+          estado: estadoNormalizado,
+          idOperacion: idOperacionNormalizado,
+          importe: importe || transaction_amount || transactionAmount,
+          fechaOperacion: fecha_operacion || fechaOperacion || date_approved || dateApproved
+        });
+      } catch (error) {
+        if (IS_PRODUCTION) {
+          throw error;
+        }
+
+        contabilizacionError = error;
+        resultado = {
+          processed: false,
+          already_processed: false,
+          conceptos_procesados: 0,
+          numero_pago: null
+        };
+
+        console.warn('⚠️ [DEV] Falló contabilización, se confirma ticket igual para pruebas de integración:', error.message);
+      }
 
       await ticketsPagoService.actualizarEstadoDesdeGateway(ticket.ticketId, {
         estado: estadoNormalizado,
@@ -292,7 +449,10 @@ async function confirmacion(req, res) {
         nroOperacion: nro_comprobante || nroOperacion || null,
         origen: origenNormalizado,
         payload,
-        processResult: resultado.already_processed ? 'DUPLICADO' : 'APLICADO'
+        processResult: resultado.already_processed
+          ? 'DUPLICADO'
+          : 'APLICADO',
+        errorMessage: contabilizacionError ? contabilizacionError.message : null
       });
 
       console.log('✅ Pago aprobado y procesado:', {
@@ -307,7 +467,10 @@ async function confirmacion(req, res) {
         processed: resultado.processed,
         message: resultado.already_processed
           ? 'Pago ya procesado anteriormente'
-          : `${resultado.conceptos_procesados} conceptos actualizados`,
+          : contabilizacionError
+            ? 'Pago confirmado en ticket (DEV). Contabilización pendiente por error local.'
+            : `${resultado.conceptos_procesados} conceptos actualizados`,
+        contabilizacion_pendiente: Boolean(contabilizacionError),
         numero_pago: resultado.numero_pago
       });
     }
@@ -357,10 +520,39 @@ async function confirmacion(req, res) {
  */
 async function pagoExitoso(req, res) {
   try {
-    const { externalReference, estado } = validarRedirectSeguro(req);
+    const { externalReference, estado, redirectCode, redirectToken } = await validarRedirectSeguro(req);
+
+    if (PAYMENT_REDIRECT_DEBUG) {
+      console.log('🔍 [pagoExitoso] Buscando ticket:', {
+        externalReference,
+        estado,
+        hasToken: Boolean(req.query.token)
+      });
+    }
 
     const ticket = await ticketsPagoService.obtenerPorExternalReference(externalReference);
-    const detalleTicket = construirDetalleTicket(ticket, externalReference, estado);
+
+    if (PAYMENT_REDIRECT_DEBUG) {
+      console.log('🔍 [pagoExitoso] Ticket encontrado:', ticket ? {
+        ticketId: ticket.ticketId,
+        ticketNumber: ticket.ticketNumber,
+        status: ticket.status,
+        amountTotal: ticket.amountTotal,
+        hasSnapshot: Boolean(ticket.payloadSnapshot),
+        snapshotLength: ticket.payloadSnapshot?.length || 0
+      } : 'NULL');
+    }
+
+    const detalleTicket = await construirDetalleTicket(ticket, externalReference, estado);
+
+    if (PAYMENT_REDIRECT_DEBUG) {
+      console.log('🔍 [pagoExitoso] Detalle construido:', {
+        montoTotal: detalleTicket.montoTotal,
+        conceptosCount: detalleTicket.conceptos.length,
+        estado: detalleTicket.estado,
+        ticketNumber: detalleTicket.ticketNumber
+      });
+    }
 
     // El estado del token es la fuente de verdad: el gateway lo firma después
     // de confirmar con SIRO. No esperamos a que el webhook actualice la BD.
@@ -373,9 +565,11 @@ async function pagoExitoso(req, res) {
         external_reference: detalleTicket.externalReference,
         ticket_number: detalleTicket.ticketNumber,
         payment_id: detalleTicket.idOperacion,
-        redirect_token: req.query.token || '',
+        redirect_token: redirectToken || '',
+        redirect_code: redirectCode || '',
         status: 'APROBADO',
         monto_total: detalleTicket.montoTotal,
+        monto_total_display: detalleTicket.montoTotalDisplay,
         conceptos: detalleTicket.conceptos,
         email_actual: ''
       });
@@ -407,9 +601,9 @@ async function pagoExitoso(req, res) {
  */
 async function pagoFallido(req, res) {
   try {
-    const { externalReference, estado } = validarRedirectSeguro(req);
+    const { externalReference, estado, redirectCode, redirectToken } = await validarRedirectSeguro(req);
     const ticket = await ticketsPagoService.obtenerPorExternalReference(externalReference);
-    const detalleTicket = construirDetalleTicket(ticket, externalReference, estado);
+    const detalleTicket = await construirDetalleTicket(ticket, externalReference, estado);
 
     res.render('pago/fallido', {
       title: 'Pago Rechazado',
@@ -417,9 +611,11 @@ async function pagoFallido(req, res) {
       external_reference: detalleTicket.externalReference,
       ticket_number: detalleTicket.ticketNumber,
       payment_id: detalleTicket.idOperacion,
-      redirect_token: req.query.token || '',
+      redirect_token: redirectToken || '',
+      redirect_code: redirectCode || '',
       status: detalleTicket.estado,
       monto_total: detalleTicket.montoTotal,
+      monto_total_display: detalleTicket.montoTotalDisplay,
       conceptos: detalleTicket.conceptos
     });
   } catch (error) {
@@ -434,9 +630,9 @@ async function pagoFallido(req, res) {
  */
 async function pagoPendiente(req, res) {
   try {
-    const { externalReference, estado } = validarRedirectSeguro(req);
+    const { externalReference, estado, redirectCode, redirectToken } = await validarRedirectSeguro(req);
     const ticket = await ticketsPagoService.obtenerPorExternalReference(externalReference);
-    const detalleTicket = construirDetalleTicket(ticket, externalReference, estado);
+    const detalleTicket = await construirDetalleTicket(ticket, externalReference, estado);
 
     res.render('pago/pendiente', {
       title: 'Pago Pendiente',
@@ -444,9 +640,11 @@ async function pagoPendiente(req, res) {
       external_reference: detalleTicket.externalReference,
       ticket_number: detalleTicket.ticketNumber,
       payment_id: detalleTicket.idOperacion,
-      redirect_token: req.query.token || '',
+      redirect_token: redirectToken || '',
+      redirect_code: redirectCode || '',
       status: detalleTicket.estado,
       monto_total: detalleTicket.montoTotal,
+      monto_total_display: detalleTicket.montoTotalDisplay,
       conceptos: detalleTicket.conceptos,
       mensaje_adicional: null
     });

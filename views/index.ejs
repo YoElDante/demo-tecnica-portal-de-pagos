@@ -74,6 +74,20 @@
       <h2 class="deudas__title">Detalle de Boletas</h2>
       <p class="deudas__subtitle">Seleccione los conceptos a abonar:</p>
 
+      <% const creditosFavor = (deudas || []).filter((d) => Number(d.Total || 0) < 0); %>
+      <% const totalCreditoFavor = creditosFavor.reduce((acc, item) => acc + Number(item.Total || 0), 0); %>
+
+      <% if (creditosFavor.length > 0) { %>
+      <div class="credito-resumen" data-total-credito="<%= totalCreditoFavor %>">
+        <h3 class="credito-resumen__title">Crédito a favor detectado</h3>
+        <p class="credito-resumen__text">
+          Se detectaron <strong><%= creditosFavor.length %></strong> movimientos a favor por
+          <strong>$ <%= Math.abs(totalCreditoFavor).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></strong>.
+          Estos créditos se informan y se aplican al neto, pero no se envían como conceptos de cobro.
+        </p>
+      </div>
+      <% } %>
+
       <% const TIPO_DESCRIPCIONES = typeof tipoDescripciones !== 'undefined' ? tipoDescripciones : {}; %>
       <% const TIPO_ICONOS = typeof tipoIconos !== 'undefined' ? tipoIconos : {}; %>
 
@@ -128,9 +142,10 @@
             </tr>
             <% } %>
             <% (deudas || []).forEach((deuda, index) => { %>
-            <tr data-tipo="<%= deuda.Tipo %>" data-idtrans="<%= deuda.IdTrans %>">
+            <% const esCreditoFavor = Number(deuda.Total || 0) < 0; %>
+            <tr data-tipo="<%= deuda.Tipo %>" data-idtrans="<%= deuda.IdTrans %>" data-total-deuda="<%= deuda.Total %>" class="<%= esCreditoFavor ? 'deudas__row--credito' : '' %>">
               <td style="text-align: center;">
-                <input type="checkbox" class="deudas__checkbox" data-total="<%= deuda.Total %>" data-idtrans="<%= deuda.IdTrans %>" checked>
+                <input type="checkbox" class="deudas__checkbox" data-total="<%= deuda.Total %>" data-idtrans="<%= deuda.IdTrans %>" <%= esCreditoFavor ? 'disabled' : 'checked' %>>
               </td>
               <td>
                 <%= deuda.FechaVto
@@ -142,7 +157,12 @@
                   }).format(new Date(deuda.FechaVto))
                   : '-' %>
               </td>
-              <td><%= deuda.Detalle || '-' %></td>
+              <td>
+                <%= deuda.Detalle || '-' %>
+                <% if (esCreditoFavor) { %>
+                <span class="deudas__badge-credito">CRÉDITO A FAVOR</span>
+                <% } %>
+              </td>
               <td><%= deuda.IdBien || '-' %></td>
               <td><%= deuda.Cuota || '-' %></td>
               <td><%= deuda.Anio || '-' %></td>
@@ -157,7 +177,7 @@
 
           <tfoot>
             <tr class="deudas__row--total">
-              <td colspan="8" style="text-align: right;"><strong>Total a Pagar:</strong></td>
+              <td colspan="8" style="text-align: right;"><strong>Total neto a pagar:</strong></td>
               <td><strong id="total-final" class="deudas__total">$ <%= totalGeneral ? totalGeneral.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00' %></strong></td>
             </tr>
           </tfoot>
@@ -212,18 +232,7 @@
     <% } %>
   </main>
 
-  <% const whatsappConfig = municipalidad && municipalidad.contactoWhatsapp ? municipalidad.contactoWhatsapp : {}; %>
-  <% const whatsappEnabled = Boolean(whatsappConfig.habilitarBoton); %>
-  <% const whatsappPhone = (whatsappConfig.telefono || '').replace(/\D/g, ''); %>
-  <% const whatsappMessage = encodeURIComponent(whatsappConfig.mensajeInicial || 'Hola, necesito ayuda con el portal de pagos.'); %>
-  <% const whatsappLabel = whatsappConfig.textoBoton || 'Contactanos'; %>
-
-  <% if (whatsappEnabled && whatsappPhone) { %>
-  <a href="https://wa.me/<%= whatsappPhone %>?text=<%= whatsappMessage %>" class="whatsapp-fab" target="_blank" rel="noopener noreferrer" aria-label="Contacto por WhatsApp" title="<%= whatsappLabel %>">
-    <span class="whatsapp-fab__tooltip"><%= whatsappLabel %></span>
-    <img src="/images/common/whatsapp.svg" alt="WhatsApp" class="whatsapp-fab__icon" />
-  </a>
-  <% } %>
+  <%- include('partials/whatsapp-button') %>
 
   <script>
     // Datos del contribuyente desde el servidor
@@ -247,12 +256,37 @@
       checkboxes.forEach(cb => {
         const fila = cb.closest('tr');
         if (fila && fila.style.display !== 'none') {
+          const totalFila = parseFloat(cb.dataset.total || '0');
+          if (!(totalFila > 0)) return;
+
           const idTrans = parseInt(cb.dataset.idtrans);
           if (idTrans) ids.push(idTrans);
         }
       });
 
       return ids;
+    }
+
+    function recopilarCreditosFavorVisibles() {
+      const filas = document.querySelectorAll('tbody tr[data-total-deuda]:not([style*="display: none"])');
+      const creditos = [];
+
+      filas.forEach(fila => {
+        const totalFila = parseFloat(fila.getAttribute('data-total-deuda') || '0');
+        if (totalFila >= 0) return;
+
+        const idTrans = parseInt(fila.getAttribute('data-idtrans') || '0');
+        if (!idTrans) return;
+
+        const celdas = fila.querySelectorAll('td');
+        creditos.push({
+          id: idTrans,
+          descripcion: (celdas[2]?.textContent || '').trim(),
+          monto: totalFila
+        });
+      });
+
+      return creditos;
     }
 
     /**
@@ -269,6 +303,9 @@
           const celdas = fila.querySelectorAll('td');
           const idTrans = parseInt(cb.dataset.idtrans);
           const total = parseFloat(cb.dataset.total || '0');
+
+          if (!(total > 0)) return;
+
           const detalleCell = celdas[2];
           const descripcion = detalleCell ? detalleCell.textContent.trim() : 'Concepto';
 
@@ -289,15 +326,17 @@
 
       const conceptosIds = recopilarIdTransSeleccionados();
       if (conceptosIds.length === 0) {
-        alert('Por favor, seleccione al menos un concepto para pagar.');
+        alert('Por favor, seleccione al menos un concepto de deuda para pagar.');
         return;
       }
+
+      const creditosAplicados = recopilarCreditosFavorVisibles();
 
       const totalElement = document.getElementById('total-final');
       const montoTotal = extraerNumero(totalElement?.textContent || '0');
 
       if (montoTotal <= 0) {
-        alert('El monto total debe ser mayor a cero.');
+        alert('El total neto a pagar es menor o igual a cero. Existe saldo a favor del contribuyente.');
         return;
       }
 
@@ -316,7 +355,12 @@
         const response = await fetch('/pago/iniciar', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contribuyente: contribuyenteData, conceptos, montoTotal })
+          body: JSON.stringify({
+            contribuyente: contribuyenteData,
+            conceptos,
+            montoTotal,
+            creditosAplicados
+          })
         });
 
         const data = await response.json();

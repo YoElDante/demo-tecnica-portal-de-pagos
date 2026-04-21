@@ -67,3 +67,22 @@ exports.lightLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false
 });
+
+/**
+ * Rate limiter para webhooks server-to-server.
+ * Permite reintentos automáticos del gateway sin bloquear pagos legítimos.
+ */
+exports.webhookLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 120,
+  message: {
+    success: false,
+    error: {
+      code: 'RATE_LIMIT_EXCEEDED',
+      message: 'Límite de peticiones excedido para webhook de pagos.',
+      retryAfter: '15 minutos'
+    }
+  },
+  standardHeaders: true,
+  legacyHeaders: false
+});

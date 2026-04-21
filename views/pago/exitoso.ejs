@@ -73,6 +73,59 @@
       font-weight: bold;
     }
 
+    .result__concept-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+    }
+
+    .result__concept-card {
+      border: 1px solid #dfe3e8;
+      border-radius: 8px;
+      padding: 0.9rem 1rem;
+      background: #fff;
+    }
+
+    .result__concept-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: baseline;
+      margin-bottom: 0.45rem;
+    }
+
+    .result__concept-title {
+      font-weight: bold;
+      color: #222;
+    }
+
+    .result__concept-total {
+      font-weight: bold;
+      color: #28a745;
+      white-space: nowrap;
+    }
+
+    .result__concept-meta {
+      color: #666;
+      font-size: 0.92rem;
+      margin: 0.2rem 0;
+      line-height: 1.4;
+    }
+
+    .result__concept-breakdown {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 0.4rem 1rem;
+      margin-top: 0.7rem;
+      padding-top: 0.7rem;
+      border-top: 1px dashed #d9dee3;
+      font-size: 0.92rem;
+    }
+
+    .result__concept-breakdown strong {
+      color: #333;
+    }
+
     /* Elemento: Sección de email */
     .result__email {
       background: #e8f5e9;
@@ -237,7 +290,7 @@
         </p>
         <p class="result__info-row">
           <span class="result__info-label">Monto total:</span>
-          <span class="result__info-value">$ <%= Number(monto_total || 0).toFixed(2) %></span>
+          <span class="result__info-value">$ <%= monto_total_display || Number(monto_total || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
         </p>
         <p class="result__info-row">
           <span class="result__info-label">Estado:</span>
@@ -248,12 +301,33 @@
       <% if (Array.isArray(conceptos) && conceptos.length > 0) { %>
       <div class="result__info">
         <p class="result__info-label">Conceptos del ticket</p>
-        <% conceptos.forEach((concepto) => { %>
-        <p class="result__info-row">
-          <span class="result__info-label"><%= concepto.descripcion %></span>
-          <span class="result__info-value">$ <%= Number(concepto.importe || 0).toFixed(2) %></span>
-        </p>
-        <% }) %>
+        <div class="result__concept-list">
+          <% conceptos.forEach((concepto) => { %>
+          <article class="result__concept-card">
+            <div class="result__concept-head">
+              <span class="result__concept-title"><%= concepto.descripcionCompleta || concepto.detalle || concepto.tipoDescripcion || 'Concepto municipal' %></span>
+              <span class="result__concept-total">$ <%= concepto.total %></span>
+            </div>
+            <p class="result__concept-meta">
+              <strong>Bien:</strong> <%= concepto.idBien || '-' %>
+              &nbsp;|&nbsp;
+              <strong>Año:</strong> <%= concepto.anio || '-' %>
+              &nbsp;|&nbsp;
+              <strong>Cuota:</strong> <%= concepto.cuota || '-' %>
+              &nbsp;|&nbsp;
+              <strong>Período:</strong> <%= concepto.periodo || '-' %>
+            </p>
+            <p class="result__concept-meta">
+              <strong>Vencimiento:</strong> <%= concepto.fechaVto || '-' %>
+            </p>
+            <div class="result__concept-breakdown">
+              <span><strong>Importe:</strong> $ <%= concepto.importe %></span>
+              <span><strong>Int/Dto:</strong> $ <%= concepto.interes %></span>
+              <span><strong>Total:</strong> $ <%= concepto.total %></span>
+            </div>
+          </article>
+          <% }) %>
+        </div>
       </div>
       <% } %>
 

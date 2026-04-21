@@ -12,10 +12,10 @@ const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
-const logger = require('morgan');
 const { apiLimiter } = require('./middlewares/rateLimiter');
-const { requestLogger, responseLogger, errorLogger } = require('./middlewares/logger');
+const { requestLogger, responseLogger, errorLogger, LOG_LEVEL } = require('./middlewares/logger');
 const { startTicketsMaintenance } = require('./services/ticketsMaintenance.service');
+const { notFoundHandler, errorHandler } = require('./middlewares/errorHandles');
 
 
 // Importar rutas
@@ -32,20 +32,11 @@ startTicketsMaintenance();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-// Configuración según entorno
-const IS_PRODUCTION = process.env.NODE_ENV === 'production';
-
 // Middlewares
-// Morgan: en producción formato compacto, en desarrollo formato detallado
-if (IS_PRODUCTION) {
-  // En producción: log mínimo, solo errores van a stdout (Azure lo captura)
-  app.use(logger('combined', {
-    skip: (req, res) => res.statusCode < 400 // Solo loguear errores
-  }));
-} else {
-  // En desarrollo: formato colorido y detallado
-  app.use(logger('dev'));
-}
+console.info('🧭 Logger inicializado', {
+  env: process.env.NODE_ENV || 'development',
+  logLevel: LOG_LEVEL
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -68,10 +59,7 @@ app.use('/api', apiRouter);
 // Error logger
 app.use(errorLogger);
 
-// Importar error handlers al inicio del archivo
-const { notFoundHandler, errorHandler } = require('./middlewares/errorHandles');
-
-// Middleware de 404 
+// Middleware de 404
 app.use(notFoundHandler);
 
 // Middleware de manejo de errores

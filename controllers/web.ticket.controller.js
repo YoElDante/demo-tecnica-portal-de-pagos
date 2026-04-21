@@ -90,6 +90,7 @@ async function generarComprobantePago(req, res) {
 
   try {
     const ticket = await ticketsPagoService.obtenerPorExternalReference(ref);
+    const portalWeb = `${req.protocol}://${req.get('host')}`;
 
     // Extraer conceptos del snapshot
     let conceptosProcesados = [];
@@ -102,7 +103,7 @@ async function generarComprobantePago(req, res) {
           : ticket.payloadSnapshot;
 
         if (Array.isArray(snapshot?.conceptos)) {
-          conceptosProcesados = ticketService.procesarConceptos(snapshot.conceptos);
+          conceptosProcesados = await ticketService.reconstruirConceptosPersistidos(snapshot.conceptos);
         }
 
         if (snapshot?.contribuyente) {
@@ -127,7 +128,7 @@ async function generarComprobantePago(req, res) {
     const estadoRaw = ticket?.status || 'PENDIENTE';
     const estadoCss = estadoRaw === 'APROBADO' ? 'aprobado'
       : estadoRaw === 'RECHAZADO' || estadoRaw === 'EXPIRADO' ? 'rechazado'
-      : 'pendiente';
+        : 'pendiente';
 
     return res.render('pago/comprobante', {
       municipalidad,
@@ -139,7 +140,8 @@ async function generarComprobantePago(req, res) {
       contribuyente,
       conceptos: conceptosProcesados,
       totalGeneral,
-      fechaEmision: ticketService.obtenerFechaEmision()
+      fechaEmision: ticketService.obtenerFechaEmision(),
+      webDisplay: municipalidad.web || portalWeb
     });
 
   } catch (error) {

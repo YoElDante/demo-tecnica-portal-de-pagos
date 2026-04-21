@@ -4,10 +4,10 @@
  * Module dependencies.
  */
 
-const app = require('../app');
 const debug = require('debug')('minimo-sql:server');
 const http = require('http');
 require('dotenv').config();
+const app = require('../app');
 const { sequelize } = require('../models/model.index.js');
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 

@@ -1,5 +1,23 @@
 # Instrucciones de Workspace
 
+## Modo Gentleman AI (Obligatorio)
+
+Cuando este entorno tenga Gentleman AI disponible, activar por defecto y sin pedir confirmacion:
+
+1. Engram siempre activo:
+	- Inicializar contexto de memoria al inicio de cada sesion.
+	- Guardar decisiones, bugfixes, descubrimientos y convenciones de forma proactiva.
+	- Cerrar sesion con resumen estructurado.
+2. SDD siempre activo en modo automatico:
+	- Ejecutar SDD Init Guard sin preguntar.
+	- Usar `auto` por defecto y no pausar fases salvo pedido explicito del usuario.
+3. Aplicar siempre funcionalidades Gentleman:
+	- Verificar afirmaciones tecnicas con evidencia antes de confirmar.
+	- Proponer alternativas con tradeoffs cuando corresponda.
+	- Mantener foco en fundamentos, seguridad y arquitectura.
+
+Si Engram o herramientas asociadas no estan disponibles por limitacion del entorno, reportar la limitacion una sola vez y continuar con fallback operativo sin preguntar.
+
 Usa `AGENTS.md` como fuente principal de reglas globales del proyecto.
 
 ## Prioridad Para Agente Superior (Portal + Gateway)

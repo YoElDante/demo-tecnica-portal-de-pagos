@@ -9,7 +9,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { strictLimiter } = require('../../middlewares/rateLimiter');
+const { webhookLimiter } = require('../../middlewares/rateLimiter');
 const { municipalidad } = require('../../config');
 
 // Importar rutas específicas
@@ -86,10 +86,10 @@ router.get('/', (req, res) => {
 router.use('/clientes', clientesRoutes);
 
 // Ruta canónica para recibir confirmaciones de pago del API Gateway
-router.post('/webhook/pago', strictLimiter, paymentController.confirmacion);
+router.post('/webhook/pago', webhookLimiter, paymentController.confirmacion);
 
 // Alias legacy mientras se migra cualquier integración anterior
-router.post('/pagos/confirmacion', strictLimiter, paymentController.confirmacion);
+router.post('/pagos/confirmacion', webhookLimiter, paymentController.confirmacion);
 
 // Consulta de estado de ticket para polling de la vista pendiente
 // GET /api/tickets/estado?ref={externalReference}

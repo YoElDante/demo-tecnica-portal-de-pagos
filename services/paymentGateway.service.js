@@ -28,6 +28,10 @@ const PAYMENT_GATEWAY = (process.env.PAYMENT_GATEWAY || 'siro').toLowerCase();
 const API_GATEWAY_URL = process.env.API_GATEWAY_URL || 'http://localhost:3000';
 const MUNICIPIO_ID = process.env.MUNICIPIO || MUNICIPIO;
 const FRONTEND_PUBLIC_URL = process.env.FRONTEND_PUBLIC_URL || 'http://localhost:4000';
+const REDIRECT_EXCHANGE_SECRET = process.env.GATEWAY_REDIRECT_EXCHANGE_SECRET
+  || process.env.GATEWAY_WEBHOOK_SECRET
+  || process.env.WEBHOOK_SECRET
+  || '';
 
 // Log de configuración al iniciar
 console.log(`💳 Payment Gateway configurado: ${PAYMENT_GATEWAY.toUpperCase()}`);
@@ -58,7 +62,7 @@ async function createMercadoPagoPayment(paymentData) {
       monto: Number(c.Total || c.monto || 0)
     })),
     monto_total: Number(montoTotal),
-    callback_url: `${FRONTEND_PUBLIC_URL}/api/pagos/confirmacion`,
+    callback_url: `${FRONTEND_PUBLIC_URL}/api/webhook/pago`,
     metadata: {
       conceptos_ids: conceptos.map(c => c.IdTrans || c.id),
       contribuyente_dni: contribuyente.dni
@@ -139,6 +143,7 @@ async function createPagoTicPayment(paymentData) {
  */
 async function createSiroPayment(paymentData) {
   const { contribuyente, conceptos, montoTotal, ticketNumber } = paymentData;
+  const callbackUrl = `${FRONTEND_PUBLIC_URL}/api/webhook/pago`;
 
   const limpiarConceptoSiro = (valor) => String(valor || '')
     .replace(/[^A-Za-z0-9\s]/g, ' ')
@@ -157,6 +162,9 @@ async function createSiroPayment(paymentData) {
     importe: Number(montoTotal),
     concepto,
     nro_comprobante: ticketNumber, // El gateway lo formatea a 20 chars para SIRO
+    // Enviamos ambas variantes para compatibilidad entre versiones del gateway.
+    callback_url: callbackUrl,
+    callbackUrl,
     metadata: {
       conceptos: conceptos.map(c => ({
         descripcion: c.detalle || c.tipoDescripcion || 'Concepto municipal',
@@ -335,6 +343,56 @@ async function checkPaymentStatus(externalReference) {
 }
 
 /**
+ * Intercambia un código opaco de redirect por el resultado de pago.
+ * Este flujo evita exponer JWT o payload sensible en la URL del navegador.
+ *
+ * @param {Object} params
+ * @param {string} params.code
+ * @param {string} params.externalReference
+ * @param {boolean} [params.consume=true] - true para un solo uso, false para lectura sin invalidar (pantalla pendiente)
+ * @returns {Promise<Object>}
+ */
+async function exchangeRedirectCode({ code, externalReference, consume = true }) {
+  if (!code) {
+    throw new Error('redirect code es requerido');
+  }
+
+  if (!REDIRECT_EXCHANGE_SECRET) {
+    throw new Error('No está configurado GATEWAY_REDIRECT_EXCHANGE_SECRET/GATEWAY_WEBHOOK_SECRET');
+  }
+
+  const response = await axios.post(
+    `${API_GATEWAY_URL}/api/pagos/redirect/exchange`,
+    {
+      code,
+      ref: externalReference,
+      municipio_id: MUNICIPIO_ID,
+      consume: consume !== false
+    },
+    {
+      timeout: 10000,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Redirect-Exchange-Secret': REDIRECT_EXCHANGE_SECRET
+      }
+    }
+  );
+
+  const body = response.data || {};
+  const data = body.data || {};
+
+  if (!body.success || !data.ref || !data.estado) {
+    throw new Error(body.message || 'No se pudo validar el redirect code');
+  }
+
+  return {
+    external_reference: data.ref,
+    estado: data.estado,
+    municipio_id: data.municipio_id || null
+  };
+}
+
+/**
  * Obtiene información sobre los gateways disponibles
  * 
  * @returns {Object} Información de gateways
@@ -356,6 +414,7 @@ function getGatewaysInfo() {
 module.exports = {
   createPayment,
   checkPaymentStatus,
+  exchangeRedirectCode,
   getGatewaysInfo,
 
   // Exportar configuración para debugging

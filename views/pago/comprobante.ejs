@@ -7,7 +7,11 @@
   <link rel="icon" type="image/x-icon" href="<%= municipalidad.logos.favicon %>">
   <title>Comprobante de Pago - <%= municipalidad.nombreCompleto %></title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
       font-family: Arial, sans-serif;
@@ -29,7 +33,10 @@
       gap: 1rem;
     }
 
-    .screen-actions__title { font-weight: bold; font-size: 1rem; }
+    .screen-actions__title {
+      font-weight: bold;
+      font-size: 1rem;
+    }
 
     .screen-actions__btn {
       background: white;
@@ -42,7 +49,9 @@
       font-size: 0.95rem;
     }
 
-    .screen-actions__btn:hover { background: #e8fafb; }
+    .screen-actions__btn:hover {
+      background: #e8fafb;
+    }
 
     .screen-actions__close {
       color: white;
@@ -51,7 +60,9 @@
       opacity: 0.85;
     }
 
-    .screen-actions__close:hover { opacity: 1; }
+    .screen-actions__close:hover {
+      opacity: 1;
+    }
 
     /* ============================================
        COMPROBANTE (página A4)
@@ -61,7 +72,7 @@
       margin: 1.5rem auto;
       background: white;
       border: 1px solid #ddd;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
     }
 
     /* Header */
@@ -82,7 +93,9 @@
       width: auto;
     }
 
-    .comprobante__org { flex: 1; }
+    .comprobante__org {
+      flex: 1;
+    }
 
     .comprobante__org h1 {
       font-size: 15pt;
@@ -103,7 +116,11 @@
       min-width: 160px;
     }
 
-    .comprobante__meta strong { display: block; font-size: 10pt; color: #333; }
+    .comprobante__meta strong {
+      display: block;
+      font-size: 10pt;
+      color: #333;
+    }
 
     .comprobante__header-info {
       display: flex;
@@ -125,7 +142,9 @@
       gap: 2rem;
     }
 
-    .comprobante__contribuyente p { color: #333; }
+    .comprobante__contribuyente p {
+      color: #333;
+    }
 
     /* Título del comprobante */
     .comprobante__tipo {
@@ -137,12 +156,25 @@
       border-bottom: 1px solid #ddd;
     }
 
-    .comprobante__tipo--aprobado { background: #e8f5e9; color: #2e7d32; }
-    .comprobante__tipo--pendiente { background: #fff8e1; color: #856404; }
-    .comprobante__tipo--rechazado { background: #fdecea; color: #c62828; }
+    .comprobante__tipo--aprobado {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .comprobante__tipo--pendiente {
+      background: #fff8e1;
+      color: #856404;
+    }
+
+    .comprobante__tipo--rechazado {
+      background: #fdecea;
+      color: #c62828;
+    }
 
     /* Tabla de conceptos */
-    .comprobante__body { padding: 1rem 1.5rem; }
+    .comprobante__body {
+      padding: 1rem 1.5rem;
+    }
 
     .comprobante__section-title {
       font-size: 10pt;
@@ -173,9 +205,13 @@
       border-bottom: 1px solid #eee;
     }
 
-    .comprobante__table tr:nth-child(even) td { background: #fafafa; }
+    .comprobante__table tr:nth-child(even) td {
+      background: #fafafa;
+    }
 
-    .comprobante__table .col-right { text-align: right; }
+    .comprobante__table .col-right {
+      text-align: right;
+    }
 
     .comprobante__table .row-total td {
       border-top: 2px solid #333;
@@ -197,9 +233,20 @@
       font-size: 10pt;
     }
 
-    .comprobante__resultado-header--aprobado { background: #2e7d32; color: white; }
-    .comprobante__resultado-header--pendiente { background: #856404; color: white; }
-    .comprobante__resultado-header--rechazado { background: #c62828; color: white; }
+    .comprobante__resultado-header--aprobado {
+      background: #2e7d32;
+      color: white;
+    }
+
+    .comprobante__resultado-header--pendiente {
+      background: #856404;
+      color: white;
+    }
+
+    .comprobante__resultado-header--rechazado {
+      background: #c62828;
+      color: white;
+    }
 
     .comprobante__resultado-body {
       padding: 0.75rem 1rem;
@@ -214,8 +261,17 @@
       gap: 0.5rem;
     }
 
-    .comprobante__resultado-label { color: #555; width: 160px; flex-shrink: 0; }
-    .comprobante__resultado-value { color: #222; font-weight: bold; word-break: break-all; }
+    .comprobante__resultado-label {
+      color: #555;
+      width: 160px;
+      flex-shrink: 0;
+    }
+
+    .comprobante__resultado-value {
+      color: #222;
+      font-weight: bold;
+      word-break: break-all;
+    }
 
     /* Footer */
     .comprobante__footer {
@@ -226,15 +282,25 @@
       background: #fafafa;
     }
 
-    .comprobante__footer p { margin: 0.2rem 0; }
+    .comprobante__footer p {
+      margin: 0.2rem 0;
+    }
 
     /* ============================================
        IMPRESIÓN
     ============================================ */
     @media print {
-      body { background: white; }
+      body {
+        background: white;
+      }
 
-      .screen-actions { display: none !important; }
+      .screen-actions {
+        display: none !important;
+      }
+
+      .whatsapp-float {
+        display: none !important;
+      }
 
       .comprobante {
         max-width: 100%;
@@ -278,7 +344,7 @@
       <div class="comprobante__header-info">
         <span><strong>Dirección:</strong> <%= municipalidad.direccion %>, <%= municipalidad.localidad %>, <%= municipalidad.provincia %></span>
         <span><strong>Tel:</strong> <%= municipalidad.telefono %></span>
-        <span><strong>Web:</strong> <%= municipalidad.web || '' %></span>
+        <span><strong>Web:</strong> <%= webDisplay || municipalidad.web || '' %></span>
       </div>
     </div>
 
@@ -306,6 +372,9 @@
         <thead>
           <tr>
             <th>Detalle</th>
+            <th>Bien</th>
+            <th>Período</th>
+            <th>Vencimiento</th>
             <th>Año</th>
             <th>Cuota</th>
             <th class="col-right">Importe</th>
@@ -316,7 +385,10 @@
         <tbody>
           <% conceptos.forEach(function(c) { %>
           <tr>
-            <td><%= c.detalle || c.tipoDescripcion || '-' %></td>
+            <td><%= c.descripcionCompleta || c.detalle || c.tipoDescripcion || '-' %></td>
+            <td><%= c.idBien || '-' %></td>
+            <td><%= c.periodo || '-' %></td>
+            <td><%= c.fechaVto || '-' %></td>
             <td><%= c.anio || '-' %></td>
             <td><%= c.cuota || '-' %></td>
             <td class="col-right">$ <%= c.importe %></td>
@@ -327,7 +399,7 @@
         </tbody>
         <tfoot>
           <tr class="row-total">
-            <td colspan="5" class="col-right">TOTAL:</td>
+            <td colspan="8" class="col-right">TOTAL:</td>
             <td class="col-right">$ <%= totalGeneral %></td>
           </tr>
         </tfoot>
@@ -397,6 +469,8 @@
     </div>
 
   </div>
+
+  <%- include('../partials/whatsapp-button') %>
 </body>
 
 </html>

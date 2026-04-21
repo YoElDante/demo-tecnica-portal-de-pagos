@@ -396,6 +396,7 @@
     (function() {
       const ref = '<%= external_reference %>';
       const token = '<%= redirect_token || "" %>';
+      const code = '<%= redirect_code || "" %>';
       const INTERVALO_MS = 30000;
       let intentos = 0;
       const MAX_INTENTOS = 20; // 10 minutos
@@ -415,11 +416,17 @@
           })
           .then(function(data) {
             if (data.status === 'APROBADO') {
+              const credencial = code
+                ? '&code=' + encodeURIComponent(code)
+                : (token ? '&token=' + encodeURIComponent(token) : '');
               window.location.href = '/pagos/exitoso?ref=' + encodeURIComponent(ref) +
-                (token ? '&token=' + encodeURIComponent(token) : '');
+                credencial;
             } else if (data.status === 'RECHAZADO' || data.status === 'EXPIRADO') {
+              const credencial = code
+                ? '&code=' + encodeURIComponent(code)
+                : (token ? '&token=' + encodeURIComponent(token) : '');
               window.location.href = '/pagos/error?ref=' + encodeURIComponent(ref) +
-                (token ? '&token=' + encodeURIComponent(token) : '');
+                credencial;
             }
             // Si sigue PENDIENTE, no hace nada — el intervalo vuelve a disparar
           })

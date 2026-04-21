@@ -37,10 +37,10 @@ module.exports = {
 
   // Contacto WhatsApp
   contactoWhatsapp: {
-    habilitarBoton: false,
-    telefono: '',
+    habilitarBoton: true,
+    telefono: '+54 (3532) 494025',
     textoBoton: 'Contactanos',
-    mensajeInicial: 'Hola, necesito ayuda con el portal de pagos municipales.'
+    mensajeInicial: 'Hola, necesito ayuda con el portal de pagos de Calchín Oeste.'
   },
 
   // ============================================

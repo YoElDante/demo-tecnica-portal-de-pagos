@@ -140,6 +140,76 @@ Ver [.env.example](.env.example) para la plantilla completa.
 
 ---
 
+## 🪵 Logging en Desarrollo
+
+En `development`, el proyecto usa logger unificado con niveles y metadata estructurada.
+
+- `npm run dev` arranca con `LOG_LEVEL=trace` por defecto.
+- `npm run dev:*` (demo, elmanzano, tinoco, sanjose) hereda el mismo nivel.
+- Los `console.log/info/warn/error/debug` se normalizan al mismo formato.
+
+Niveles soportados:
+
+```bash
+error | warn | info | debug | trace
+```
+
+Formato base de salida:
+
+```text
+[timestamp] [LEVEL] mensaje | { metadata }
+```
+
+Incluye request/response con:
+
+- `requestId`
+- método y URL
+- IP y `user-agent`
+- duración de respuesta (`duration_ms`)
+- status HTTP
+
+---
+
+## 🔌 Integración Local Portal + Gateway
+
+Configuración recomendada para desarrollo local (`NODE_ENV=development`):
+
+- Portal: `http://localhost:4000`
+- Gateway: `http://localhost:3000`
+
+Variables clave en el portal:
+
+```env
+API_GATEWAY_URL=http://localhost:3000
+FRONTEND_PUBLIC_URL=http://localhost:4000
+```
+
+### Endpoints esperados en local
+
+- Portal expone webhook en `POST /api/webhook/pago` (alias legacy: `POST /api/pagos/confirmacion`).
+- Gateway debe crear pagos en `POST /api/pagos` (consumido por el portal usando `API_GATEWAY_URL`).
+- Redirect de usuario vuelve al portal en:
+	- `GET /pagos/exitoso`
+	- `GET /pagos/pendiente`
+	- `GET /pagos/error` (y alias `GET /pagos/fallido`)
+
+Para SIRO en local, el portal envía en el request al gateway:
+
+- `callback_url=http://localhost:4000/api/pagos/confirmacion`
+- `callbackUrl=http://localhost:4000/api/pagos/confirmacion`
+
+Si en el gateway aparece el error `callbackUrl no configurada — PUBLIC_URL es requerido`, revisar su `.env`
+y definir `PUBLIC_URL` correctamente (por ejemplo `http://localhost:3000` o el valor requerido por su implementación).
+
+### Nota sobre HTTPS en local
+
+Por defecto, este portal levanta servidor HTTP (no HTTPS) en `bin/www`.
+Si necesitás `https://localhost:4000`, hace falta agregar terminación TLS local
+(por ejemplo proxy local con certificados de desarrollo) o cambiar el bootstrap
+del servidor para usar `https.createServer`.
+
+---
+
 ## 🌐 Rutas de la API
 
 Base: `/api`
