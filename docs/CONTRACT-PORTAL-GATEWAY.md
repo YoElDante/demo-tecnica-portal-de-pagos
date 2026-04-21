@@ -2,7 +2,7 @@
 
 > Este documento define el contrato completo entre el portal web municipal
 > y el API Gateway de pagos. Debe implementarse en AMBOS proyectos.
-> Generado en sesión de diseño: 2026-03-31.
+> Generado en sesión de diseño: 2026-03-31. Actualizado: 2026-04-21.
 
 ---
 
@@ -15,9 +15,14 @@
       ↓
 [Portal Web Municipal]  →  (2) POST /api/pagos  →  [API Gateway]  →  [SIRO / Plataforma de pago]
                                                          |
-                        (4) Redirect seguro con JWT      |  (3) SIRO notifica al gateway
-                        ←─────────────────────────────  ↓
-[Contribuyente ve vista de resultado]        (5) POST webhook JWT  →  [Portal Web — backend]
+                   (4) Redirect con ?code=opaco         |  (3) SIRO notifica al gateway
+                   ←──────────────────────────────────  ↓
+[Contribuyente ve vista de resultado]        (5) POST webhook JWT cifrado  →  [Portal Web — backend]
+          |
+          | (4b) Portal backend → POST /exchange {code, secret}  → [API Gateway]
+          |      Gateway responde con { estado, ref, importe }
+          ↓
+     Vista renderizada con datos reales (sin JWT en URL del navegador)
 ```
 
 **Regla fundamental e innegociable:**
@@ -27,60 +32,83 @@ Esto aplica tanto al redirect del contribuyente como a las notificaciones de res
 
 ---
 
-## Flujo A — Redirect del contribuyente
+## Flujo A — Redirect del contribuyente (código de intercambio opaco)
 
 ### Cómo funciona
 
 1. El contribuyente completa (o abandona) el pago en la plataforma externa
 2. La plataforma redirige al **gateway** (no al portal)
-3. El gateway procesa el resultado y redirige al contribuyente al portal
-   con un token de un solo uso firmado
+3. El gateway genera un **código opaco de un solo uso** con TTL corto y redirige al contribuyente al portal con ese código — sin JWT ni datos sensibles en la URL del navegador
+4. El backend del portal intercambia ese código contra el gateway via llamada server-to-server autenticada con `GATEWAY_REDIRECT_EXCHANGE_SECRET`
+5. El gateway responde con el resultado del pago y el portal renderiza la vista
 
 ### URL de redirect que el gateway envía al contribuyente
 
 ```
 GET https://{municipio}.alcaldia.com.ar/pagos/{resultado}
-    ?ref={external_reference}
-    &token={JWT_de_un_solo_uso}
+    ?code={codigo_opaco_de_un_solo_uso}
 ```
 
 Ejemplos:
 ```
-https://elmanzano.alcaldia.com.ar/pagos/exitoso?ref=ELMANZANO-1774990412831-93vweg&token=eyJ...
-https://elmanzano.alcaldia.com.ar/pagos/pendiente?ref=ELMANZANO-1774990412831-93vweg&token=eyJ...
-https://elmanzano.alcaldia.com.ar/pagos/error?ref=ELMANZANO-1774990412831-93vweg&token=eyJ...
+https://elmanzano.alcaldia.com.ar/pagos/exitoso?code=a1b2c3d4e5f6...
+https://elmanzano.alcaldia.com.ar/pagos/pendiente?code=a1b2c3d4e5f6...
+https://elmanzano.alcaldia.com.ar/pagos/error?code=a1b2c3d4e5f6...
 ```
 
-### El JWT del redirect
+El `code` no contiene información decodificable por el navegador. Es un identificador opaco que solo el gateway puede resolver.
 
-- **Algoritmo**: HS256
-- **Clave de firma**: `WEBHOOK_SECRET` + fecha del día (`2026-03-31`)
-  → La clave cambia cada día: un token capturado hoy es inválido mañana
-- **Expiración**: 10 minutos (el contribuyente debe llegar rápido desde SIRO)
-- **Payload**:
-```json
+### Endpoint de intercambio en el gateway
+
+```
+POST {API_GATEWAY_URL}/api/pagos/redirect/exchange
+Content-Type: application/json
+Authorization: Bearer {GATEWAY_REDIRECT_EXCHANGE_SECRET}
+
 {
-  "ref": "ELMANZANO-1774990412831-93vweg",
-  "municipio_id": "ELMANZANO",
-  "estado": "APROBADO",
-  "iat": 1774990412,
-  "exp": 1774991012
+  "code": "a1b2c3d4e5f6...",
+  "externalReference": "ELMANZANO-1774990412831-93vweg"
 }
 ```
 
+**Response:**
+```json
+{
+  "external_reference": "ELMANZANO-1774990412831-93vweg",
+  "municipio_id": "ELMANZANO",
+  "estado": "APROBADO",
+  "importe": 1500.50
+}
+```
+
+### El JWT del redirect (solo viaja server-to-server)
+
+El gateway gestiona internamente un JWT cifrado para el redirect. Este JWT:
+
+- **Algoritmo**: cifrado (no solo firmado) — protege el payload en tránsito
+- **Clave de firma/cifrado**: `WEBHOOK_SECRET` + fecha del día (`YYYY-MM-DD`)
+  → La clave rota cada día. Un código capturado hoy es inválido mañana.
+- **Expiración**: 10 minutos — ventana suficiente para que el contribuyente llegue desde SIRO
+- El JWT **nunca aparece en la URL del navegador** — viaja exclusivamente en el exchange server-to-server
+
 ### Lo que el portal DEBE hacer al recibir el redirect
 
-1. Verificar que el `token` es válido (firma + no expirado)
-2. Si el token es inválido → mostrar página de error genérica, NO la vista de resultado
-3. Si el token es válido → mostrar la vista correspondiente (`exitoso`, `pendiente`, `error`)
-4. **NUNCA actualizar la BD del portal basándose en este redirect**
+1. Extraer el `code` del query string
+2. Llamar al endpoint de exchange del gateway con el secreto configurado
+3. Si el gateway rechaza el code (inválido, expirado, ya consumido) → mostrar página de error genérica
+4. Si el exchange es exitoso → renderizar la vista con los datos retornados
+5. **NUNCA actualizar la BD del portal basándose en este redirect**
    La BD se actualiza solo con el webhook server-to-server (Flujo B)
 
-### Por qué esta restricción
+### Por qué este diseño
 
-La vista de resultado puede usarse como prueba legal ("el contribuyente pagó").
-Si esa vista es accesible sin token válido, cualquiera puede mostrarla sin haber pagado.
-El token con clave rotativa diaria garantiza que solo el gateway puede generarla.
+Un JWT firmado (no cifrado) en la URL del navegador expone el payload a cualquiera que acceda al historial, logs de proxy, o encabezados Referer. El código opaco elimina esa superficie de ataque: el payload sensible viaja exclusivamente entre servidores autenticados con un secreto dedicado.
+
+### Variables requeridas en el portal
+
+```env
+GATEWAY_REDIRECT_EXCHANGE_SECRET=mismo_valor_que_en_el_gateway
+```
 
 ---
 
@@ -107,10 +135,10 @@ SIRO_ELMANZANO_WEBHOOK_URL=https://elmanzano.alcaldia.com.ar/api/webhook/pago
 
 ### JWT del webhook
 
-- **Algoritmo**: HS256
-- **Clave de firma**: `WEBHOOK_SECRET` + fecha del día (`2026-03-31`)
-  → Mismo mecanismo que el redirect. Clave compartida fuera de banda entre ambos proyectos.
-- **Expiración**: 5 minutos
+- **Algoritmo**: cifrado (no solo firmado) — protege el payload en tránsito
+- **Clave de firma/cifrado**: `WEBHOOK_SECRET` + fecha del día (`YYYY-MM-DD`)
+  → Clave compartida fuera de banda entre ambos proyectos. Rota diariamente.
+- **Expiración**: 10 minutos
 
 ### Payload del webhook
 
@@ -274,15 +302,29 @@ mostrar un aviso del estilo:
 
 ---
 
-## WEBHOOK_SECRET — Gestión del secreto compartido
+## Secretos compartidos — Gestión
 
-- Se genera una vez por municipio: un string aleatorio de al menos 32 caracteres
-- Se comparte **fuera de banda** (no por email, no por chat, no en el repo)
-- Se configura como variable de entorno en AMBOS proyectos:
+El sistema usa dos secretos distintos con propósitos distintos. No deben ser el mismo valor.
+
+### WEBHOOK_SECRET — JWT del webhook y del redirect
+
+- Se genera una vez (mínimo 32 caracteres aleatorios)
+- Se comparte **fuera de banda** entre ambos proyectos
+- La clave efectiva de firma/cifrado es: `WEBHOOK_SECRET` + `YYYY-MM-DD`
+  → Rotación automática diaria sin intervención manual
+- Variables de entorno:
   - Gateway: `WEBHOOK_SECRET`
-  - Portal: `GATEWAY_WEBHOOK_SECRET` (o el nombre que el portal elija)
-- La clave de firma efectiva es: `WEBHOOK_SECRET` + `YYYY-MM-DD` del día actual
-- Si se compromete el secreto: se reemplaza en ambos proyectos y se reinician los servicios
+  - Portal: `GATEWAY_WEBHOOK_SECRET` (fallback: `WEBHOOK_SECRET`)
+- Si se compromete: reemplazar en ambos proyectos y reiniciar servicios
+
+### GATEWAY_REDIRECT_EXCHANGE_SECRET — autenticación del exchange server-to-server
+
+- Secreto dedicado exclusivamente para el endpoint `POST /api/pagos/redirect/exchange`
+- Distinto al `WEBHOOK_SECRET` — diferente superficie de ataque, diferente rotación
+- Variables de entorno:
+  - Gateway: `GATEWAY_REDIRECT_EXCHANGE_SECRET`
+  - Portal: `GATEWAY_REDIRECT_EXCHANGE_SECRET`
+- Si el portal no lo tiene configurado, el exchange falla con error claro al arrancar
 
 ---
 

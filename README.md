@@ -12,8 +12,9 @@
 
 Portal web que permite a contribuyentes:
 - Consultar deudas pendientes por DNI
-- Generar tickets de pago
-- Procesar pagos via SIRO del Banco Roela mediante un gateway intermedio
+- Ver créditos a favor aplicados automáticamente al saldo a pagar
+- Seleccionar y pagar conceptos de deuda via SIRO del Banco Roela mediante un gateway intermedio
+- Recibir comprobante de pago con número de ticket y estado en tiempo real
 
 El sistema soporta **múltiples municipios** con el mismo código, diferenciados por variables de entorno.
 
@@ -24,6 +25,7 @@ El sistema soporta **múltiples municipios** con el mismo código, diferenciados
 | El Manzano | `npm run dev:elmanzano` | Azure SQL |
 | Tinoco | `npm run dev:tinoco` | Azure SQL |
 | San José de las Salinas | `npm run dev:sanjose` | Azure SQL |
+| Calchín Oeste | `npm run dev:calchinoeste` | Azure SQL |
 
 ### DNIs de prueba
 
@@ -120,7 +122,8 @@ API_GATEWAY_URL=https://api-gateway.azurewebsites.net
 FRONTEND_PUBLIC_URL=http://localhost:4000
 
 # === SEGURIDAD ===
-WEBHOOK_SECRET=secreto_para_validar_webhooks
+GATEWAY_WEBHOOK_SECRET=secreto_compartido_con_el_gateway
+GATEWAY_REDIRECT_EXCHANGE_SECRET=secreto_para_intercambio_de_redirect_code
 ```
 
 Ver [.env.example](.env.example) para la plantilla completa.
@@ -136,6 +139,7 @@ Ver [.env.example](.env.example) para la plantilla completa.
 | `npm run dev:elmanzano` | Desarrollo con El Manzano |
 | `npm run dev:tinoco` | Desarrollo con Tinoco |
 | `npm run dev:sanjose` | Desarrollo con San José de las Salinas |
+| `npm run dev:calchinoeste` | Desarrollo con Calchín Oeste |
 | `npm run testDB` | Probar conexión a base de datos |
 
 ---
@@ -195,11 +199,29 @@ FRONTEND_PUBLIC_URL=http://localhost:4000
 
 Para SIRO en local, el portal envía en el request al gateway:
 
-- `callback_url=http://localhost:4000/api/pagos/confirmacion`
-- `callbackUrl=http://localhost:4000/api/pagos/confirmacion`
+- `callback_url=http://localhost:4000/api/webhook/pago`
+- `callbackUrl=http://localhost:4000/api/webhook/pago`
 
 Si en el gateway aparece el error `callbackUrl no configurada — PUBLIC_URL es requerido`, revisar su `.env`
 y definir `PUBLIC_URL` correctamente (por ejemplo `http://localhost:3000` o el valor requerido por su implementación).
+
+### Seguridad del redirect — código de intercambio opaco
+
+El gateway NO expone el JWT directamente en la URL de redirect al navegador del contribuyente.
+En su lugar usa un **código opaco de un solo uso** (`?code=...`) con TTL corto.
+
+El portal intercambia ese código contra el gateway via una llamada server-to-server autenticada
+con `GATEWAY_REDIRECT_EXCHANGE_SECRET`. El JWT cifrado viaja exclusivamente server-to-server,
+nunca en la URL del navegador.
+
+```
+Gateway → redirect → Portal browser → ?code=abc123
+Portal backend → POST /api/pagos/redirect/exchange { code, secret } → Gateway
+Gateway → { estado, external_reference, ... }
+Portal → renderiza vista con esos datos
+```
+
+Si `GATEWAY_REDIRECT_EXCHANGE_SECRET` no está configurado, el portal rechaza el redirect con un error claro.
 
 ### Nota sobre HTTPS en local
 

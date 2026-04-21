@@ -11,6 +11,7 @@
     "dev:elmanzano": "cp envs/.env.elmanzano .env && npm run dev",
     "dev:tinoco": "cp envs/.env.tinoco .env && npm run dev",
     "dev:sanjose": "cp envs/.env.sanjosedelassalinas .env && npm run dev",
+    "dev:calchinoeste": "cp envs/.env.calchinoeste .env && npm run dev",
     "testDB": "node ./tests/connection.db.test.js"
   },
   "repository": {
