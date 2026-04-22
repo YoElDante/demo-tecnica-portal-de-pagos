@@ -28,6 +28,10 @@ const app = express();
 // Mantenimiento automatico de tickets (expiracion + purga no pagados)
 startTicketsMaintenance();
 
+// Confiar en proxy headers de Azure Load Balancer
+// Esto permite que express-rate-limit lea X-Forwarded-For correctamente
+app.set('trust proxy', 1);
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
