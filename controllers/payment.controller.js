@@ -442,15 +442,6 @@ async function confirmacion(req, res) {
     }
 
     if (estadoNormalizado === 'APROBADO') {
-      const resultado = await pagosService.confirmarPagoGateway({
-        ticket,
-        externalReference,
-        estado: estadoNormalizado,
-        idOperacion: idOperacionNormalizado,
-        importe: importe || transaction_amount || transactionAmount,
-        fechaOperacion: fecha_operacion || fechaOperacion || date_approved || dateApproved
-      });
-
       await ticketsPagoService.actualizarEstadoDesdeGateway(ticket.ticketId, {
         estado: estadoNormalizado,
         idOperacion: idOperacionNormalizado,
@@ -458,6 +449,21 @@ async function confirmacion(req, res) {
         origen: origenNormalizado,
         fechaOperacion: fecha_operacion || fechaOperacion || date_approved || dateApproved
       });
+
+      let resultado;
+      try {
+        resultado = await pagosService.confirmarPagoGateway({
+          ticket,
+          externalReference,
+          estado: estadoNormalizado,
+          idOperacion: idOperacionNormalizado,
+          importe: importe || transaction_amount || transactionAmount,
+          fechaOperacion: fecha_operacion || fechaOperacion || date_approved || dateApproved
+        });
+      } catch (errContable) {
+        console.error('[Webhook] confirmarPagoGateway falló — ticket ya marcado APROBADO en BD', errContable.message);
+        resultado = { processed: false, conceptos_procesados: 0, numero_pago: null, already_processed: false };
+      }
 
       await ticketsPagoService.registrarEventoGateway({
         ticketId: ticket.ticketId,
