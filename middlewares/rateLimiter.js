@@ -22,7 +22,7 @@ function cleanIpKeyGenerator(req) {
     const ips = forwardedFor.split(',')[0].trim(); // Primero es la original
     return ips.split(':')[0]; // Extraer solo la IP, descartar puerto
   }
-  
+
   // Fallback a req.ip (menos confiable en proxy, pero intenta limpiar)
   const ip = req.ip || req.connection.remoteAddress || 'unknown';
   return ip.split(':')[0]; // Extraer solo la IP
@@ -44,6 +44,7 @@ exports.apiLimiter = rateLimit({
     }
   },
   keyGenerator: cleanIpKeyGenerator,
+  validate: { keyGeneratorIpFallback: false },
   standardHeaders: true, // Retorna info en headers `RateLimit-*`
   legacyHeaders: false, // Deshabilita headers `X-RateLimit-*`
   handler: (req, res) => {
@@ -74,6 +75,7 @@ exports.strictLimiter = rateLimit({
     }
   },
   keyGenerator: cleanIpKeyGenerator,
+  validate: { keyGeneratorIpFallback: false },
   standardHeaders: true,
   legacyHeaders: false
 });
@@ -86,6 +88,7 @@ exports.lightLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 200,
   keyGenerator: cleanIpKeyGenerator,
+  validate: { keyGeneratorIpFallback: false },
   standardHeaders: true,
   legacyHeaders: false
 });
@@ -103,7 +106,7 @@ function webhookKeyGenerator(req) {
     const ips = forwardedFor.split(',')[0].trim(); // Primero es la original
     return ips.split(':')[0]; // Extraer solo la IP, descartar puerto
   }
-  
+
   // Fallback a req.ip (menos confiable en proxy, pero intenta limpiar)
   const ip = req.ip || req.connection.remoteAddress || '';
   return ip.split(':')[0]; // Extraer solo la IP
@@ -125,6 +128,7 @@ exports.webhookLimiter = rateLimit({
     }
   },
   keyGenerator: webhookKeyGenerator,
+  validate: { keyGeneratorIpFallback: false },
   standardHeaders: true,
   legacyHeaders: false
 });
