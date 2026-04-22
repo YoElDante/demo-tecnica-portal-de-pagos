@@ -46,6 +46,19 @@ function renderizarErrorGenerico(res) {
   });
 }
 
+function obtenerContextoRedirect(req = {}) {
+  return {
+    refQuery: normalizarCadena(req.query?.ref || req.query?.external_reference || req.query?.externalReference),
+    hasCode: Boolean(normalizarCadena(req.query?.code)),
+    hasToken: Boolean(req.query?.token),
+    ip: req.ip,
+    requestId: req.requestId || null,
+    forwardedFor: req.headers?.['x-forwarded-for'] || null,
+    forwardedHost: req.headers?.['x-forwarded-host'] || null,
+    forwardedProto: req.headers?.['x-forwarded-proto'] || null
+  };
+}
+
 function normalizarCadena(valor) {
   if (valor === null || valor === undefined) {
     return null;
@@ -85,6 +98,16 @@ async function validarRedirectSeguro(req) {
       code,
       externalReference: refRecibida,
       consume: false
+    });
+
+    console.log('🔐 [redirect-exchange] Resultado validacion code', {
+      ref_query: refRecibida,
+      ref_exchange: normalizarCadena(exchanged.external_reference),
+      estado: normalizarEstado(exchanged.estado),
+      municipio_exchange: exchanged.municipio_id || null,
+      issued_at: exchanged.issued_at || null,
+      id_operacion: exchanged.id_operacion || null,
+      importe: exchanged.importe ?? null
     });
 
     if (exchanged?.municipio_id && MUNICIPIO_ID && exchanged.municipio_id.toUpperCase() !== MUNICIPIO_ID.toUpperCase()) {
@@ -163,7 +186,8 @@ async function construirDetalleTicket(ticket, externalReference, estadoFallback 
     montoTotal,
     montoTotalDisplay: ticketService.formatearMoneda(montoTotal),
     idOperacion: ticket?.idOperacion || null,
-    conceptos
+    conceptos,
+    isDemo: payload?.isDemo === true
   };
 }
 
@@ -176,7 +200,8 @@ async function construirDetalleTicket(ticket, externalReference, estadoFallback 
  */
 async function iniciarPago(req, res) {
   try {
-    const { conceptos, contribuyente, montoTotal, creditosAplicados } = req.body;
+    const { conceptos, contribuyente, montoTotal, creditosAplicados, is_demo } = req.body;
+    const isDemoMode = is_demo === true && MUNICIPIO_ID.toUpperCase() === 'DEMO';
 
     console.log('🛒 Iniciando proceso de pago:', {
       contribuyente_dni: contribuyente?.dni,
@@ -282,7 +307,8 @@ async function iniciarPago(req, res) {
         montoTotal: montoNeto,
         montoPositivos: totalPositivos,
         montoCreditos: totalCreditos,
-        montoSolicitadoFrontend: Number(montoTotal || 0)
+        montoSolicitadoFrontend: Number(montoTotal || 0),
+        isDemo: isDemoMode
       }
     });
 
@@ -510,6 +536,15 @@ async function pagoExitoso(req, res) {
 
     const ticket = await ticketsPagoService.obtenerPorExternalReference(externalReference);
 
+    if (!ticket) {
+      console.warn('⚠️ [pagoExitoso] No se encontro ticket para external_reference', {
+        externalReference,
+        estado,
+        ...obtenerContextoRedirect(req)
+      });
+      throw new Error(`Ticket no encontrado para external_reference=${externalReference}`);
+    }
+
     if (PAYMENT_REDIRECT_DEBUG) {
       console.log('🔍 [pagoExitoso] Ticket encontrado:', ticket ? {
         ticketId: ticket.ticketId,
@@ -549,7 +584,8 @@ async function pagoExitoso(req, res) {
         monto_total: detalleTicket.montoTotal,
         monto_total_display: detalleTicket.montoTotalDisplay,
         conceptos: detalleTicket.conceptos,
-        email_actual: ''
+        email_actual: '',
+        is_demo: detalleTicket.isDemo
       });
     }
 
@@ -568,7 +604,7 @@ async function pagoExitoso(req, res) {
     });
 
   } catch (error) {
-    console.warn(`⚠️ Redirect inválido a /pagos/exitoso: ${error.message}`);
+    console.warn(`⚠️ Redirect inválido a /pagos/exitoso: ${error.message}`, obtenerContextoRedirect(req));
     return renderizarErrorGenerico(res);
   }
 }

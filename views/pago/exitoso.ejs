@@ -270,6 +270,11 @@
     <div class="page-dots page-dots--br"></div>
     <div class="page-circle page-circle--1"></div>
     <div class="page-circle page-circle--2"></div>
+    <% if (typeof is_demo !== 'undefined' && is_demo) { %>
+    <div style="background:#fff3cd;border:2px solid #f9a825;border-radius:10px;padding:0.9rem 1.25rem;max-width:600px;margin:1.5rem auto 0;text-align:center;font-size:0.92rem;color:#856404;font-weight:500;">
+      🧪 <strong>MODO DEMOSTRACIÓN</strong> — Esta operación no modificó deudas reales en la base de datos.
+    </div>
+    <% } %>
     <section class="result result--success">
       <div class="result__icon">✅</div>
       <h1 class="result__title">¡Pago Exitoso!</h1>

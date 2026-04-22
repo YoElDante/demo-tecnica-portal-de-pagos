@@ -309,6 +309,25 @@ const confirmarPagoGateway = async (datosPago) => {
     };
   }
 
+  // Modo demostración: el pago se procesa en SIRO pero no toca la BD de deudas
+  const snapshotRaw = ticket?.payloadSnapshot
+    ? (typeof ticket.payloadSnapshot === 'string' ? JSON.parse(ticket.payloadSnapshot) : ticket.payloadSnapshot)
+    : {};
+  const isDemoMode = snapshotRaw?.isDemo === true &&
+    String(ticket?.municipioId || '').toUpperCase() === 'DEMO';
+
+  if (isDemoMode) {
+    return {
+      received: true,
+      processed: false,
+      already_processed: false,
+      demo_mode: true,
+      numero_pago: null,
+      conceptos_procesados: 0,
+      creditos_limpiados: 0
+    };
+  }
+
   const conceptos = extraerConceptosDesdeTicket(ticket);
   const creditosAplicados = extraerCreditosDesdeTicket(ticket);
   if (conceptos.length === 0) {

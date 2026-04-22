@@ -388,7 +388,13 @@ async function exchangeRedirectCode({ code, externalReference, consume = true })
   return {
     external_reference: data.ref,
     estado: data.estado,
-    municipio_id: data.municipio_id || null
+    municipio_id: data.municipio_id || null,
+    importe: data.importe ?? null,
+    concepto: data.concepto ?? null,
+    nro_comprobante: data.nro_comprobante ?? null,
+    fecha_operacion: data.fecha_operacion ?? null,
+    id_operacion: data.id_operacion ?? null,
+    issued_at: data.issued_at ?? null
   };
 }
 

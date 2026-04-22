@@ -314,6 +314,13 @@
 
 <body>
 
+  <!-- Banner modo demostración (solo pantalla) -->
+  <% if (typeof is_demo !== 'undefined' && is_demo) { %>
+  <div style="background:#fff3cd;border-bottom:2px solid #f9a825;padding:0.75rem 1.5rem;text-align:center;font-size:0.92rem;color:#856404;font-weight:600;display:flex;align-items:center;justify-content:center;gap:0.5rem;">
+    🧪 <strong>MODO DEMOSTRACIÓN</strong> — Esta operación no modificó deudas reales en la base de datos.
+  </div>
+  <% } %>
+
   <!-- Barra de acciones (solo pantalla) -->
   <div class="screen-actions">
     <span class="screen-actions__title">Comprobante de pago — <%= municipalidad.nombreCompleto %></span>

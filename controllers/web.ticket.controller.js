@@ -96,6 +96,7 @@ async function generarComprobantePago(req, res) {
     let conceptosProcesados = [];
     let contribuyente = { nombreCompleto: 'No disponible', dni: '-' };
 
+    let isDemo = false;
     if (ticket?.payloadSnapshot) {
       try {
         const snapshot = typeof ticket.payloadSnapshot === 'string'
@@ -115,6 +116,8 @@ async function generarComprobantePago(req, res) {
             dni: c.dni || '-'
           };
         }
+
+        isDemo = snapshot?.isDemo === true;
       } catch (_) {
         // snapshot inválido — seguir con datos vacíos
       }
@@ -141,7 +144,8 @@ async function generarComprobantePago(req, res) {
       conceptos: conceptosProcesados,
       totalGeneral,
       fechaEmision: ticketService.obtenerFechaEmision(),
-      webDisplay: municipalidad.web || portalWeb
+      webDisplay: municipalidad.web || portalWeb,
+      is_demo: isDemo
     });
 
   } catch (error) {

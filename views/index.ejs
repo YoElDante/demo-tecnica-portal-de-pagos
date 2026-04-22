@@ -186,6 +186,128 @@
     </section>
     <% } %>
 
+    <!-- Toggle Modo Demostración (solo visible en municipio DEMO) -->
+    <% if (typeof demoModoHabilitado !== 'undefined' && demoModoHabilitado && deudas && deudas.length > 0) { %>
+    <div class="demo-toggle-wrapper">
+      <label class="demo-toggle-switch" for="toggle-demo-modo">
+        <input type="checkbox" id="toggle-demo-modo">
+        <span class="demo-toggle-switch__track"></span>
+        <span class="demo-toggle-switch__thumb"></span>
+      </label>
+      <span class="demo-toggle-label">Modo Demostración</span>
+      <span class="demo-toggle-info">
+        <span class="demo-toggle-info__icon">ⓘ</span>
+        <span class="demo-toggle-info__tooltip">
+          Cuando está <strong>activo</strong>, el pago se procesa en SIRO
+          pero <strong>las deudas NO se modifican</strong> en la base de datos.<br><br>
+          Útil para mostrar el flujo completo sin alterar datos reales.<br><br>
+          Dejalo <strong>desactivado</strong> si querés demostrar la sincronización
+          real entre el portal web y la aplicación de escritorio.
+        </span>
+      </span>
+    </div>
+    <style>
+      .demo-toggle-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: #fff8e1;
+        border: 1.5px solid #f9a825;
+        border-radius: 10px;
+        padding: 0.75rem 1.25rem;
+        margin: 1rem auto;
+        max-width: 600px;
+        width: fit-content;
+      }
+      .demo-toggle-switch {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        cursor: pointer;
+        width: 46px;
+        height: 26px;
+        flex-shrink: 0;
+      }
+      .demo-toggle-switch input { display: none; }
+      .demo-toggle-switch__track {
+        position: absolute;
+        inset: 0;
+        background: #ccc;
+        border-radius: 13px;
+        transition: background 0.25s;
+      }
+      .demo-toggle-switch input:checked ~ .demo-toggle-switch__track {
+        background: #f9a825;
+      }
+      .demo-toggle-switch__thumb {
+        position: absolute;
+        left: 3px;
+        top: 3px;
+        width: 20px;
+        height: 20px;
+        background: white;
+        border-radius: 50%;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        transition: left 0.25s;
+      }
+      .demo-toggle-switch input:checked ~ .demo-toggle-switch__thumb {
+        left: 23px;
+      }
+      .demo-toggle-label {
+        font-weight: 600;
+        color: #5f4500;
+        font-size: 0.95rem;
+        white-space: nowrap;
+      }
+      .demo-toggle-info {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+      }
+      .demo-toggle-info__icon {
+        color: #f9a825;
+        font-size: 1.15rem;
+        cursor: help;
+        line-height: 1;
+      }
+      .demo-toggle-info__tooltip {
+        display: none;
+        position: absolute;
+        left: 1.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #333;
+        color: #fff;
+        font-size: 0.82rem;
+        line-height: 1.5;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        width: 280px;
+        z-index: 100;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+        pointer-events: none;
+      }
+      .demo-toggle-info:hover .demo-toggle-info__tooltip {
+        display: block;
+      }
+      /* Banner activo cuando el toggle está ON */
+      .demo-modo-activo-banner {
+        display: none;
+        background: #fff3cd;
+        border: 1.5px solid #f9a825;
+        border-radius: 8px;
+        padding: 0.6rem 1rem;
+        color: #856404;
+        font-size: 0.88rem;
+        font-weight: 500;
+        text-align: center;
+        margin: 0.5rem auto;
+        max-width: 600px;
+      }
+      #toggle-demo-modo:checked ~ * .demo-modo-activo-banner { display: block; }
+    </style>
+    <% } %>
+
     <!-- Botones de acción -->
     <% if (deudas && deudas.length > 0) { %>
     <section class="actions">
@@ -351,6 +473,9 @@
       loadingMsg.style.display = 'block';
       setTimeout(() => loadingContainer.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
 
+      const toggleDemo = document.getElementById('toggle-demo-modo');
+      const isDemoMode = toggleDemo ? toggleDemo.checked : false;
+
       try {
         const response = await fetch('/pago/iniciar', {
           method: 'POST',
@@ -359,7 +484,8 @@
             contribuyente: contribuyenteData,
             conceptos,
             montoTotal,
-            creditosAplicados
+            creditosAplicados,
+            is_demo: isDemoMode
           })
         });
 

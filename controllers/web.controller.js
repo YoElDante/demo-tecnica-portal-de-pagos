@@ -2,7 +2,7 @@
  * Web Controller
  * Controlador para renderizar vistas EJS (interfaz web)
  * Solo maneja renderizado, la lógica está en services
- * 
+ *
  * @author Dante Marcos Delprato
  * @version 1.1
  * @date 2026-01-20
@@ -11,7 +11,11 @@
 const ClientesService = require('../services/clientes.service');
 const DeudasService = require('../services/deudas.service');
 // Configuración centralizada - cambiar municipio en .env (MUNICIPIO=xxx)
-const { municipalidad } = require('../config');
+const { municipalidad, MUNICIPIO } = require('../config');
+
+const demoModoHabilitado = String(MUNICIPIO || '').toUpperCase() === 'DEMO';
+
+const BASE_RENDER = { municipalidad, demoModoHabilitado };
 
 /**
  * Renderiza la página principal
@@ -19,8 +23,8 @@ const { municipalidad } = require('../config');
  */
 exports.renderIndex = (req, res) => {
   res.render('index', {
+    ...BASE_RENDER,
     title: 'Portal de Pagos',
-    municipalidad,
     cliente: null,
     deudas: [],
     tiposDeuda: [],
@@ -41,11 +45,10 @@ exports.buscarPorDni = async (req, res) => {
   try {
     const dni = String(req.body?.dni || '').trim();
 
-    // Validar DNI
     if (!ClientesService.validarDni(dni)) {
       return res.render('index', {
+        ...BASE_RENDER,
         title: 'Portal de Pagos',
-        municipalidad,
         dni,
         cliente: null,
         deudas: [],
@@ -58,13 +61,12 @@ exports.buscarPorDni = async (req, res) => {
       });
     }
 
-    // Buscar cliente
     const cliente = await ClientesService.buscarPorDni(dni);
 
     if (!cliente) {
       return res.render('index', {
+        ...BASE_RENDER,
         title: 'Portal de Pagos',
-        municipalidad,
         dni,
         cliente: null,
         deudas: [],
@@ -77,23 +79,15 @@ exports.buscarPorDni = async (req, res) => {
       });
     }
 
-    // Obtener deudas del cliente
     const deudas = await DeudasService.obtenerDeudasPorCodigo(cliente.Codigo);
-
-    // Lista de tipos presentes
     const tiposDeuda = [...new Set(deudas.map(d => d.Tipo).filter(Boolean))];
-
-    // Pasar diccionarios (una sola vez)
     const tipoDescripciones = DeudasService.TIPO_DESCRIPCIONES;
     const tipoIconos = DeudasService.TIPO_ICONOS;
-
-    // Calcular total
     const totalGeneral = DeudasService.calcularTotal(deudas);
 
-    // Render
     return res.render('index', {
+      ...BASE_RENDER,
       title: 'Portal de Pagos',
-      municipalidad,
       dni,
       cliente,
       deudas,
@@ -108,8 +102,8 @@ exports.buscarPorDni = async (req, res) => {
   } catch (error) {
     console.error('Error en buscarPorDni (web):', error);
     return res.render('index', {
+      ...BASE_RENDER,
       title: 'Portal de Pagos',
-      municipalidad,
       dni: req.body?.dni || '',
       cliente: null,
       deudas: [],
