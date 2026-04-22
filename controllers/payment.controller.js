@@ -94,11 +94,22 @@ async function validarRedirectSeguro(req) {
   const code = normalizarCadena(req.query.code);
 
   if (code) {
-    const exchanged = await paymentGatewayService.exchangeRedirectCode({
-      code,
-      externalReference: refRecibida,
-      consume: false
-    });
+    let exchanged;
+
+    try {
+      exchanged = await paymentGatewayService.exchangeRedirectCode({
+        code,
+        externalReference: refRecibida,
+        consume: false
+      });
+    } catch (error) {
+      console.warn('⚠️ [redirect-exchange] Fallo validando code', {
+        ref_query: refRecibida,
+        reason: error.message,
+        ...obtenerContextoRedirect(req)
+      });
+      throw error;
+    }
 
     console.log('🔐 [redirect-exchange] Resultado validacion code', {
       ref_query: refRecibida,

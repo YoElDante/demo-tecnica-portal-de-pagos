@@ -32,6 +32,14 @@ const REDIRECT_EXCHANGE_SECRET = process.env.GATEWAY_REDIRECT_EXCHANGE_SECRET
   || process.env.GATEWAY_WEBHOOK_SECRET
   || process.env.WEBHOOK_SECRET
   || '';
+const FALLBACK_REDIRECT_EXCHANGE_SECRETS = [
+  process.env.GATEWAY_REDIRECT_EXCHANGE_SECRET,
+  process.env.GATEWAY_WEBHOOK_SECRET,
+  process.env.WEBHOOK_SECRET
+]
+  .map((value) => String(value || '').trim())
+  .filter((value) => value.length > 0)
+  .filter((value, index, arr) => arr.indexOf(value) === index);
 
 // Log de configuración al iniciar
 console.log(`💳 Payment Gateway configurado: ${PAYMENT_GATEWAY.toUpperCase()}`);
@@ -361,41 +369,69 @@ async function exchangeRedirectCode({ code, externalReference, consume = true })
     throw new Error('No está configurado GATEWAY_REDIRECT_EXCHANGE_SECRET/GATEWAY_WEBHOOK_SECRET');
   }
 
-  const response = await axios.post(
-    `${API_GATEWAY_URL}/api/pagos/redirect/exchange`,
-    {
-      code,
-      ref: externalReference,
-      municipio_id: MUNICIPIO_ID,
-      consume: consume !== false
-    },
-    {
-      timeout: 10000,
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Redirect-Exchange-Secret': REDIRECT_EXCHANGE_SECRET
+  const secretsToTry = [
+    REDIRECT_EXCHANGE_SECRET,
+    ...FALLBACK_REDIRECT_EXCHANGE_SECRETS
+  ]
+    .map((value) => String(value || '').trim())
+    .filter((value) => value.length > 0)
+    .filter((value, index, arr) => arr.indexOf(value) === index);
+
+  let lastError = null;
+
+  for (const secret of secretsToTry) {
+    try {
+      const response = await axios.post(
+        `${API_GATEWAY_URL}/api/pagos/redirect/exchange`,
+        {
+          code,
+          ref: externalReference,
+          municipio_id: MUNICIPIO_ID,
+          consume: consume !== false
+        },
+        {
+          timeout: 10000,
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Redirect-Exchange-Secret': secret
+          }
+        }
+      );
+
+      const body = response.data || {};
+      const data = body.data || {};
+
+      if (!body.success || !data.ref || !data.estado) {
+        throw new Error(body.message || 'No se pudo validar el redirect code');
+      }
+
+      return {
+        external_reference: data.ref,
+        estado: data.estado,
+        municipio_id: data.municipio_id || null,
+        importe: data.importe ?? null,
+        concepto: data.concepto ?? null,
+        nro_comprobante: data.nro_comprobante ?? null,
+        fecha_operacion: data.fecha_operacion ?? null,
+        id_operacion: data.id_operacion ?? null,
+        issued_at: data.issued_at ?? null
+      };
+    } catch (error) {
+      lastError = error;
+      const status = error?.response?.status;
+      if (status !== 401) {
+        break;
       }
     }
-  );
-
-  const body = response.data || {};
-  const data = body.data || {};
-
-  if (!body.success || !data.ref || !data.estado) {
-    throw new Error(body.message || 'No se pudo validar el redirect code');
   }
 
-  return {
-    external_reference: data.ref,
-    estado: data.estado,
-    municipio_id: data.municipio_id || null,
-    importe: data.importe ?? null,
-    concepto: data.concepto ?? null,
-    nro_comprobante: data.nro_comprobante ?? null,
-    fecha_operacion: data.fecha_operacion ?? null,
-    id_operacion: data.id_operacion ?? null,
-    issued_at: data.issued_at ?? null
-  };
+  if (lastError?.response?.status) {
+    const status = lastError.response.status;
+    const reason = lastError?.response?.data?.message || lastError?.response?.data?.error || lastError.message;
+    throw new Error(`Redirect exchange falló [${status}]: ${reason}`);
+  }
+
+  throw lastError || new Error('No se pudo validar el redirect code');
 }
 
 /**
