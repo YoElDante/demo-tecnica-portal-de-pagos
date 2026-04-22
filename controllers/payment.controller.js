@@ -18,10 +18,10 @@ const deudasService = require('../services/deudas.service');
 const { municipalidad } = require('../config');
 
 const MUNICIPIO_ID = process.env.MUNICIPIO || '';
-if (!process.env.PAYMENT_GATEWAY) {
-  console.warn('⚠️  PAYMENT_GATEWAY no configurado — usando SIRO por defecto. Definir en .env para producción.');
+const GATEWAY_PROVIDER = process.env.PAYMENT_GATEWAY?.toUpperCase();
+if (!GATEWAY_PROVIDER) {
+  throw new Error('PAYMENT_GATEWAY no configurado. Definir en .env antes de iniciar el servidor.');
 }
-const GATEWAY_PROVIDER = (process.env.PAYMENT_GATEWAY || 'SIRO').toUpperCase();
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const PAYMENT_REDIRECT_DEBUG = process.env.PAYMENT_REDIRECT_DEBUG === 'true' || !IS_PRODUCTION;
 
@@ -300,7 +300,7 @@ async function iniciarPago(req, res) {
       throw new Error('El gateway no devolvio external_reference para correlacionar el ticket');
     }
 
-    await ticketsPagoService.actualizarConReferencia(ticket.ticketId, externalReference);
+    await ticketsPagoService.actualizarConReferencia(ticket.ticketId, externalReference, ticketNumber);
 
     console.log(`🔗 Redirigiendo a ${GATEWAY_PROVIDER}:`, {
       external_reference: externalReference,
@@ -405,33 +405,14 @@ async function confirmacion(req, res) {
     }
 
     if (estadoNormalizado === 'APROBADO') {
-      let resultado;
-      let contabilizacionError = null;
-
-      try {
-        resultado = await pagosService.confirmarPagoGateway({
-          ticket,
-          externalReference,
-          estado: estadoNormalizado,
-          idOperacion: idOperacionNormalizado,
-          importe: importe || transaction_amount || transactionAmount,
-          fechaOperacion: fecha_operacion || fechaOperacion || date_approved || dateApproved
-        });
-      } catch (error) {
-        if (IS_PRODUCTION) {
-          throw error;
-        }
-
-        contabilizacionError = error;
-        resultado = {
-          processed: false,
-          already_processed: false,
-          conceptos_procesados: 0,
-          numero_pago: null
-        };
-
-        console.warn('⚠️ [DEV] Falló contabilización, se confirma ticket igual para pruebas de integración:', error.message);
-      }
+      const resultado = await pagosService.confirmarPagoGateway({
+        ticket,
+        externalReference,
+        estado: estadoNormalizado,
+        idOperacion: idOperacionNormalizado,
+        importe: importe || transaction_amount || transactionAmount,
+        fechaOperacion: fecha_operacion || fechaOperacion || date_approved || dateApproved
+      });
 
       await ticketsPagoService.actualizarEstadoDesdeGateway(ticket.ticketId, {
         estado: estadoNormalizado,
@@ -452,7 +433,7 @@ async function confirmacion(req, res) {
         processResult: resultado.already_processed
           ? 'DUPLICADO'
           : 'APLICADO',
-        errorMessage: contabilizacionError ? contabilizacionError.message : null
+        errorMessage: null
       });
 
       console.log('✅ Pago aprobado y procesado:', {
@@ -467,10 +448,7 @@ async function confirmacion(req, res) {
         processed: resultado.processed,
         message: resultado.already_processed
           ? 'Pago ya procesado anteriormente'
-          : contabilizacionError
-            ? 'Pago confirmado en ticket (DEV). Contabilización pendiente por error local.'
-            : `${resultado.conceptos_procesados} conceptos actualizados`,
-        contabilizacion_pendiente: Boolean(contabilizacionError),
+          : `${resultado.conceptos_procesados} conceptos actualizados`,
         numero_pago: resultado.numero_pago
       });
     }

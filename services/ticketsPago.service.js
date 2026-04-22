@@ -130,19 +130,39 @@ async function crearTicketConNumeroUnico(datos) {
  * Actualiza el ticket a estado PENDIENTE con el external_reference del gateway.
  * Se llama inmediatamente después de que el gateway acepta la intención de pago.
  *
- * @param {number} ticketId         - PK del ticket a actualizar
- * @param {string} externalReference - ID de referencia devuelto por el gateway
+ * Usa ticketNumber como fallback si ticketId no es confiable (edge case BIGINT+MSSQL).
+ *
+ * @param {number|null} ticketId       - PK del ticket (puede ser unreliable en MSSQL+BIGINT)
+ * @param {string} externalReference   - ID de referencia devuelto por el gateway
+ * @param {string} [ticketNumber]      - Número único del ticket (fallback seguro)
  * @returns {Promise<void>}
  */
-async function actualizarConReferencia(ticketId, externalReference) {
-  await TicketsPago.update(
-    {
-      externalReference,
-      status: 'PENDIENTE',
-      updatedAtUtc: new Date()
-    },
-    { where: { ticketId } }
+async function actualizarConReferencia(ticketId, externalReference, ticketNumber) {
+  const where = (ticketId != null && ticketId !== 0)
+    ? { ticketId }
+    : { ticketNumber };
+
+  if (!where.ticketId && !where.ticketNumber) {
+    throw new Error('Se requiere ticketId o ticketNumber para actualizar el ticket');
+  }
+
+  const [affected] = await TicketsPago.update(
+    { externalReference, status: 'PENDIENTE', updatedAtUtc: new Date() },
+    { where }
   );
+
+  if (affected === 0 && ticketNumber && where.ticketId) {
+    // ticketId no matcheó — reintentar con ticketNumber (fallback ante BIGINT edge case)
+    const [affectedByNumber] = await TicketsPago.update(
+      { externalReference, status: 'PENDIENTE', updatedAtUtc: new Date() },
+      { where: { ticketNumber } }
+    );
+    if (affectedByNumber === 0) {
+      throw new Error(`actualizarConReferencia: 0 filas afectadas para ticketId=${ticketId}, ticketNumber=${ticketNumber}`);
+    }
+  } else if (affected === 0) {
+    throw new Error(`actualizarConReferencia: 0 filas afectadas para ticketId=${ticketId}`);
+  }
 }
 
 /**
