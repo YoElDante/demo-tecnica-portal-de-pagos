@@ -44,7 +44,7 @@ exports.apiLimiter = rateLimit({
     }
   },
   keyGenerator: cleanIpKeyGenerator,
-  validate: { keyGeneratorIpFallback: false },
+  validate: { ip: false, keyGeneratorIpFallback: false },
   standardHeaders: true, // Retorna info en headers `RateLimit-*`
   legacyHeaders: false, // Deshabilita headers `X-RateLimit-*`
   handler: (req, res) => {
@@ -75,7 +75,7 @@ exports.strictLimiter = rateLimit({
     }
   },
   keyGenerator: cleanIpKeyGenerator,
-  validate: { keyGeneratorIpFallback: false },
+  validate: { ip: false, keyGeneratorIpFallback: false },
   standardHeaders: true,
   legacyHeaders: false
 });
@@ -88,7 +88,7 @@ exports.lightLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 200,
   keyGenerator: cleanIpKeyGenerator,
-  validate: { keyGeneratorIpFallback: false },
+  validate: { ip: false, keyGeneratorIpFallback: false },
   standardHeaders: true,
   legacyHeaders: false
 });
@@ -128,7 +128,7 @@ exports.webhookLimiter = rateLimit({
     }
   },
   keyGenerator: webhookKeyGenerator,
-  validate: { keyGeneratorIpFallback: false },
+  validate: { ip: false, keyGeneratorIpFallback: false },
   standardHeaders: true,
   legacyHeaders: false
 });
