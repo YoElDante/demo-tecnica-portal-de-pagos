@@ -17,11 +17,31 @@ const demoModoHabilitado = String(MUNICIPIO || '').toUpperCase() === 'DEMO';
 
 const BASE_RENDER = { municipalidad, demoModoHabilitado };
 
+// Cache simple de sugerencias — se refresca cada 5 minutos
+let _sugerenciasCache = { data: null, ts: 0 };
+const SUGERENCIAS_TTL_MS = 5 * 60 * 1000;
+
+async function obtenerSugerenciasDemo() {
+  if (!demoModoHabilitado) return [];
+  const ahora = Date.now();
+  if (_sugerenciasCache.data && (ahora - _sugerenciasCache.ts) < SUGERENCIAS_TTL_MS) {
+    return _sugerenciasCache.data;
+  }
+  try {
+    const data = await ClientesService.obtenerPrimerosConDeuda(5);
+    _sugerenciasCache = { data, ts: ahora };
+    return data;
+  } catch {
+    return [];
+  }
+}
+
 /**
  * Renderiza la página principal
  * GET /
  */
-exports.renderIndex = (req, res) => {
+exports.renderIndex = async (req, res) => {
+  const sugerenciasDemo = await obtenerSugerenciasDemo();
   res.render('index', {
     ...BASE_RENDER,
     title: 'Portal de Pagos',
@@ -33,7 +53,8 @@ exports.renderIndex = (req, res) => {
     totalGeneral: 0,
     clienteNoEncontrado: false,
     dni: '',
-    mensaje: null
+    mensaje: null,
+    sugerenciasDemo
   });
 };
 
@@ -44,6 +65,7 @@ exports.renderIndex = (req, res) => {
 exports.buscarPorDni = async (req, res) => {
   try {
     const dni = String(req.body?.dni || '').trim();
+    const sugerenciasDemo = await obtenerSugerenciasDemo();
 
     if (!ClientesService.validarDni(dni)) {
       return res.render('index', {
@@ -57,7 +79,8 @@ exports.buscarPorDni = async (req, res) => {
         tipoIconos: DeudasService.TIPO_ICONOS,
         totalGeneral: 0,
         clienteNoEncontrado: false,
-        mensaje: 'El DNI debe tener entre 7 y 10 números.'
+        mensaje: 'El DNI debe tener entre 7 y 10 números.',
+        sugerenciasDemo
       });
     }
 
@@ -75,7 +98,8 @@ exports.buscarPorDni = async (req, res) => {
         tipoIconos: DeudasService.TIPO_ICONOS,
         totalGeneral: 0,
         clienteNoEncontrado: true,
-        mensaje: null
+        mensaje: null,
+        sugerenciasDemo
       });
     }
 
@@ -96,11 +120,13 @@ exports.buscarPorDni = async (req, res) => {
       tipoIconos,
       totalGeneral,
       clienteNoEncontrado: false,
-      mensaje: null
+      mensaje: null,
+      sugerenciasDemo
     });
 
   } catch (error) {
     console.error('Error en buscarPorDni (web):', error);
+    const sugerenciasDemo = await obtenerSugerenciasDemo();
     return res.render('index', {
       ...BASE_RENDER,
       title: 'Portal de Pagos',
@@ -112,7 +138,8 @@ exports.buscarPorDni = async (req, res) => {
       tipoIconos: DeudasService.TIPO_ICONOS,
       totalGeneral: 0,
       clienteNoEncontrado: false,
-      mensaje: 'Error interno al buscar los datos.'
+      mensaje: 'Error interno al buscar los datos.',
+      sugerenciasDemo
     });
   }
 };

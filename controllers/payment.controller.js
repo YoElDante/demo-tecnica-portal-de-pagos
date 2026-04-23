@@ -198,7 +198,8 @@ async function construirDetalleTicket(ticket, externalReference, estadoFallback 
     montoTotalDisplay: ticketService.formatearMoneda(montoTotal),
     idOperacion: ticket?.idOperacion || null,
     conceptos,
-    isDemo: payload?.isDemo === true
+    isDemo: payload?.isDemo === true,
+    isSimulacion: payload?.isSimulacion === true
   };
 }
 
@@ -211,8 +212,9 @@ async function construirDetalleTicket(ticket, externalReference, estadoFallback 
  */
 async function iniciarPago(req, res) {
   try {
-    const { conceptos, contribuyente, montoTotal, creditosAplicados, is_demo } = req.body;
+    const { conceptos, contribuyente, montoTotal, creditosAplicados, is_demo, demo_resultado } = req.body;
     const isDemoMode = is_demo === true && MUNICIPIO_ID.toUpperCase() === 'DEMO';
+    const isDemoSimulado = MUNICIPIO_ID.toUpperCase() === 'DEMO' && demo_resultado && demo_resultado !== 'real';
 
     console.log('🛒 Iniciando proceso de pago:', {
       contribuyente_dni: contribuyente?.dni,
@@ -319,11 +321,44 @@ async function iniciarPago(req, res) {
         montoPositivos: totalPositivos,
         montoCreditos: totalCreditos,
         montoSolicitadoFrontend: Number(montoTotal || 0),
-        isDemo: isDemoMode
+        isDemo: isDemoMode,
+        isSimulacion: isDemoSimulado
       }
     });
 
     console.log('🎫 Ticket creado en BD:', { ticketNumber, ticketId: ticket.ticketId });
+
+    if (isDemoSimulado) {
+      const externalRef = `DEMO-SIM-${ticketNumber}`;
+      await ticketsPagoService.actualizarConReferencia(ticket.ticketId, externalRef, ticketNumber);
+
+      const token = gatewayTokenService.signGatewayToken({
+        ref: externalRef,
+        external_reference: externalRef,
+        estado: demo_resultado,
+        municipio_id: MUNICIPIO_ID
+      });
+
+      const destinosPorResultado = {
+        approved: `/pagos/exitoso?token=${token}&ref=${externalRef}`,
+        pending:  `/pagos/exitoso?token=${token}&ref=${externalRef}`,
+        rejected: `/pagos/error?token=${token}&ref=${externalRef}`,
+        error:    `/pagos/error-generico?demo_sim=1`
+      };
+
+      const redirectUrl = destinosPorResultado[demo_resultado] || `/pagos/error-generico`;
+
+      console.log(`🎭 [DEMO] Simulando resultado '${demo_resultado}' para ticket ${ticketNumber}`);
+
+      return res.json({
+        success: true,
+        redirect_url: redirectUrl,
+        external_reference: externalRef,
+        ticket_number: ticketNumber,
+        monto_neto: montoNeto,
+        credito_aplicado: totalCreditos
+      });
+    }
 
     const resultado = await paymentGatewayService.createPayment({
       contribuyente: { ...contribuyente, codigo: codigoContribuyente },
@@ -588,6 +623,8 @@ async function pagoExitoso(req, res) {
     // de confirmar con SIRO. No esperamos a que el webhook actualice la BD.
     const estadoConfirmado = estado || detalleTicket.estado;
 
+    const demoModoHabilitado = MUNICIPIO_ID.toUpperCase() === 'DEMO';
+
     if (estadoConfirmado === 'APROBADO') {
       return res.render('pago/exitoso', {
         title: 'Pago Exitoso',
@@ -602,7 +639,9 @@ async function pagoExitoso(req, res) {
         monto_total_display: detalleTicket.montoTotalDisplay,
         conceptos: detalleTicket.conceptos,
         email_actual: '',
-        is_demo: detalleTicket.isDemo
+        is_demo: detalleTicket.isDemo,
+        is_simulacion: detalleTicket.isSimulacion,
+        demoModoHabilitado
       });
     }
 
@@ -617,7 +656,10 @@ async function pagoExitoso(req, res) {
       status: estadoConfirmado,
       monto_total: detalleTicket.montoTotal,
       conceptos: detalleTicket.conceptos,
-      mensaje_adicional: null
+      mensaje_adicional: null,
+      is_demo: detalleTicket.isDemo,
+      is_simulacion: detalleTicket.isSimulacion,
+      demoModoHabilitado
     });
 
   } catch (error) {
@@ -647,7 +689,10 @@ async function pagoFallido(req, res) {
       status: detalleTicket.estado,
       monto_total: detalleTicket.montoTotal,
       monto_total_display: detalleTicket.montoTotalDisplay,
-      conceptos: detalleTicket.conceptos
+      conceptos: detalleTicket.conceptos,
+      is_demo: detalleTicket.isDemo,
+      is_simulacion: detalleTicket.isSimulacion,
+      demoModoHabilitado: MUNICIPIO_ID.toUpperCase() === 'DEMO'
     });
   } catch (error) {
     console.warn(`⚠️ Redirect inválido a /pagos/error: ${error.message}`);
@@ -677,7 +722,10 @@ async function pagoPendiente(req, res) {
       monto_total: detalleTicket.montoTotal,
       monto_total_display: detalleTicket.montoTotalDisplay,
       conceptos: detalleTicket.conceptos,
-      mensaje_adicional: null
+      mensaje_adicional: null,
+      is_demo: detalleTicket.isDemo,
+      is_simulacion: detalleTicket.isSimulacion,
+      demoModoHabilitado: MUNICIPIO_ID.toUpperCase() === 'DEMO'
     });
   } catch (error) {
     console.warn(`⚠️ Redirect inválido a /pagos/pendiente: ${error.message}`);
@@ -685,8 +733,14 @@ async function pagoPendiente(req, res) {
   }
 }
 
-function pagoErrorGenerico(_req, res) {
-  return renderizarErrorGenerico(res);
+function pagoErrorGenerico(req, res) {
+  return res.status(400).render('pago/error-generico', {
+    title: 'Resultado no válido',
+    municipalidad,
+    demoModoHabilitado: MUNICIPIO_ID.toUpperCase() === 'DEMO',
+    is_simulacion: req.query.demo_sim === '1',
+    is_demo: false
+  });
 }
 
 /**

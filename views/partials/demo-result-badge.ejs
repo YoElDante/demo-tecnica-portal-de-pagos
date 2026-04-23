@@ -1,0 +1,98 @@
+<%#
+  Badge de contexto DEMO para vistas de resultado de pago.
+  Variables esperadas (todas opcionales, default false):
+    is_simulacion     — resultado generado por el Panel de Demostración (sin SIRO)
+    is_demo           — modo demo activo (SIRO real, BD no modificada)
+    demoModoHabilitado — municipio configurado como DEMO
+%>
+
+<%
+  const _esSimulacion   = typeof is_simulacion !== 'undefined' && is_simulacion;
+  const _esDemo         = typeof is_demo !== 'undefined' && is_demo;
+  const _esPortalDemo   = typeof demoModoHabilitado !== 'undefined' && demoModoHabilitado;
+  const _mostrar        = _esSimulacion || _esDemo || _esPortalDemo;
+%>
+
+<% if (_mostrar) { %>
+<div class="demo-result-badge <%= _esSimulacion ? 'demo-result-badge--simulacion' : (_esDemo ? 'demo-result-badge--demo' : 'demo-result-badge--portal') %>">
+  <% if (_esSimulacion) { %>
+    <span class="demo-result-badge__icon">🎭</span>
+    <div class="demo-result-badge__text">
+      <strong>RESULTADO SIMULADO</strong>
+      <span>Este estado fue generado por el Panel de Demostración. No se procesó ningún pago real.</span>
+    </div>
+  <% } else if (_esDemo) { %>
+    <span class="demo-result-badge__icon">🧪</span>
+    <div class="demo-result-badge__text">
+      <strong>MODO DEMOSTRACIÓN</strong>
+      <span>Esta operación no modificó deudas reales en la base de datos.</span>
+    </div>
+  <% } else { %>
+    <span class="demo-result-badge__icon">🔬</span>
+    <div class="demo-result-badge__text">
+      <strong>PORTAL DE DEMOSTRACIÓN</strong>
+      <span>Este portal está configurado en modo demo. Los datos son de prueba.</span>
+    </div>
+  <% } %>
+</div>
+<% } %>
+
+<style>
+  .demo-result-badge {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    max-width: 600px;
+    margin: 1.25rem auto 0;
+    padding: 0.85rem 1.1rem;
+    border-radius: 10px;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.88rem;
+  }
+
+  .demo-result-badge--simulacion {
+    background: #1a1a35;
+    border: 1.5px solid #4a4e9c;
+    color: #c0c8f0;
+  }
+
+  .demo-result-badge--demo {
+    background: #fff8e1;
+    border: 1.5px solid #f9a825;
+    color: #5f4500;
+  }
+
+  .demo-result-badge--portal {
+    background: #f0f4ff;
+    border: 1.5px solid #aab4e8;
+    color: #3a4480;
+  }
+
+  .demo-result-badge__icon {
+    font-size: 1.3rem;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .demo-result-badge__text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    line-height: 1.4;
+  }
+
+  .demo-result-badge__text strong {
+    font-size: 0.80rem;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+  }
+
+  .demo-result-badge__text span {
+    font-size: 0.83rem;
+    opacity: 0.88;
+  }
+
+  @media print {
+    .demo-result-badge { display: none !important; }
+  }
+</style>

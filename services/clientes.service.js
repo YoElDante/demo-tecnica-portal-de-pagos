@@ -113,6 +113,38 @@ exports.listarContribuyentes = async (limit = 50, offset = 0) => {
 };
 
 /**
+ * Devuelve los primeros N clientes que tienen deudas pendientes con importe positivo.
+ * Usado exclusivamente por el portal DEMO para mostrar sugerencias de búsqueda.
+ * @param {number} limit
+ * @returns {Promise<Array<{codigo, dni, nombre}>>}
+ */
+exports.obtenerPrimerosConDeuda = async (limit = 5) => {
+  const { sequelize } = require('../models/model.index');
+
+  const clientes = await Cliente.findAll({
+    attributes: ['Codigo', 'Nombre', 'Apellido', 'DOCUMENTO'],
+    where: sequelize.literal(`EXISTS (
+      SELECT 1 FROM ClientesCtaCte
+      WHERE ClientesCtaCte.Codigo = Cliente.Codigo
+        AND ClientesCtaCte.Saldo <> 0
+        AND ClientesCtaCte.Importe > 0
+    )`),
+    limit: limit * 3,
+    order: [['Codigo', 'ASC']],
+    raw: true
+  });
+
+  return clientes
+    .filter(c => /[^0]/.test(String(c.DOCUMENTO || '').trim()))
+    .slice(0, limit)
+    .map(c => ({
+      codigo: String(c.Codigo || '').trim(),
+      dni:    String(c.DOCUMENTO || '').trim(),
+      nombre: `${c.Nombre || ''} ${c.Apellido || ''}`.trim()
+    }));
+};
+
+/**
  * Valida el formato de un DNI
  * @param {string} dni - DNI a validar
  * @returns {boolean} True si es válido

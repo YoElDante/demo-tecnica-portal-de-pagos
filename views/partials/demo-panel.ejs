@@ -1,0 +1,439 @@
+<%#
+  Panel de Demostración — partial exclusivo para MUNICIPIO=DEMO
+  Variables expuestas globalmente para que iniciarPago() las consuma:
+    window.DEMO_PANEL.resultado   — 'real' | 'approved' | 'pending' | 'rejected' | 'error'
+    window.DEMO_PANEL.modificaBD  — true | false
+%>
+
+<div class="demo-panel" id="demo-panel">
+
+  <div class="demo-panel__header">
+    <div class="demo-panel__title-row">
+      <span class="demo-panel__badge-icon">🎛️</span>
+      <span class="demo-panel__title">Panel de Demostración</span>
+    </div>
+    <button type="button" class="demo-panel__toggle" id="demo-panel-toggle" aria-label="Ocultar panel">
+      <span id="demo-panel-toggle-icon">▲</span>
+    </button>
+  </div>
+
+  <div class="demo-panel__body" id="demo-panel-body">
+
+    <!-- Resultado simulado -->
+    <div class="demo-panel__section">
+      <span class="demo-panel__label">Resultado simulado:</span>
+      <div class="demo-panel__opciones">
+        <button type="button" class="demo-opcion demo-opcion--active" data-valor="real"
+          data-desc="El pago se procesa en SIRO de forma real. El resultado depende de la pasarela. Usá esta opción para demostrar el flujo completo de extremo a extremo.">
+          🔄 Real
+        </button>
+        <button type="button" class="demo-opcion" data-valor="approved"
+          data-desc="El portal muestra la pantalla de pago exitoso con el detalle del ticket y el comprobante descargable, sin realizar ningún cobro en SIRO.">
+          ✅ Aprobado
+        </button>
+        <button type="button" class="demo-opcion" data-valor="pending"
+          data-desc="Se muestra la pantalla de pago pendiente con el estado 'Aguardando acreditación' y verificación automática del estado cada 30 segundos.">
+          ⏳ Pendiente
+        </button>
+        <button type="button" class="demo-opcion" data-valor="rejected"
+          data-desc="Se muestra la pantalla de pago rechazado con los posibles motivos de falla. Útil para demostrar el manejo de errores y la experiencia del usuario ante un rechazo bancario.">
+          ❌ Rechazado
+        </button>
+        <button type="button" class="demo-opcion" data-valor="error"
+          data-desc="Se simula un redirect inválido y se muestra la pantalla de error genérico, que aparece cuando el resultado del pago no puede ser validado por el portal.">
+          ⚠️ Error
+        </button>
+      </div>
+      <div class="demo-panel__desc" id="demo-panel-desc">
+        El pago se procesa en SIRO de forma real. El resultado depende de la pasarela. Usá esta opción para demostrar el flujo completo de extremo a extremo.
+      </div>
+    </div>
+
+    <!-- Base de datos -->
+    <div class="demo-panel__section demo-panel__section--bd">
+      <span class="demo-panel__label">Base de datos:</span>
+      <div class="demo-panel__bd-row">
+        <span class="demo-bd-lock" id="demo-bd-lock">🔒 Protegida</span>
+        <button type="button" class="demo-panel__btn-secondary" id="demo-bd-toggle-btn">Desbloquear</button>
+      </div>
+    </div>
+
+    <div class="demo-panel__pass-row" id="demo-bd-pass-row">
+      <span class="demo-panel__pass-label">Ingresá la contraseña para habilitar la modificación de la base de datos:</span>
+      <div class="demo-panel__pass-inputs">
+        <input type="password" id="demo-bd-pass-input" class="demo-bd-pass-input" placeholder="Contraseña" maxlength="10" autocomplete="off">
+        <button type="button" class="demo-panel__btn-primary" id="demo-bd-confirm-btn">Confirmar</button>
+        <button type="button" class="demo-panel__btn-cancel" id="demo-bd-cancel-btn">Cancelar</button>
+      </div>
+      <span class="demo-bd-pass-error" id="demo-bd-pass-error">Contraseña incorrecta. Intentá nuevamente.</span>
+    </div>
+
+  </div>
+
+</div>
+
+<style>
+  /* ── Tarjeta contenedora ───────────────────────────────────── */
+  .demo-panel {
+    background: #f0fbfc;
+    border: 1.5px solid #a3d8e0;
+    border-radius: 12px;
+    margin: 1.5rem auto 1.25rem;
+    max-width: 860px;
+    font-family: 'Open Sans', sans-serif;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 168, 181, 0.08);
+  }
+
+  /* ── Header ────────────────────────────────────────────────── */
+  .demo-panel__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.1rem;
+    background: #e0f7fa;
+    border-bottom: 1px solid #a3d8e0;
+    gap: 0.75rem;
+  }
+
+  .demo-panel__title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .demo-panel__badge-icon {
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  .demo-panel__title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #003E5C;
+    letter-spacing: 0.02em;
+  }
+
+  .demo-panel__toggle {
+    background: white;
+    border: 1px solid #a3d8e0;
+    border-radius: 6px;
+    color: #00A8B5;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    flex-shrink: 0;
+  }
+
+  .demo-panel__toggle:hover {
+    background: #00A8B5;
+    color: white;
+    border-color: #00A8B5;
+  }
+
+  /* ── Body ──────────────────────────────────────────────────── */
+  .demo-panel__body {
+    padding: 0.9rem 1.1rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .demo-panel__body--hidden {
+    display: none;
+  }
+
+  /* ── Secciones ─────────────────────────────────────────────── */
+  .demo-panel__section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .demo-panel__label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #003E5C;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Chips de resultado ────────────────────────────────────── */
+  .demo-panel__opciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .demo-opcion {
+    background: white;
+    border: 1.5px solid #a3d8e0;
+    border-radius: 20px;
+    color: #003E5C;
+    font-size: 0.82rem;
+    padding: 0.32rem 0.85rem;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    white-space: nowrap;
+    line-height: 1.4;
+  }
+
+  .demo-opcion:hover {
+    background: #e0f7fa;
+    border-color: #00A8B5;
+  }
+
+  .demo-opcion--active {
+    background: #003E5C;
+    border-color: #003E5C;
+    color: white;
+    font-weight: 600;
+  }
+
+  /* ── Descripción dinámica ──────────────────────────────────── */
+  .demo-panel__desc {
+    background: #e0f7fa;
+    border-left: 3px solid #00A8B5;
+    border-radius: 0 8px 8px 0;
+    padding: 0.55rem 0.85rem;
+    font-size: 0.80rem;
+    color: #004a5c;
+    line-height: 1.55;
+    transition: opacity 0.2s;
+  }
+
+  /* ── Sección BD ────────────────────────────────────────────── */
+  .demo-panel__bd-row {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+  }
+
+  .demo-bd-lock {
+    font-size: 0.83rem;
+    color: #555;
+    transition: color 0.2s;
+  }
+
+  .demo-bd-lock--open {
+    color: #00A8B5;
+    font-weight: 600;
+  }
+
+  /* ── Botones ───────────────────────────────────────────────── */
+  .demo-panel__btn-secondary {
+    background: white;
+    border: 1px solid #a3d8e0;
+    border-radius: 6px;
+    color: #00A8B5;
+    font-size: 0.78rem;
+    padding: 0.22rem 0.65rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    line-height: 1.4;
+  }
+
+  .demo-panel__btn-secondary:hover {
+    background: #00A8B5;
+    color: white;
+    border-color: #00A8B5;
+  }
+
+  .demo-panel__btn-primary {
+    background: #003E5C;
+    border: 1px solid #003E5C;
+    border-radius: 6px;
+    color: white;
+    font-size: 0.78rem;
+    padding: 0.22rem 0.65rem;
+    cursor: pointer;
+    transition: background 0.15s;
+    line-height: 1.4;
+  }
+
+  .demo-panel__btn-primary:hover {
+    background: #00A8B5;
+    border-color: #00A8B5;
+  }
+
+  .demo-panel__btn-cancel {
+    background: white;
+    border: 1px solid #e0b3b3;
+    border-radius: 6px;
+    color: #c0392b;
+    font-size: 0.78rem;
+    padding: 0.22rem 0.65rem;
+    cursor: pointer;
+    transition: background 0.15s;
+    line-height: 1.4;
+  }
+
+  .demo-panel__btn-cancel:hover {
+    background: #fdf0f0;
+  }
+
+  /* ── Fila contraseña ───────────────────────────────────────── */
+  .demo-panel__pass-row {
+    display: none;
+    flex-direction: column;
+    gap: 0.45rem;
+    background: #e0f7fa;
+    border: 1px solid #a3d8e0;
+    border-radius: 8px;
+    padding: 0.7rem 0.9rem;
+  }
+
+  .demo-panel__pass-row.visible {
+    display: flex;
+  }
+
+  .demo-panel__pass-label {
+    font-size: 0.78rem;
+    color: #004a5c;
+  }
+
+  .demo-panel__pass-inputs {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .demo-bd-pass-input {
+    background: white;
+    border: 1px solid #a3d8e0;
+    border-radius: 6px;
+    color: #003E5C;
+    font-size: 0.82rem;
+    padding: 0.25rem 0.65rem;
+    width: 120px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .demo-bd-pass-input:focus {
+    border-color: #00A8B5;
+  }
+
+  .demo-bd-pass-error {
+    display: none;
+    font-size: 0.78rem;
+    color: #c0392b;
+    font-style: italic;
+  }
+
+  .demo-bd-pass-error.visible {
+    display: block;
+  }
+</style>
+
+<script>
+  (function () {
+    const DEMO_PASS    = '0314';
+    const STORAGE_KEY  = 'demo_panel_collapsed';
+
+    window.DEMO_PANEL = { resultado: 'real', modificaBD: false };
+
+    /* ── Colapso ───────────────────────────────────────────── */
+    const panelBody   = document.getElementById('demo-panel-body');
+    const panelToggle = document.getElementById('demo-panel-toggle');
+    const panelIcon   = document.getElementById('demo-panel-toggle-icon');
+
+    function aplicarColapso(colapsado) {
+      if (colapsado) {
+        panelBody.classList.add('demo-panel__body--hidden');
+        panelIcon.textContent = '▼';
+        panelToggle.title = 'Mostrar panel';
+      } else {
+        panelBody.classList.remove('demo-panel__body--hidden');
+        panelIcon.textContent = '▲';
+        panelToggle.title = 'Ocultar panel';
+      }
+    }
+
+    aplicarColapso(localStorage.getItem(STORAGE_KEY) === '1');
+
+    panelToggle.addEventListener('click', function () {
+      const colapsado = !panelBody.classList.contains('demo-panel__body--hidden');
+      localStorage.setItem(STORAGE_KEY, colapsado ? '1' : '0');
+      aplicarColapso(colapsado);
+    });
+
+    /* ── Resultado simulado ────────────────────────────────── */
+    const descEl = document.getElementById('demo-panel-desc');
+
+    document.querySelectorAll('.demo-opcion').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.demo-opcion').forEach(function (b) {
+          b.classList.remove('demo-opcion--active');
+        });
+        btn.classList.add('demo-opcion--active');
+        window.DEMO_PANEL.resultado = btn.dataset.valor;
+        descEl.textContent = btn.dataset.desc;
+      });
+    });
+
+    /* ── BD lock / unlock ──────────────────────────────────── */
+    const lockLabel  = document.getElementById('demo-bd-lock');
+    const toggleBtn  = document.getElementById('demo-bd-toggle-btn');
+    const passRow    = document.getElementById('demo-bd-pass-row');
+    const passInput  = document.getElementById('demo-bd-pass-input');
+    const confirmBtn = document.getElementById('demo-bd-confirm-btn');
+    const cancelBtn  = document.getElementById('demo-bd-cancel-btn');
+    const passError  = document.getElementById('demo-bd-pass-error');
+
+    function mostrarPass() {
+      passRow.classList.add('visible');
+      passInput.value = '';
+      passError.classList.remove('visible');
+      passInput.focus();
+    }
+
+    function ocultarPass() {
+      passRow.classList.remove('visible');
+      passInput.value = '';
+      passError.classList.remove('visible');
+    }
+
+    function desbloquear() {
+      window.DEMO_PANEL.modificaBD = true;
+      lockLabel.textContent = '🔓 Modificable';
+      lockLabel.classList.add('demo-bd-lock--open');
+      toggleBtn.textContent = 'Bloquear';
+      ocultarPass();
+    }
+
+    function bloquear() {
+      window.DEMO_PANEL.modificaBD = false;
+      lockLabel.textContent = '🔒 Protegida';
+      lockLabel.classList.remove('demo-bd-lock--open');
+      toggleBtn.textContent = 'Desbloquear';
+    }
+
+    toggleBtn.addEventListener('click', function () {
+      if (window.DEMO_PANEL.modificaBD) {
+        bloquear();
+      } else {
+        mostrarPass();
+      }
+    });
+
+    confirmBtn.addEventListener('click', function () {
+      if (passInput.value === DEMO_PASS) {
+        desbloquear();
+      } else {
+        passError.classList.add('visible');
+        passInput.value = '';
+        passInput.focus();
+      }
+    });
+
+    passInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') confirmBtn.click();
+      if (e.key === 'Escape') ocultarPass();
+    });
+
+    cancelBtn.addEventListener('click', ocultarPass);
+  })();
+</script>

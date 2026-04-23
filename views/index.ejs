@@ -43,13 +43,220 @@
        CONTENIDO PRINCIPAL
        ============================================ -->
   <main class="main">
+
+    <% if (demoModoHabilitado) { %>
+    <div class="demo-info" id="demo-info-card">
+
+      <div class="demo-info__header">
+        <div class="demo-info__title-row">
+          <span class="demo-info__badge">🧪</span>
+          <span class="demo-info__title">Portal de Demostración — Alcald+IA</span>
+        </div>
+        <button type="button" class="demo-info__toggle" id="demo-info-toggle" aria-label="Ocultar información">
+          <span id="demo-info-toggle-icon">▲</span>
+        </button>
+      </div>
+
+      <div class="demo-info__body" id="demo-info-body">
+        <div class="demo-info__columns">
+
+          <div class="demo-info__col">
+            <p class="demo-info__col-title">¿Para qué sirve este portal?</p>
+            <ul class="demo-info__list">
+              <li>Demostraciones comerciales y presentaciones a municipios</li>
+              <li>Evaluación técnica del sistema antes de la implementación</li>
+              <li>Capacitación de equipos municipales</li>
+              <li>Pruebas de integración con las pasarelas de pago (SIRO, MercadoPago)</li>
+              <li>Validación de flujos y casos de uso reales</li>
+            </ul>
+          </div>
+
+          <div class="demo-info__col">
+            <p class="demo-info__col-title">Funcionalidades disponibles</p>
+            <ul class="demo-info__list">
+              <li><strong>Contribuyentes de ejemplo</strong> pre-cargados bajo el campo de búsqueda</li>
+              <li><strong>Simulación de resultados</strong>: aprobado, pendiente, rechazado y error — sin procesar pagos reales</li>
+              <li><strong>Modo BD protegida</strong>: procesa el cobro en la pasarela sin modificar deudas reales</li>
+              <li><strong>Modo BD modificable</strong> (con contraseña): demuestra la sincronización real entre el portal y el sistema municipal</li>
+            </ul>
+          </div>
+
+        </div>
+
+        <div class="demo-info__footer">
+          <span class="demo-info__footer-icon">⚠️</span>
+          <span>Los datos mostrados son de demostración y no corresponden a un municipio real. Para implementar el sistema en su municipio, contacte al equipo de <strong>Alcald+IA</strong>.</span>
+        </div>
+      </div>
+
+    </div>
+
+    <style>
+      .demo-info {
+        background: #f0fbfc;
+        border: 1.5px solid #a3d8e0;
+        border-radius: 12px;
+        margin: 0 auto 1.25rem;
+        max-width: 860px;
+        font-family: 'Open Sans', sans-serif;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 168, 181, 0.08);
+      }
+
+      .demo-info__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 1.1rem;
+        background: #e0f7fa;
+        border-bottom: 1px solid #a3d8e0;
+        gap: 0.75rem;
+      }
+
+      .demo-info__title-row {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+      }
+
+      .demo-info__badge {
+        font-size: 1rem;
+        line-height: 1;
+      }
+
+      .demo-info__title {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #003E5C;
+        letter-spacing: 0.02em;
+      }
+
+      .demo-info__toggle {
+        background: white;
+        border: 1px solid #a3d8e0;
+        border-radius: 6px;
+        color: #00A8B5;
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+        cursor: pointer;
+        transition: background 0.15s, color 0.15s, border-color 0.15s;
+        flex-shrink: 0;
+      }
+
+      .demo-info__toggle:hover {
+        background: #00A8B5;
+        color: white;
+        border-color: #00A8B5;
+      }
+
+      .demo-info__body {
+        padding: 1rem 1.1rem 0.85rem;
+      }
+
+      .demo-info__columns {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem 1.5rem;
+        margin-bottom: 0.85rem;
+      }
+
+      @media (max-width: 600px) {
+        .demo-info__columns {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .demo-info__col-title {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #003E5C;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin: 0 0 0.45rem;
+      }
+
+      .demo-info__list {
+        margin: 0;
+        padding-left: 1.1rem;
+        color: #555;
+        font-size: 0.80rem;
+        line-height: 1.65;
+      }
+
+      .demo-info__list li {
+        margin-bottom: 0.2rem;
+      }
+
+      .demo-info__list strong {
+        color: #003E5C;
+      }
+
+      .demo-info__footer {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        background: #e0f7fa;
+        border-radius: 8px;
+        padding: 0.6rem 0.85rem;
+        font-size: 0.78rem;
+        color: #555;
+        line-height: 1.5;
+        border: 1px solid #a3d8e0;
+      }
+
+      .demo-info__footer-icon {
+        font-size: 0.9rem;
+        flex-shrink: 0;
+        margin-top: 0.05rem;
+      }
+
+      .demo-info__footer strong {
+        color: #003E5C;
+      }
+
+      .demo-info__body--hidden {
+        display: none;
+      }
+    </style>
+
+    <script>
+      (function () {
+        const STORAGE_KEY = 'demo_info_collapsed';
+        const body   = document.getElementById('demo-info-body');
+        const toggle = document.getElementById('demo-info-toggle');
+        const icon   = document.getElementById('demo-info-toggle-icon');
+
+        function aplicarEstado(colapsado) {
+          if (colapsado) {
+            body.classList.add('demo-info__body--hidden');
+            icon.textContent = '▼';
+            toggle.title = 'Mostrar información';
+          } else {
+            body.classList.remove('demo-info__body--hidden');
+            icon.textContent = '▲';
+            toggle.title = 'Ocultar información';
+          }
+        }
+
+        const colapsadoInicial = localStorage.getItem(STORAGE_KEY) === '1';
+        aplicarEstado(colapsadoInicial);
+
+        toggle.addEventListener('click', function () {
+          const ahora = body.classList.contains('demo-info__body--hidden');
+          localStorage.setItem(STORAGE_KEY, ahora ? '0' : '1');
+          aplicarEstado(!ahora);
+        });
+      })();
+    </script>
+    <% } %>
+
     <!-- Formulario de búsqueda -->
     <section class="form">
       <h1 class="form__title">Sistema de Pago Online</h1>
       <br>
       <h2 class="form__subtitle">Datos del Contribuyente</h2>
 
-      <form action="/buscar" method="POST" class="form__content">
+      <form action="/buscar" method="POST" class="form__content" id="form-buscar">
         <div class="form__group">
           <label for="dni" class="form__label">DNI (7-10 dígitos)</label>
           <div class="form__input-wrapper">
@@ -58,6 +265,20 @@
           </div>
           <% if (typeof mensaje !== 'undefined' && mensaje) { %>
           <span class="form__error"><%= mensaje %></span>
+          <% } %>
+          <% if (demoModoHabilitado && typeof sugerenciasDemo !== 'undefined' && sugerenciasDemo.length > 0) { %>
+          <div class="demo-sugerencias">
+            <span class="demo-sugerencias__label">Contribuyentes de ejemplo:</span>
+            <div class="demo-sugerencias__chips">
+              <% sugerenciasDemo.forEach(function(s) { %>
+              <button type="button" class="demo-sugerencias__chip"
+                onclick="seleccionarContribuyente('<%= s.dni %>')">
+                <span class="demo-sugerencias__chip-dni"><%= s.dni %></span>
+                <span class="demo-sugerencias__chip-nombre"><%= s.nombre %></span>
+              </button>
+              <% }); %>
+            </div>
+          </div>
           <% } %>
         </div>
 
@@ -186,126 +407,9 @@
     </section>
     <% } %>
 
-    <!-- Toggle Modo Demostración (solo visible en municipio DEMO) -->
+    <!-- Panel de Demostración (solo visible en municipio DEMO) -->
     <% if (typeof demoModoHabilitado !== 'undefined' && demoModoHabilitado && deudas && deudas.length > 0) { %>
-    <div class="demo-toggle-wrapper">
-      <label class="demo-toggle-switch" for="toggle-demo-modo">
-        <input type="checkbox" id="toggle-demo-modo">
-        <span class="demo-toggle-switch__track"></span>
-        <span class="demo-toggle-switch__thumb"></span>
-      </label>
-      <span class="demo-toggle-label">Modo Demostración</span>
-      <span class="demo-toggle-info">
-        <span class="demo-toggle-info__icon">ⓘ</span>
-        <span class="demo-toggle-info__tooltip">
-          Cuando está <strong>activo</strong>, el pago se procesa en SIRO
-          pero <strong>las deudas NO se modifican</strong> en la base de datos.<br><br>
-          Útil para mostrar el flujo completo sin alterar datos reales.<br><br>
-          Dejalo <strong>desactivado</strong> si querés demostrar la sincronización
-          real entre el portal web y la aplicación de escritorio.
-        </span>
-      </span>
-    </div>
-    <style>
-      .demo-toggle-wrapper {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        background: #fff8e1;
-        border: 1.5px solid #f9a825;
-        border-radius: 10px;
-        padding: 0.75rem 1.25rem;
-        margin: 1rem auto;
-        max-width: 600px;
-        width: fit-content;
-      }
-      .demo-toggle-switch {
-        position: relative;
-        display: inline-flex;
-        align-items: center;
-        cursor: pointer;
-        width: 46px;
-        height: 26px;
-        flex-shrink: 0;
-      }
-      .demo-toggle-switch input { display: none; }
-      .demo-toggle-switch__track {
-        position: absolute;
-        inset: 0;
-        background: #ccc;
-        border-radius: 13px;
-        transition: background 0.25s;
-      }
-      .demo-toggle-switch input:checked ~ .demo-toggle-switch__track {
-        background: #f9a825;
-      }
-      .demo-toggle-switch__thumb {
-        position: absolute;
-        left: 3px;
-        top: 3px;
-        width: 20px;
-        height: 20px;
-        background: white;
-        border-radius: 50%;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-        transition: left 0.25s;
-      }
-      .demo-toggle-switch input:checked ~ .demo-toggle-switch__thumb {
-        left: 23px;
-      }
-      .demo-toggle-label {
-        font-weight: 600;
-        color: #5f4500;
-        font-size: 0.95rem;
-        white-space: nowrap;
-      }
-      .demo-toggle-info {
-        position: relative;
-        display: inline-flex;
-        align-items: center;
-      }
-      .demo-toggle-info__icon {
-        color: #f9a825;
-        font-size: 1.15rem;
-        cursor: help;
-        line-height: 1;
-      }
-      .demo-toggle-info__tooltip {
-        display: none;
-        position: absolute;
-        left: 1.5rem;
-        top: 50%;
-        transform: translateY(-50%);
-        background: #333;
-        color: #fff;
-        font-size: 0.82rem;
-        line-height: 1.5;
-        padding: 0.75rem 1rem;
-        border-radius: 8px;
-        width: 280px;
-        z-index: 100;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-        pointer-events: none;
-      }
-      .demo-toggle-info:hover .demo-toggle-info__tooltip {
-        display: block;
-      }
-      /* Banner activo cuando el toggle está ON */
-      .demo-modo-activo-banner {
-        display: none;
-        background: #fff3cd;
-        border: 1.5px solid #f9a825;
-        border-radius: 8px;
-        padding: 0.6rem 1rem;
-        color: #856404;
-        font-size: 0.88rem;
-        font-weight: 500;
-        text-align: center;
-        margin: 0.5rem auto;
-        max-width: 600px;
-      }
-      #toggle-demo-modo:checked ~ * .demo-modo-activo-banner { display: block; }
-    </style>
+      <%- include('partials/demo-panel') %>
     <% } %>
 
     <!-- Botones de acción -->
@@ -473,8 +577,8 @@
       loadingMsg.style.display = 'block';
       setTimeout(() => loadingContainer.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
 
-      const toggleDemo = document.getElementById('toggle-demo-modo');
-      const isDemoMode = toggleDemo ? toggleDemo.checked : false;
+      const demoResultado = (window.DEMO_PANEL && window.DEMO_PANEL.resultado) || 'real';
+      const isDemoMode = window.DEMO_PANEL ? !window.DEMO_PANEL.modificaBD : false;
 
       try {
         const response = await fetch('/pago/iniciar', {
@@ -485,7 +589,8 @@
             conceptos,
             montoTotal,
             creditosAplicados,
-            is_demo: isDemoMode
+            is_demo: isDemoMode,
+            demo_resultado: demoResultado
           })
         });
 
@@ -512,7 +617,68 @@
     function volverArriba() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+
+    function seleccionarContribuyente(dni) {
+      document.getElementById('dni').value = dni;
+      document.getElementById('form-buscar').submit();
+    }
   </script>
+
+  <style>
+    .demo-sugerencias {
+      margin-top: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .demo-sugerencias__label {
+      font-size: 0.78rem;
+      color: #6b7280;
+      font-style: italic;
+    }
+
+    .demo-sugerencias__chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .demo-sugerencias__chip {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 0.3rem 0.65rem;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      text-align: left;
+      line-height: 1.3;
+    }
+
+    .demo-sugerencias__chip:hover {
+      background: #e0eaff;
+      border-color: #93c5fd;
+    }
+
+    .demo-sugerencias__chip-dni {
+      font-size: 0.80rem;
+      font-weight: 700;
+      color: #1e40af;
+      font-family: monospace;
+    }
+
+    .demo-sugerencias__chip-nombre {
+      font-size: 0.75rem;
+      color: #64748b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 160px;
+    }
+  </style>
 
 
   <!-- ============================================

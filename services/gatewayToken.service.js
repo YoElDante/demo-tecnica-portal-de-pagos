@@ -37,6 +37,21 @@ function construirSecretosRotativos(secretBase) {
   return [formatearFechaEnZona(ahora), formatearFechaEnZona(ayer)].map((fecha) => `${secretBase}${fecha}`);
 }
 
+function signGatewayToken(payload, expiresIn = '30m') {
+  const secretBase = obtenerSecretBase();
+
+  if (!secretBase) {
+    throw new Error('No está configurado GATEWAY_WEBHOOK_SECRET ni WEBHOOK_SECRET');
+  }
+
+  const secret = construirSecretosRotativos(secretBase)[0];
+  return jwt.sign(payload, secret, {
+    algorithm: 'HS256',
+    issuer: 'api-gateway-pagos',
+    expiresIn
+  });
+}
+
 function verifyGatewayToken(token) {
   const secretBase = obtenerSecretBase();
 
@@ -66,5 +81,6 @@ function verifyGatewayToken(token) {
 
 module.exports = {
   obtenerTokenBearer,
+  signGatewayToken,
   verifyGatewayToken
 };
