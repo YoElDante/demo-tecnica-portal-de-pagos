@@ -20,6 +20,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <script src="/javascripts/deudas.js" defer></script>
+  <script src="/javascripts/index.js" defer></script>
   <title><%= title %> - <%= municipalidad.nombre %></title>
 </head>
 
@@ -90,164 +91,6 @@
       </div>
 
     </div>
-
-    <style>
-      .demo-info {
-        background: #f0fbfc;
-        border: 1.5px solid #a3d8e0;
-        border-radius: 12px;
-        margin: 0 auto 1.25rem;
-        max-width: 860px;
-        font-family: 'Open Sans', sans-serif;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0, 168, 181, 0.08);
-      }
-
-      .demo-info__header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0.75rem 1.1rem;
-        background: #e0f7fa;
-        border-bottom: 1px solid #a3d8e0;
-        gap: 0.75rem;
-      }
-
-      .demo-info__title-row {
-        display: flex;
-        align-items: center;
-        gap: 0.55rem;
-      }
-
-      .demo-info__badge {
-        font-size: 1rem;
-        line-height: 1;
-      }
-
-      .demo-info__title {
-        font-size: 0.85rem;
-        font-weight: 700;
-        color: #003E5C;
-        letter-spacing: 0.02em;
-      }
-
-      .demo-info__toggle {
-        background: white;
-        border: 1px solid #a3d8e0;
-        border-radius: 6px;
-        color: #00A8B5;
-        font-size: 0.7rem;
-        padding: 0.2rem 0.5rem;
-        cursor: pointer;
-        transition: background 0.15s, color 0.15s, border-color 0.15s;
-        flex-shrink: 0;
-      }
-
-      .demo-info__toggle:hover {
-        background: #00A8B5;
-        color: white;
-        border-color: #00A8B5;
-      }
-
-      .demo-info__body {
-        padding: 1rem 1.1rem 0.85rem;
-      }
-
-      .demo-info__columns {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem 1.5rem;
-        margin-bottom: 0.85rem;
-      }
-
-      @media (max-width: 600px) {
-        .demo-info__columns {
-          grid-template-columns: 1fr;
-        }
-      }
-
-      .demo-info__col-title {
-        font-size: 0.78rem;
-        font-weight: 700;
-        color: #003E5C;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin: 0 0 0.45rem;
-      }
-
-      .demo-info__list {
-        margin: 0;
-        padding-left: 1.1rem;
-        color: #555;
-        font-size: 0.80rem;
-        line-height: 1.65;
-      }
-
-      .demo-info__list li {
-        margin-bottom: 0.2rem;
-      }
-
-      .demo-info__list strong {
-        color: #003E5C;
-      }
-
-      .demo-info__footer {
-        display: flex;
-        align-items: flex-start;
-        gap: 0.5rem;
-        background: #e0f7fa;
-        border-radius: 8px;
-        padding: 0.6rem 0.85rem;
-        font-size: 0.78rem;
-        color: #555;
-        line-height: 1.5;
-        border: 1px solid #a3d8e0;
-      }
-
-      .demo-info__footer-icon {
-        font-size: 0.9rem;
-        flex-shrink: 0;
-        margin-top: 0.05rem;
-      }
-
-      .demo-info__footer strong {
-        color: #003E5C;
-      }
-
-      .demo-info__body--hidden {
-        display: none;
-      }
-    </style>
-
-    <script>
-      (function () {
-        const STORAGE_KEY = 'demo_info_collapsed';
-        const body   = document.getElementById('demo-info-body');
-        const toggle = document.getElementById('demo-info-toggle');
-        const icon   = document.getElementById('demo-info-toggle-icon');
-
-        function aplicarEstado(colapsado) {
-          if (colapsado) {
-            body.classList.add('demo-info__body--hidden');
-            icon.textContent = '▼';
-            toggle.title = 'Mostrar información';
-          } else {
-            body.classList.remove('demo-info__body--hidden');
-            icon.textContent = '▲';
-            toggle.title = 'Ocultar información';
-          }
-        }
-
-        const colapsadoInicial = localStorage.getItem(STORAGE_KEY) === '1';
-        aplicarEstado(colapsadoInicial);
-
-        toggle.addEventListener('click', function () {
-          const ahora = body.classList.contains('demo-info__body--hidden');
-          localStorage.setItem(STORAGE_KEY, ahora ? '0' : '1');
-          aplicarEstado(!ahora);
-        });
-      })();
-    </script>
     <% } %>
 
     <!-- Formulario de búsqueda -->
@@ -271,8 +114,7 @@
             <span class="demo-sugerencias__label">Contribuyentes de ejemplo:</span>
             <div class="demo-sugerencias__chips">
               <% sugerenciasDemo.forEach(function(s) { %>
-              <button type="button" class="demo-sugerencias__chip"
-                onclick="seleccionarContribuyente('<%= s.dni %>')">
+              <button type="button" class="demo-sugerencias__chip" onclick="seleccionarContribuyente('<%= s.dni %>')">
                 <span class="demo-sugerencias__chip-dni"><%= s.dni %></span>
                 <span class="demo-sugerencias__chip-nombre"><%= s.nombre %></span>
               </button>
@@ -409,7 +251,7 @@
 
     <!-- Panel de Demostración (solo visible en municipio DEMO) -->
     <% if (typeof demoModoHabilitado !== 'undefined' && demoModoHabilitado && deudas && deudas.length > 0) { %>
-      <%- include('partials/demo-panel') %>
+    <%- include('partials/demo-panel') %>
     <% } %>
 
     <!-- Botones de acción -->
@@ -461,224 +303,13 @@
   <%- include('partials/whatsapp-button') %>
 
   <script>
-    // Datos del contribuyente desde el servidor
-    // codigo: identificador único (autoincremental, nunca se repite)
-    // dni: solo para referencia/display, puede tener duplicados en BDs antiguas
     const contribuyenteData = {
       codigo: '<%= cliente ? cliente.Codigo : "" %>',
       dni: '<%= cliente ? (cliente.DOCUMENTO || "").trim() : "" %>',
       nombre: '<%= cliente ? (cliente.Nombre + " " + cliente.Apellido).trim() : "" %>',
       email: '<%= cliente ? (cliente.Email || "") : "" %>'
     };
-
-    /**
-     * Recopila los IDs de transacción de las deudas seleccionadas
-     * @returns {Array<number>} Array de IdTrans seleccionados
-     */
-    function recopilarIdTransSeleccionados() {
-      const checkboxes = document.querySelectorAll('.deudas__checkbox[data-idtrans]:checked');
-      const ids = [];
-
-      checkboxes.forEach(cb => {
-        const fila = cb.closest('tr');
-        if (fila && fila.style.display !== 'none') {
-          const totalFila = parseFloat(cb.dataset.total || '0');
-          if (!(totalFila > 0)) return;
-
-          const idTrans = parseInt(cb.dataset.idtrans);
-          if (idTrans) ids.push(idTrans);
-        }
-      });
-
-      return ids;
-    }
-
-    function recopilarCreditosFavorVisibles() {
-      const filas = document.querySelectorAll('tbody tr[data-total-deuda]:not([style*="display: none"])');
-      const creditos = [];
-
-      filas.forEach(fila => {
-        const totalFila = parseFloat(fila.getAttribute('data-total-deuda') || '0');
-        if (totalFila >= 0) return;
-
-        const idTrans = parseInt(fila.getAttribute('data-idtrans') || '0');
-        if (!idTrans) return;
-
-        const celdas = fila.querySelectorAll('td');
-        creditos.push({
-          id: idTrans,
-          descripcion: (celdas[2]?.textContent || '').trim(),
-          monto: totalFila
-        });
-      });
-
-      return creditos;
-    }
-
-    /**
-     * Recopila los conceptos seleccionados con formato para el API
-     * @returns {Array} Array de conceptos para enviar al backend
-     */
-    function recopilarConceptosParaPago() {
-      const checkboxes = document.querySelectorAll('.deudas__checkbox[data-idtrans]:checked');
-      const conceptos = [];
-
-      checkboxes.forEach(cb => {
-        const fila = cb.closest('tr');
-        if (fila && fila.style.display !== 'none') {
-          const celdas = fila.querySelectorAll('td');
-          const idTrans = parseInt(cb.dataset.idtrans);
-          const total = parseFloat(cb.dataset.total || '0');
-
-          if (!(total > 0)) return;
-
-          const detalleCell = celdas[2];
-          const descripcion = detalleCell ? detalleCell.textContent.trim() : 'Concepto';
-
-          conceptos.push({ id: idTrans, descripcion, monto: total });
-        }
-      });
-
-      return conceptos;
-    }
-
-    /**
-     * Inicia el proceso de pago contra el gateway configurado (SIRO)
-     */
-    async function iniciarPago() {
-      const botonesIds = ['btn-ir-a-pagar', 'btn-ir-a-pagar-bottom'];
-      const loadingContainer = document.getElementById('qr-container');
-      const loadingMsg = document.getElementById('pago-loading');
-
-      const conceptosIds = recopilarIdTransSeleccionados();
-      if (conceptosIds.length === 0) {
-        alert('Por favor, seleccione al menos un concepto de deuda para pagar.');
-        return;
-      }
-
-      const creditosAplicados = recopilarCreditosFavorVisibles();
-
-      const totalElement = document.getElementById('total-final');
-      const montoTotal = extraerNumero(totalElement?.textContent || '0');
-
-      if (montoTotal <= 0) {
-        alert('El total neto a pagar es menor o igual a cero. Existe saldo a favor del contribuyente.');
-        return;
-      }
-
-      const conceptos = recopilarConceptosParaPago();
-
-      // Deshabilitar botones y mostrar loading
-      botonesIds.forEach(id => {
-        const btn = document.getElementById(id);
-        if (btn) { btn.disabled = true; btn.textContent = '⏳ Procesando...'; }
-      });
-      loadingContainer.style.display = 'flex';
-      loadingMsg.style.display = 'block';
-      setTimeout(() => loadingContainer.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
-
-      const demoResultado = (window.DEMO_PANEL && window.DEMO_PANEL.resultado) || 'real';
-      const isDemoMode = window.DEMO_PANEL ? !window.DEMO_PANEL.modificaBD : false;
-
-      try {
-        const response = await fetch('/pago/iniciar', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contribuyente: contribuyenteData,
-            conceptos,
-            montoTotal,
-            creditosAplicados,
-            is_demo: isDemoMode,
-            demo_resultado: demoResultado
-          })
-        });
-
-        const data = await response.json();
-
-        if (data.success && data.redirect_url) {
-          window.location.href = data.redirect_url;
-        } else {
-          throw new Error(data.message || 'Error al iniciar el pago');
-        }
-      } catch (error) {
-        console.error('Error al iniciar pago:', error);
-        alert('Error al procesar el pago: ' + error.message);
-
-        // Restaurar botones
-        botonesIds.forEach(id => {
-          const btn = document.getElementById(id);
-          if (btn) { btn.disabled = false; btn.innerHTML = '💳 Ir a Pagar'; }
-        });
-        loadingContainer.style.display = 'none';
-      }
-    }
-
-    function volverArriba() {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function seleccionarContribuyente(dni) {
-      document.getElementById('dni').value = dni;
-      document.getElementById('form-buscar').submit();
-    }
   </script>
-
-  <style>
-    .demo-sugerencias {
-      margin-top: 0.75rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.45rem;
-    }
-
-    .demo-sugerencias__label {
-      font-size: 0.78rem;
-      color: #6b7280;
-      font-style: italic;
-    }
-
-    .demo-sugerencias__chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-    }
-
-    .demo-sugerencias__chip {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      background: #f1f5f9;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      padding: 0.3rem 0.65rem;
-      cursor: pointer;
-      transition: background 0.15s, border-color 0.15s;
-      text-align: left;
-      line-height: 1.3;
-    }
-
-    .demo-sugerencias__chip:hover {
-      background: #e0eaff;
-      border-color: #93c5fd;
-    }
-
-    .demo-sugerencias__chip-dni {
-      font-size: 0.80rem;
-      font-weight: 700;
-      color: #1e40af;
-      font-family: monospace;
-    }
-
-    .demo-sugerencias__chip-nombre {
-      font-size: 0.75rem;
-      color: #64748b;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 160px;
-    }
-  </style>
 
 
   <!-- ============================================
@@ -686,6 +317,7 @@
        ============================================ -->
   <footer class="footer">
     <p class="footer__text">&copy; Power by Alcald+IA. Todos los derechos reservados.</p>
+    <p>🌐 <a href="https://www.alcaldia.com.ar" target="_blank">www.alcaldia.com.ar</a></p>
   </footer>
 
 </body>
