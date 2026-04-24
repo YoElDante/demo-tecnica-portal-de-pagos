@@ -332,6 +332,49 @@ async function iniciarPago(req, res) {
       const externalRef = `DEMO-SIM-${ticketNumber}`;
       await ticketsPagoService.actualizarConReferencia(ticket.ticketId, externalRef, ticketNumber);
 
+      if (demo_resultado === 'approved' && !isDemoMode) {
+        const ticketSimulado = await ticketsPagoService.obtenerPorExternalReference(externalRef);
+        const idOperacionSimulada = `SIM-${Date.now()}`;
+        const fechaOperacionSimulada = new Date().toISOString();
+
+        if (!ticketSimulado) {
+          throw new Error(`No se encontró ticket simulado para external_reference=${externalRef}`);
+        }
+
+        await ticketsPagoService.actualizarEstadoDesdeGateway(ticketSimulado.ticketId, {
+          estado: 'APROBADO',
+          idOperacion: idOperacionSimulada,
+          nroOperacion: ticketNumber,
+          origen: 'SIMULACION_DEMO',
+          fechaOperacion: fechaOperacionSimulada
+        });
+
+        const resultadoSimulado = await pagosService.confirmarPagoGateway({
+          ticket: ticketSimulado,
+          externalReference: externalRef,
+          estado: 'APROBADO',
+          idOperacion: idOperacionSimulada,
+          importe: montoNeto,
+          fechaOperacion: fechaOperacionSimulada
+        });
+
+        await ticketsPagoService.registrarEventoGateway({
+          ticketId: ticketSimulado.ticketId,
+          externalReference: externalRef,
+          estado: 'APROBADO',
+          idOperacion: idOperacionSimulada,
+          nroOperacion: ticketNumber,
+          origen: 'SIMULACION_DEMO',
+          payload: {
+            simulacion: true,
+            demo_resultado,
+            monto_neto: montoNeto
+          },
+          processResult: resultadoSimulado.already_processed ? 'DUPLICADO' : 'APLICADO',
+          errorMessage: null
+        });
+      }
+
       const token = gatewayTokenService.signGatewayToken({
         ref: externalRef,
         external_reference: externalRef,
@@ -341,9 +384,9 @@ async function iniciarPago(req, res) {
 
       const destinosPorResultado = {
         approved: `/pagos/exitoso?token=${token}&ref=${externalRef}`,
-        pending:  `/pagos/exitoso?token=${token}&ref=${externalRef}`,
+        pending: `/pagos/exitoso?token=${token}&ref=${externalRef}`,
         rejected: `/pagos/error?token=${token}&ref=${externalRef}`,
-        error:    `/pagos/error-generico?demo_sim=1`
+        error: `/pagos/error-generico?demo_sim=1`
       };
 
       const redirectUrl = destinosPorResultado[demo_resultado] || `/pagos/error-generico`;
@@ -496,8 +539,31 @@ async function confirmacion(req, res) {
           fechaOperacion: fecha_operacion || fechaOperacion || date_approved || dateApproved
         });
       } catch (errContable) {
-        console.error('[Webhook] confirmarPagoGateway falló — ticket ya marcado APROBADO en BD', errContable.message);
-        resultado = { processed: false, conceptos_procesados: 0, numero_pago: null, already_processed: false };
+        await ticketsPagoService.registrarEventoGateway({
+          ticketId: ticket.ticketId,
+          externalReference,
+          estado: estadoNormalizado,
+          idOperacion: idOperacionNormalizado,
+          nroOperacion: nro_comprobante || nroOperacion || null,
+          origen: origenNormalizado,
+          payload,
+          processResult: 'ERROR',
+          errorMessage: errContable.message
+        });
+
+        console.error('[Webhook] confirmarPagoGateway falló — se responde 500 para habilitar reintento del gateway', {
+          external_reference: externalReference,
+          id_operacion: idOperacionNormalizado,
+          error: errContable.message
+        });
+
+        return res.status(500).json({
+          received: false,
+          processed: false,
+          message: IS_PRODUCTION
+            ? 'No se pudo aplicar la actualización contable'
+            : `Error contable: ${errContable.message}`
+        });
       }
 
       await ticketsPagoService.registrarEventoGateway({
