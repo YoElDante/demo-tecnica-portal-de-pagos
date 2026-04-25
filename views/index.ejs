@@ -210,16 +210,7 @@
               <td style="text-align: center;">
                 <input type="checkbox" class="deudas__checkbox" data-total="<%= deuda.Total %>" data-idtrans="<%= deuda.IdTrans %>" <%= esCreditoFavor ? 'disabled' : 'checked' %>>
               </td>
-              <td>
-                <%= deuda.FechaVto
-                  ? new Intl.DateTimeFormat('es-AR', {
-                    timeZone: process.env.APP_TIMEZONE || 'America/Argentina/Cordoba',
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric'
-                  }).format(new Date(deuda.FechaVto))
-                  : '-' %>
-              </td>
+              <td><%= deuda.FechaVtoDisplay || '-' %></td>
               <td>
                 <%= deuda.Detalle || '-' %>
                 <% if (esCreditoFavor) { %>

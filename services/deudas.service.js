@@ -13,10 +13,17 @@ const { Op } = require('sequelize');
 // ============================================
 // CONFIGURACIÓN DE TASA DE INTERÉS
 // ============================================
-// La tasa se lee de variables de entorno, con fallback a 40%
-// En Azure App Service: Configuración → TASA_INTERES_ANUAL
-// En desarrollo: agregar TASA_INTERES_ANUAL=40 en .env
-const TASA_INTERES_ANUAL = parseFloat(process.env.TASA_INTERES_ANUAL) || 40;
+// La tasa se lee de variables de entorno y es obligatoria para evitar
+// decisiones de negocio hardcodeadas por omisión de configuración.
+const tasaInteresAnualRaw = process.env.TASA_INTERES_ANUAL;
+if (!tasaInteresAnualRaw) {
+  throw new Error('TASA_INTERES_ANUAL no configurada en el entorno');
+}
+
+const TASA_INTERES_ANUAL = Number.parseFloat(tasaInteresAnualRaw);
+if (Number.isNaN(TASA_INTERES_ANUAL) || TASA_INTERES_ANUAL < 0) {
+  throw new Error('TASA_INTERES_ANUAL inválida; debe ser un número mayor o igual a 0');
+}
 const DIAS_POR_ANIO = 365;
 const TASA_DIARIA = TASA_INTERES_ANUAL / 100 / DIAS_POR_ANIO;
 
@@ -71,8 +78,10 @@ const TIPO_ICONOS = {
 function calcularDiasMora(fechaVencimiento, fechaActual = new Date()) {
   if (!fechaVencimiento) return 0;
 
-  const vencimiento = new Date(fechaVencimiento);
+  const vencimiento = normalizarFechaCivil(fechaVencimiento);
   const hoy = new Date(fechaActual);
+
+  if (!vencimiento) return 0;
 
   // Normalizar a medianoche para comparación exacta
   vencimiento.setHours(0, 0, 0, 0);
@@ -82,6 +91,47 @@ function calcularDiasMora(fechaVencimiento, fechaActual = new Date()) {
   const diasMora = Math.floor(diferenciaMilisegundos / (1000 * 60 * 60 * 24));
 
   return diasMora > 0 ? diasMora : 0;
+}
+
+/**
+ * Convierte fechas de vencimiento a fecha civil local para evitar
+ * corrimientos por zona horaria (caso típico: YYYY-MM-DD interpretado como UTC).
+ * @param {Date|string} valor
+ * @returns {Date|null}
+ */
+function normalizarFechaCivil(valor) {
+  if (!valor) return null;
+
+  if (valor instanceof Date && !Number.isNaN(valor.getTime())) {
+    return new Date(valor.getFullYear(), valor.getMonth(), valor.getDate(), 12, 0, 0);
+  }
+
+  if (typeof valor === 'string') {
+    const fechaOnly = valor.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (fechaOnly) {
+      const year = Number(fechaOnly[1]);
+      const month = Number(fechaOnly[2]) - 1;
+      const day = Number(fechaOnly[3]);
+      return new Date(year, month, day, 12, 0, 0);
+    }
+  }
+
+  const parsed = new Date(valor);
+  if (Number.isNaN(parsed.getTime())) {
+    return null;
+  }
+
+  return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate(), 12, 0, 0);
+}
+
+function formatearFechaCivil(valor) {
+  const fecha = normalizarFechaCivil(valor);
+  if (!fecha) return '';
+
+  const dia = String(fecha.getDate()).padStart(2, '0');
+  const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+  const anio = fecha.getFullYear();
+  return `${dia}/${mes}/${anio}`;
 }
 
 /**
@@ -111,7 +161,7 @@ exports.obtenerDeudasPorCodigo = async (codigo) => {
     attributes: [
       'IdTrans',
       [sequelize.fn('CONVERT', sequelize.literal('VARCHAR(10)'), sequelize.col('Fecha'), 120), 'Fecha'],
-      'FechaVto',
+      [sequelize.fn('CONVERT', sequelize.literal('VARCHAR(10)'), sequelize.col('FechaVto'), 120), 'FechaVto'],
       'Detalle',
       'Dominio',
       'NRO_CUOTA',
@@ -185,7 +235,7 @@ exports.obtenerDeudasPorCodigoODni = async (codigo) => {
     attributes: [
       'IdTrans',
       [sequelize.fn('CONVERT', sequelize.literal('VARCHAR(10)'), sequelize.col('Fecha'), 120), 'Fecha'],
-      'FechaVto',
+      [sequelize.fn('CONVERT', sequelize.literal('VARCHAR(10)'), sequelize.col('FechaVto'), 120), 'FechaVto'],
       'Detalle',
       'Dominio',
       'NRO_CUOTA',
@@ -226,6 +276,7 @@ exports.formatearDeuda = (deuda) => {
     IdTrans: deuda.IdTrans,
     Fecha: deuda.Fecha || '',
     FechaVto: deuda.FechaVto || '',
+    FechaVtoDisplay: formatearFechaCivil(deuda.FechaVto),
     Detalle: `${deuda.Detalle || ''} ${deuda.Dominio || ''}`.trim(),
     IdBien: deuda.ID_BIEN || '-',
     Cuota: deuda.NRO_CUOTA || '',
@@ -266,7 +317,7 @@ exports.obtenerDeudasPorIds = async (ids) => {
     attributes: [
       'IdTrans',
       [sequelize.fn('CONVERT', sequelize.literal('VARCHAR(10)'), sequelize.col('Fecha'), 120), 'Fecha'],
-      'FechaVto',
+      [sequelize.fn('CONVERT', sequelize.literal('VARCHAR(10)'), sequelize.col('FechaVto'), 120), 'FechaVto'],
       'Detalle',
       'Dominio',
       'NRO_CUOTA',

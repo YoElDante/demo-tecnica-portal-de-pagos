@@ -213,8 +213,9 @@ async function construirDetalleTicket(ticket, externalReference, estadoFallback 
 async function iniciarPago(req, res) {
   try {
     const { conceptos, contribuyente, montoTotal, creditosAplicados, is_demo, demo_resultado } = req.body;
+    const demoResultadoNormalizado = String(demo_resultado || 'real').trim().toLowerCase();
     const isDemoMode = is_demo === true && MUNICIPIO_ID.toUpperCase() === 'DEMO';
-    const isDemoSimulado = MUNICIPIO_ID.toUpperCase() === 'DEMO' && demo_resultado && demo_resultado !== 'real';
+    const isDemoSimulado = MUNICIPIO_ID.toUpperCase() === 'DEMO' && demoResultadoNormalizado !== 'real';
 
     console.log('🛒 Iniciando proceso de pago:', {
       contribuyente_dni: contribuyente?.dni,
@@ -322,7 +323,9 @@ async function iniciarPago(req, res) {
         montoCreditos: totalCreditos,
         montoSolicitadoFrontend: Number(montoTotal || 0),
         isDemo: isDemoMode,
-        isSimulacion: isDemoSimulado
+        isSimulacion: isDemoSimulado,
+        demoResultado: demoResultadoNormalizado,
+        bdModificableSolicitada: !isDemoMode
       }
     });
 
@@ -332,9 +335,15 @@ async function iniciarPago(req, res) {
       const externalRef = `DEMO-SIM-${ticketNumber}`;
       await ticketsPagoService.actualizarConReferencia(ticket.ticketId, externalRef, ticketNumber);
 
-      if (demo_resultado === 'approved' && !isDemoMode) {
+      console.log('🎛️ [DEMO] Estado de simulación recibido:', {
+        ticketNumber,
+        demoResultado: demoResultadoNormalizado,
+        bdModificableSolicitada: !isDemoMode
+      });
+
+      if (demoResultadoNormalizado === 'approved' && !isDemoMode) {
         const ticketSimulado = await ticketsPagoService.obtenerPorExternalReference(externalRef);
-        const idOperacionSimulada = `SIM-${Date.now()}`;
+        const idOperacionSimulada = String(Date.now());
         const fechaOperacionSimulada = new Date().toISOString();
 
         if (!ticketSimulado) {
@@ -345,7 +354,7 @@ async function iniciarPago(req, res) {
           estado: 'APROBADO',
           idOperacion: idOperacionSimulada,
           nroOperacion: ticketNumber,
-          origen: 'SIMULACION_DEMO',
+          origen: 'MANUAL',
           fechaOperacion: fechaOperacionSimulada
         });
 
@@ -358,16 +367,20 @@ async function iniciarPago(req, res) {
           fechaOperacion: fechaOperacionSimulada
         });
 
+        if (!resultadoSimulado.processed && !resultadoSimulado.already_processed) {
+          throw new Error('La simulación aprobada no pudo aplicar cambios contables en la base de datos');
+        }
+
         await ticketsPagoService.registrarEventoGateway({
           ticketId: ticketSimulado.ticketId,
           externalReference: externalRef,
           estado: 'APROBADO',
           idOperacion: idOperacionSimulada,
           nroOperacion: ticketNumber,
-          origen: 'SIMULACION_DEMO',
+          origen: 'MANUAL',
           payload: {
             simulacion: true,
-            demo_resultado,
+            demo_resultado: demoResultadoNormalizado,
             monto_neto: montoNeto
           },
           processResult: resultadoSimulado.already_processed ? 'DUPLICADO' : 'APLICADO',
@@ -378,7 +391,7 @@ async function iniciarPago(req, res) {
       const token = gatewayTokenService.signGatewayToken({
         ref: externalRef,
         external_reference: externalRef,
-        estado: demo_resultado,
+        estado: demoResultadoNormalizado,
         municipio_id: MUNICIPIO_ID
       });
 
@@ -389,9 +402,9 @@ async function iniciarPago(req, res) {
         error: `/pagos/error-generico?demo_sim=1`
       };
 
-      const redirectUrl = destinosPorResultado[demo_resultado] || `/pagos/error-generico`;
+      const redirectUrl = destinosPorResultado[demoResultadoNormalizado] || `/pagos/error-generico`;
 
-      console.log(`🎭 [DEMO] Simulando resultado '${demo_resultado}' para ticket ${ticketNumber}`);
+      console.log(`🎭 [DEMO] Simulando resultado '${demoResultadoNormalizado}' para ticket ${ticketNumber}`);
 
       return res.json({
         success: true,

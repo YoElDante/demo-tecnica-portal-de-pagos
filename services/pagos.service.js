@@ -39,11 +39,29 @@ const verificarPagoExistente = async (operationRefs) => {
  * @param {number} idTrans - ID de la transacción
  * @returns {Promise<Object|null>} Registro de la deuda
  */
-const obtenerDeudaPorId = async (idTrans) => {
+const obtenerDeudaPorId = async (idTrans, transaction = null) => {
   return await ClientesCtaCte.findOne({
     where: { IdTrans: idTrans },
+    transaction,
     raw: true
   });
+};
+
+/**
+ * Ejecuta rollback sin ocultar el error original del flujo.
+ * @param {Object} transaction - Transacción Sequelize
+ * @param {string} contexto - Etiqueta del flujo para logging
+ */
+const rollbackSeguro = async (transaction, contexto) => {
+  if (!transaction || transaction.finished) {
+    return;
+  }
+
+  try {
+    await transaction.rollback();
+  } catch (rollbackError) {
+    console.warn(`[Pagos] Rollback falló en ${contexto}: ${rollbackError.message}`);
+  }
 };
 
 /**
@@ -75,6 +93,23 @@ const generarNumeroPago = (paymentId) => {
 };
 
 /**
+ * Normaliza el identificador operativo al límite real de la columna
+ * dbo.ClientesCtaCte.NRO_OPERACION (varchar(10)).
+ * @param {string|number} referencia
+ * @returns {string}
+ */
+const normalizarNroOperacion = (referencia) => {
+  const valor = String(referencia || '').trim();
+  if (!valor) {
+    return '';
+  }
+
+  const soloDigitos = valor.replace(/\D/g, '');
+  const base = soloDigitos || valor;
+  return base.slice(-10);
+};
+
+/**
  * Actualiza una deuda como pagada
  * @param {number} idTrans - ID de la transacción a actualizar
  * @param {Object} datosPago - Datos del pago ya normalizados
@@ -82,15 +117,20 @@ const generarNumeroPago = (paymentId) => {
  * @param {Object} transaction - Transacción de Sequelize
  */
 const actualizarDeudaComoPagada = async (idTrans, datosPago, numeroPago, transaction) => {
-  const fechaPago = datosPago.date_approved ? new Date(datosPago.date_approved) : new Date();
+  const fechaPago = sequelize.literal('GETDATE()');
   const ejercicioActual = new Date().getFullYear().toString();
+  const nroOperacion = normalizarNroOperacion(datosPago.payment_id);
+
+  if (!nroOperacion) {
+    throw new Error('NRO_OPERACION inválido para registrar el pago');
+  }
 
   await ClientesCtaCte.update({
     Saldo: 0,
     EsPago: 1,
     FechaPago: fechaPago,
     NumeroPago: numeroPago,
-    NRO_OPERACION: datosPago.payment_id.toString(),
+    NRO_OPERACION: nroOperacion,
     Ejercicio: ejercicioActual
   }, {
     where: { IdTrans: idTrans },
@@ -108,8 +148,13 @@ const actualizarDeudaComoPagada = async (idTrans, datosPago, numeroPago, transac
  * @returns {Promise<Object>} Registro de cobro creado
  */
 const crearRegistroCobro = async (deudaOriginal, datosPago, numeroPago, montoCobrado, transaction) => {
-  const fechaPago = datosPago.date_approved ? new Date(datosPago.date_approved) : new Date();
+  const fechaPago = sequelize.literal('GETDATE()');
   const ejercicioActual = new Date().getFullYear().toString();
+  const nroOperacion = normalizarNroOperacion(datosPago.payment_id);
+
+  if (!nroOperacion) {
+    throw new Error('NRO_OPERACION inválido para registrar cobro');
+  }
 
   return await ClientesCtaCte.create({
     Codigo: deudaOriginal.Codigo,
@@ -122,7 +167,7 @@ const crearRegistroCobro = async (deudaOriginal, datosPago, numeroPago, montoCob
     FechaPago: fechaPago,
     EsPago: 1,
     NumeroPago: numeroPago,
-    NRO_OPERACION: datosPago.payment_id.toString(),
+    NRO_OPERACION: nroOperacion,
     TIPO_BIEN: deudaOriginal.TIPO_BIEN,
     ANO_CUOTA: deudaOriginal.ANO_CUOTA,
     NRO_CUOTA: deudaOriginal.NRO_CUOTA,
@@ -153,6 +198,7 @@ const confirmarPago = async (datosPago) => {
   }
 
   const { payment_id, status, metadata, transaction_amount } = datosPago;
+  const paymentIdNormalizado = normalizarNroOperacion(payment_id);
   const conceptosIds = metadata.conceptos_ids;
 
   if (status !== 'approved') {
@@ -164,7 +210,7 @@ const confirmarPago = async (datosPago) => {
     };
   }
 
-  const yaExiste = await verificarPagoExistente(payment_id);
+  const yaExiste = await verificarPagoExistente(paymentIdNormalizado || payment_id);
   if (yaExiste) {
     console.log(`[Pagos] Pago ${payment_id} ya fue procesado anteriormente`);
     return {
@@ -175,16 +221,15 @@ const confirmarPago = async (datosPago) => {
     };
   }
 
-  const numeroPago = generarNumeroPago(payment_id);
+  const numeroPago = generarNumeroPago(paymentIdNormalizado || payment_id);
   const transaction = await sequelize.transaction();
 
   try {
     const resultados = [];
     const cantidadConceptos = conceptosIds.length;
-    const montoPorConcepto = transaction_amount / cantidadConceptos;
 
     for (const idTrans of conceptosIds) {
-      const deuda = await obtenerDeudaPorId(idTrans);
+      const deuda = await obtenerDeudaPorId(idTrans, transaction);
 
       if (!deuda) {
         console.warn(`[Pagos] Deuda con IdTrans ${idTrans} no encontrada`);
@@ -206,8 +251,14 @@ const confirmarPago = async (datosPago) => {
         continue;
       }
 
-      await actualizarDeudaComoPagada(idTrans, datosPago, numeroPago, transaction);
-      await crearRegistroCobro(deuda, datosPago, numeroPago, montoPorConcepto, transaction);
+      const contextoPago = {
+        ...datosPago,
+        payment_id: paymentIdNormalizado || payment_id
+      };
+      const montoCobrado = Number(deuda.Saldo ?? deuda.Importe ?? 0);
+
+      await actualizarDeudaComoPagada(idTrans, contextoPago, numeroPago, transaction);
+      await crearRegistroCobro(deuda, contextoPago, numeroPago, montoCobrado, transaction);
 
       resultados.push({
         IdTrans: idTrans,
@@ -234,7 +285,7 @@ const confirmarPago = async (datosPago) => {
     };
 
   } catch (error) {
-    await transaction.rollback();
+    await rollbackSeguro(transaction, 'confirmarPago');
     console.error(`[Pagos] Error procesando pago ${payment_id}:`, error);
     throw error;
   }
@@ -334,8 +385,12 @@ const confirmarPagoGateway = async (datosPago) => {
     throw new Error('El ticket no tiene conceptos asociados para aplicar el cobro');
   }
 
-  const operationReference = idOperacion || externalReference;
-  const referenciasIdempotencia = [operationReference, externalReference].filter(Boolean);
+  const operationReference = normalizarNroOperacion(idOperacion || externalReference);
+  const referenciasIdempotencia = [operationReference].filter(Boolean);
+
+  if (!operationReference) {
+    throw new Error('No se pudo derivar un NRO_OPERACION válido para registrar el pago');
+  }
 
   const yaExiste = await verificarPagoExistente(referenciasIdempotencia);
   if (yaExiste) {
@@ -369,7 +424,7 @@ const confirmarPagoGateway = async (datosPago) => {
         continue;
       }
 
-      const deuda = await obtenerDeudaPorId(idTrans);
+      const deuda = await obtenerDeudaPorId(idTrans, transaction);
 
       if (!deuda) {
         resultados.push({
@@ -420,7 +475,7 @@ const confirmarPagoGateway = async (datosPago) => {
         continue;
       }
 
-      const deudaCredito = await obtenerDeudaPorId(idTransCredito);
+      const deudaCredito = await obtenerDeudaPorId(idTransCredito, transaction);
 
       if (!deudaCredito) {
         resultadosCreditos.push({
@@ -451,7 +506,7 @@ const confirmarPagoGateway = async (datosPago) => {
       }
 
       await actualizarDeudaComoPagada(idTransCredito, {
-        payment_id: `${operationReference}-CRED`,
+        payment_id: operationReference,
         date_approved: fechaOperacion
       }, numeroPago, transaction);
 
@@ -480,7 +535,12 @@ const confirmarPagoGateway = async (datosPago) => {
       resultados_creditos: resultadosCreditos
     };
   } catch (error) {
-    await transaction.rollback();
+    await rollbackSeguro(transaction, 'confirmarPagoGateway');
+    console.error('[Pagos] Error en confirmarPagoGateway:', {
+      externalReference,
+      idOperacion: idOperacion || null,
+      detalle: error.message
+    });
     throw error;
   }
 };
