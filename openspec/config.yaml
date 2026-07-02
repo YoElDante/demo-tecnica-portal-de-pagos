@@ -1,0 +1,92 @@
+# OpenSpec Config — demo-portal-de-pago
+# Generado por sdd-init (modo hybrid)
+# Ultima actualizacion: 2026-07-02
+
+context: |
+  Portal de Pagos Municipal - multi-municipio.
+  Stack: Node.js 20+, Express 4, Sequelize 6 + tedious (Azure SQL), EJS 3.
+  Multiples municipios diferenciados por MUNICIPIO + DB_* (config/index.js).
+  No procesa pagos directos: delega al API Gateway (docs/CONTRACT-PORTAL-GATEWAY.md).
+  Working branch: develop. Production branch: main.
+
+strict_tdd: false
+strict_tdd_reason: "No existe test runner formal (jest/mocha/vitest). Unico script: tests/connection.db.test.js (smoke test de BD)."
+
+# Capacidades de testing detectadas en package.json + tests/
+testing:
+  runner:
+    command: "npm run testDB"
+    framework: "node-script"
+    notes: "Ejecuta tests/connection.db.test.js sin framework. Sequelize.authenticate() smoke test."
+  layers:
+    unit: { available: false, tool: null }
+    integration: { available: false, tool: null }
+    e2e: { available: false, tool: null }
+  coverage:
+    available: false
+    command: null
+  quality:
+    linter: { available: false, command: null }
+    type_checker: { available: false, command: null, notes: "Stack en JavaScript puro, sin TypeScript." }
+    formatter: { available: false, command: null }
+
+# Reglas de fase para el workflow SDD
+phases:
+  proposal:
+    required: true
+    output: "openspec/changes/<nombre>/proposal.md"
+    language: "es"
+  spec:
+    required: true
+    output: "openspec/changes/<nombre>/specs/<modulo>/spec.md"
+    language: "es"
+  design:
+    required: true
+    output: "openspec/changes/<nombre>/design.md"
+    language: "es"
+  tasks:
+    required: true
+    output: "openspec/changes/<nombre>/tasks.md"
+    language: "es"
+    format: "checklist"
+  apply:
+    required: true
+    branch: "develop"
+    rules:
+      - "Mantener cambios pequenos y orientados a la raiz del problema."
+      - "Respetar arquitectura multi-municipio (no hardcodear nombres, logos ni URLs)."
+      - "Toda credencial fuera del codigo fuente (variables de entorno)."
+      - "Idempotencia obligatoria en pagos (id_operacion / NRO_OPERACION)."
+      - "Tickets con validez limitada; interes configurable por municipio."
+  verify:
+    required: true
+    command: "npm run testDB"
+    notes: "Validar conectividad y revisar manualmente los criterios del proposal/spec."
+  archive:
+    required: true
+    destination: "openspec/changes/archive/<YYYY-MM-DD>-<nombre>/"
+    syncs: "delta specs a openspec/specs/"
+
+# Convenciones del proyecto
+conventions:
+  package_manager: "npm"
+  node_version: ">=20"
+  deps_pinning: "exactas (sin ^ ni ~)"
+  multi_municipio:
+    selector: "MUNICIPIO"
+    branding_dir: "config/municipalidad.config.<municipio>.js"
+    envs_dir: "envs/.env.<municipio>"
+    db: "config/database.config.js (unico para todos)"
+  payment_flow:
+    gateway: "API Gateway (no se integra directo con SIRO/ MercadoPago)"
+    confirmation: "webhook server-to-server (redirect NO es fuente de verdad)"
+    idempotency_key: "id_operacion / NRO_OPERACION"
+
+# Persistencia adicional
+persistence:
+  engram:
+    project: "demo-portal-de-pago"
+    topic_keys:
+      project_context: "sdd-init/demo-portal-de-pago"
+      testing_capabilities: "sdd/demo-portal-de-pago/testing-capabilities"
+      skill_registry: "skill-registry"

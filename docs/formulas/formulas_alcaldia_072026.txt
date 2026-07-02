@@ -1,0 +1,83 @@
+# Formulas calculo de intereses y deudas
+
+Esto me paso el contador, que es el dueño del software de escritorio.
+
+---
+
+## Su mensaje explicativo
+
+Eduardo Ferreyra [01/07/2026 - 09:04]: "Esta parte es de los interes , coeficientes o descuentos. Y tambien revisa si tiene descuento especial por jubilado que viende la ficha de contribuyentes"
+
+---
+
+## Bloque de codigo de Phyton
+
+```
+
+eldescuento = 0.00
+                        elinteres = 0.00
+                        # CUOTA BASICA = "" ES CUOTA COMUN , sno es cuota unica que lleva descuento
+                        if cuotabasica == '':
+                          #  if grupoF.RecIntereses == 0 or grupoF.RecIntereses is None :
+                                if grupoF.Saldo > 0:
+                                    if grupoF.FechaVto is not None:
+                                        diferencia = (datetime.now() - grupoF.FechaVto)
+                                        dias = diferencia.days 
+                                    else:
+                                        dias = 0
+                                        
+                                    ## verifica formato de fecha de vto.
+                                    fecha_bd = grupoF.FechaVto.date() if hasattr(grupoF.FechaVto, 'date') else grupoF.FechaVto
+                                    fecha_limite = fechadesdeintereses.date() if hasattr(fechadesdeintereses, 'date') else fechadesdeintereses
+                                    ## inicializa en estos valores , sino despues lo cambia , para agregar a detalle
+                                    coef = str(tasainteres)
+                                    tipocoef =  "T:" 
+                                    # si tiene coeficiente entra a ver si calcula con coef o inte, sino pasa directo a interes
+                                    if grupoF.CoeficienteCuota is not None:
+                                        if fecha_bd < fecha_limite and grupoF.CoeficienteCuota > 0 :
+                                            coef = float((float(indicefinalint)/float(grupoF.CoeficienteCuota)))
+                                            coef = "{:,.2f}".format(coef)
+                                            elinteres = float(grupoF.Saldo) * float((float(indicefinalint)/float(grupoF.CoeficienteCuota)))
+                                            valor_formateado = "{:,.2f}".format(elinteres)
+                                            tipocoef =  "C:" 
+                                        else:
+                                            ### este y el que sigue en el otro else es igual por logica ..
+                                            if grupoF.TipoMovim == "FA" and dias > 0:
+                                                elinteres = float(grupoF.Saldo) * descinmueble * (tasainteres/365/100) * dias
+                                                valor_formateado = "{:,.2f}".format(elinteres)
+                                            else:
+                                                elinteres = 0
+                                                valor_formateado = "{:,.2f}".format(elinteres)
+                                    else:
+                                            if grupoF.TipoMovim == "FA" and dias > 0:
+                                                elinteres = float(grupoF.Saldo) * descinmueble * (tasainteres/365/100) * dias
+                                                valor_formateado = "{:,.2f}".format(elinteres)
+                                            else:
+                                                elinteres = 0
+                                                valor_formateado = "{:,.2f}".format(elinteres)
+                                                
+                                        
+                                    
+                                    columna4 = f"{columna4}{dias}{tipocoef}{coef}"
+
+
+                                else:
+                                    if grupoF.ACTUALIZACION_COBRADO != None:
+                                        valor_formateado = "{:,.2f}".format(grupoF.ACTUALIZACION_COBRADO)
+
+                                
+                        else:
+                            if grupoF.Saldo > 0:
+                                if grupoF.TipoMovim != "FA":
+                                    eldescuento = 0
+                                    valor_formateado = "{:,.2f}".format(eldescuento) 
+                                else:    
+                                    if grupoF.Saldo is not None:
+                                        eldescuento = float(grupoF.Saldo) * float(tasadescuento/100) * float(descinmueble)
+                                        valor_formateado = "{:,.2f}".format(eldescuento * -1)
+                                        columnax = "X" 
+    
+                        ## columna 11 es de los intereses o descuentos de la tabla      
+                        columna11 = valor_formateado
+
+```

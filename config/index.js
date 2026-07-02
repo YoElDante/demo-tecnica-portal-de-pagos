@@ -55,7 +55,7 @@ if (!MUNICIPIO) {
 // 5. Crear envs/.env.NUEVO con las credenciales de BD
 // 6. Configurar variables de BD en Azure App Service para producción
 
-const municipiosDisponibles = ['elmanzano', 'sanjosedelassalinas', 'tinoco', 'demo', 'calchinoeste'];
+const municipiosDisponibles = ['elmanzano', 'sanjosedelassalinas', 'tinoco', 'demo', 'calchinoeste', 'carrilobo'];
 
 if (!municipiosDisponibles.includes(MUNICIPIO)) {
   console.error('');

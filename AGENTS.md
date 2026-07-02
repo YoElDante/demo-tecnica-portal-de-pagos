@@ -1,5 +1,11 @@
 # Portal de Pagos Municipal - AGENTS
 
+## Modelo de IA preferente
+
+**Preferencia: OpenCode.** Solo utilizar GitHub Copilot cuando se solicite explícitamente.
+
+---
+
 ## Entrada Rapida Para Orquestador Multi-Repo
 
 Si este repositorio se analiza desde un agente de nivel superior que coordina Portal + Gateway, usar esta ruta minima antes de explorar el resto del proyecto.
@@ -50,7 +56,7 @@ Este repositorio implementa un portal web municipal para consultar deudas por DN
 8. Los tickets tienen validez limitada porque los intereses cambian diariamente.
 9. Todo cambio nuevo debe respetar el modelo multi-municipio y no hardcodear nombres, logos o URLs.
 10. Antes de implementar una feature relevante, revisar `openspec/specs` y trabajar con `openspec/changes`.
-11. La rama principal de trabajo es `main`. La rama `develop` fue eliminada. Todo cambio se commitea directamente en `main`, que es la rama de produccion.
+11. La rama principal de trabajo es `develop`. La rama `main` es producción y solo recibe merges aprobados desde `develop`.
 12. `.env` y `envs/` no se versionan ni se usan como mecanismo de promocion entre ramas; demo y produccion se configuran por entorno.
 13. Las dependencias npm se declaran con version exacta (sin `^` ni `~`) para evitar actualizaciones no controladas.
 14. No actualizar dependencias en repositorios estables salvo necesidad de seguridad o correccion critica, y siempre con validacion explicita.
@@ -70,15 +76,37 @@ Este repositorio implementa un portal web municipal para consultar deudas por DN
 - No asumir que todos los municipios comparten mismas credenciales, cuentas de pago o branding.
 - Al agregar dependencias nuevas, fijar una version confiable y estable de forma exacta.
 
+## Qué NO hace
+
+- No procesa pagos directamente — delega al API Gateway
+- No guarda credenciales bancarias ni hash de SIRO
+- No se comunica directamente con SIRO ni ninguna plataforma de pago
+- No envía emails ni notificaciones al contribuyente
+- No accede a BD de otros municipios
+
+## Estado de Desarrollo
+
+| Fase | Estado |
+|------|--------|
+| Búsqueda por DNI y deudas | ✅ Completo |
+| Integración gateway de pagos (SIRO) | ✅ Completo |
+| Tracking formal de tickets (BD) | 🔲 En `openspec/changes/ticket-payment-tracking/` |
+| Tasa de interés configurable end-to-end | 🔲 Parcial en `openspec/changes/configurable-interest-rate/` |
+| Hardening HTTP (helmet + HTTPS) | 🔲 En `openspec/changes/security-hardening/` |
+| Comprobantes por email | 🔲 Pendiente |
+| Tests automatizados | 🔲 Solo 1 test de conexión BD (`npm run testDB`) |
+
 ## Comandos de Trabajo
 
 ```bash
 npm install
+npm test                # (placeholder — test suite pendiente)
 npm run dev
 npm run dev:demo
 npm run dev:elmanzano
 npm run dev:tinoco
 npm run dev:sanjose
+npm run dev:calchinoeste
 npm run testDB
 ```
 
@@ -110,8 +138,9 @@ npm run testDB
 1. Revisar el PRD y la spec relevante en `openspec/specs`.
 2. Si el cambio no existe, crear un nuevo directorio en `openspec/changes/<nombre-del-cambio>/`.
 3. Definir `proposal.md`, `design.md` y `tasks.md` antes de implementar.
-4. Implementar en `main` respetando las reglas globales y las skills aplicables.
+4. Implementar en `develop` respetando las reglas globales y las skills aplicables.
 5. Validar en demo antes de asumir que produccion esta correcta.
+6. Mergear a `main` para deploy a producción.
 7. Actualizar la documentacion de producto si cambia comportamiento funcional.
 
 Ver flujo completo en `docs/GUIA_RAMAS.md`.

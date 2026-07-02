@@ -1,6 +1,9 @@
 /**
  * Modelo de la tabla dbo.TicketPagoEventos
  * Auditoria de eventos y webhooks de tickets de pago
+ * Alineado con script_creacion_bd_ElManzano_062026.sql
+ * 
+ * @updated 2026-07-02 — defaults agregados
  */
 
 const { DataTypes } = require('sequelize');
@@ -49,13 +52,14 @@ module.exports = (sequelize) => {
       field: 'error_message'
     },
     payloadJson: {
-      type: DataTypes.TEXT,
+      type: DataTypes.TEXT,             // SQL: nvarchar(max) — Sequelize TEXT es el mapping correcto
       allowNull: true,
       field: 'payload_json'
     },
     receivedAtUtc: {
       type: DataTypes.DATE,
       allowNull: false,
+      defaultValue: DataTypes.NOW,
       field: 'received_at_utc'
     },
     processedAtUtc: {
