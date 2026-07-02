@@ -110,17 +110,38 @@ npm run dev:calchinoeste
 npm run testDB
 ```
 
-## Documentos Fuente
+## Mapa de Documentacion
 
-- `README.md`: onboarding general del proyecto
-- `docs/README.md`: indice de documentacion
-- `docs/AI_CONTEXT.md`: contexto compacto y estado del sistema
-- `docs/PLAN_CONFIGURACION_MULTIAMBIENTE.md`: resumen operativo multi-municipio
-- `docs/CONTRACT-PORTAL-GATEWAY.md`: contrato con el gateway de pagos
-- `docs/GUIA_NUEVO_MUNICIPIO.md`: incorporacion de nuevos municipios
-- `docs/DEPLOY_AZURE.md`: despliegue en Azure App Service
-- `docs/PENDIENTE_SEGURIDAD.md`: resumen operativo de hardening
-- `docs/bd/LOGICA_DEUDAS_PAGOS.md`: logica de deuda, mora y registracion
+> **Índice maestro**: `docs/README.md` — todos los documentos del proyecto con badges de frescura.
+
+### Ruta minima para agentes de IA
+
+Antes de tocar codigo, leer en este orden:
+
+1. **`docs/AI_CONTEXT.md`** — contexto compacto (stack, arquitectura, riesgos, quick-start)
+2. **`docs/GLOSSARY.md`** — terminos de dominio (CodMovim, TIPO_BIEN, estados, seguridad)
+3. **Skill relevante** segun la tarea (ver [Skills Disponibles](#skills-disponibles))
+4. **OpenSpec spec** del area afectada (`openspec/specs/{area}/spec.md`)
+
+### Documentos clave por area
+
+| Area | Documento principal |
+|------|---------------------|
+| Onboarding general | `docs/AI_CONTEXT.md` |
+| Glosario de dominio | `docs/GLOSSARY.md` |
+| Contrato portal↔gateway | `docs/CONTRACT-PORTAL-GATEWAY.md` |
+| Logica de deuda y pagos | `docs/bd/LOGICA_DEUDAS_PAGOS.md` |
+| Alta de municipio | `docs/GUIA_NUEVO_MUNICIPIO.md` |
+| Despliegue Azure | `docs/DEPLOY_AZURE.md` |
+| Runbook / troubleshooting | `docs/GUIDES/RUNBOOK.md` |
+| Decisiones de arquitectura | `docs/ADR.md` |
+| Ramas y flujo git | `docs/GUIA_RAMAS.md` |
+| Seguridad / hardening | `docs/PENDIENTE_SEGURIDAD.md` |
+| Indice maestro completo | `docs/README.md` |
+
+### Archivo historico
+
+Documentacion obsoleta en `docs/_archive/`. No usar como referencia operativa. Ver `docs/_archive/README.md`.
 
 ## Skills Disponibles
 
