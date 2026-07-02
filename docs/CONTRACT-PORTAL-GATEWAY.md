@@ -274,6 +274,19 @@ El portal debe:
 
 ---
 
+## Gestión de callbacks en el gateway
+
+El gateway actúa como orquestador centralizado de todas las notificaciones entre pasarelas y portales:
+
+- Recibe callbacks de SIRO (y cualquier futura pasarela) en endpoints propios
+- Normaliza el resultado al contrato común del sistema
+- Distribuye hacia los portales via webhook firmado (Flujo B)
+- Gestiona reintentos con backoff exponencial si el portal no responde
+
+El portal **nunca** recibe callbacks directos de plataformas de pago — todo pasa por el gateway.
+
+---
+
 ## Gestión de tickets en el portal
 
 ### Ciclo de vida de un ticket
@@ -299,6 +312,15 @@ Si el contribuyente consulta su deuda y tiene tickets en estado `PENDIENTE`:
 mostrar un aviso del estilo:
 > "Tiene un pago en proceso de confirmación. Si realizó un pago recientemente,
 > el estado se actualizará en las próximas horas."
+
+**Caso: redirect antes que el webhook.** Si el contribuyente vuelve al portal via redirect (Flujo A) pero el webhook (Flujo B) aún no llegó, la vista muestra "pendiente de confirmación". El frontend hace polling periódico contra el backend del portal, que consulta el estado del ticket en BD local. Cuando el webhook impacta, el polling detecta el cambio y actualiza la vista. Esto asegura que el contribuyente nunca vea un estado inconsistente.
+
+## Criterios de UX
+
+1. El contribuyente siempre vuelve al portal tras intentar pagar en SIRO
+2. El estado visual prioriza consistencia con la BD local del portal
+3. Se muestra detalle del ticket para captura/descarga/comprobante
+4. Créditos a favor del contribuyente se informan en la pantalla de selección de deudas y se aplican automáticamente al neto a pagar
 
 ---
 
