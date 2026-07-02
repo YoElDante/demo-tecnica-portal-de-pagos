@@ -1,3 +1,5 @@
+> ⚠️ **Este documento está supersedido.** Para referencia actual del proyecto, consultá [AGENTS.md](AGENTS.md) y [docs/README.md](docs/README.md).
+
 # PRD - Portal de Pagos Municipal Multi-Municipio
 
 ## Vision

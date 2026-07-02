@@ -1,3 +1,5 @@
+> ⚠️ **Snapshot automático del 2026-06-30.** La información puede estar desactualizada. Para el estado actual del proyecto, consultá [AGENTS.md](../AGENTS.md) y [docs/README.md](README.md).
+
 # Informe de Estado — Portal de Pagos Municipal
 
 **Fecha:** 2026-06-30 04:26 (ART, UTC-3)

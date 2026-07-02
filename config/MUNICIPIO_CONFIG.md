@@ -44,34 +44,6 @@ Este archivo:
 
 ---
 
-## 📍 Estado Anterior (YA NO APLICA - solo referencia histórica)
-
-> ⚠️ **IMPORTANTE**: Esta sección documenta cómo funcionaba ANTES de la Fase 1.
-> Actualmente TODO se configura mediante variables de entorno.
-> NO es necesario modificar ningún archivo de código.
-
-Antes de la centralización, había que modificar archivos manualmente:
-
-### 1. Conexión a Base de Datos
-**Archivo**: `models/model.index.js` (líneas 10-11)
-
-```javascript
-// Descomentar el municipio deseado:
-const sequelize = require('../config/database.config.elmanzano.js');
-//const sequelize = require('../config/database.config.sanjosedelassalinas.js');
-```
-
-### 2. Datos del Municipio (nombre, logo, etc.)
-**Archivo**: `services/paymentGateway.service.js` (línea 16)
-
-```javascript
-const municipalidadConfig = require('../config/municipalidad.config.elmanzano');
-```
-
-Y también en `controllers/web.ticket.controller.js`.
-
----
-
 ## ➕ Agregar un Nuevo Municipio
 
 ### Paso 1: Crear archivo de datos visuales

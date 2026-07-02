@@ -30,4 +30,4 @@ npm run dev
 
 ## Resources
 
-- **Documentation**: See [references/docs.md](references/docs.md) for local debt logic guidance.
+- **Documentation**: [LOGICA_DEUDAS_PAGOS.md](../../docs/bd/LOGICA_DEUDAS_PAGOS.md), [AI_CONTEXT.md](../../docs/AI_CONTEXT.md), [interest-calculation spec](../../openspec/specs/interest-calculation/spec.md)

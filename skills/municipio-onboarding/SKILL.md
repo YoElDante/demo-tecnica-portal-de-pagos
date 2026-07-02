@@ -33,4 +33,4 @@ npm run testDB
 
 ## Resources
 
-- **Documentation**: See [references/docs.md](references/docs.md) for local onboarding guidance.
+- **Documentation**: [GUIA_NUEVO_MUNICIPIO.md](../../docs/GUIA_NUEVO_MUNICIPIO.md), [MUNICIPIO_CONFIG.md](../../config/MUNICIPIO_CONFIG.md), [README.md](../../README.md)

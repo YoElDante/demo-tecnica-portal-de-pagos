@@ -31,4 +31,4 @@ npm run dev
 
 ## Resources
 
-- **Documentation**: See [references/docs.md](references/docs.md) for local payment contract guidance.
+- **Documentation**: [CONTRACT-PORTAL-GATEWAY.md](../../docs/CONTRACT-PORTAL-GATEWAY.md), [INTEGRACION_PAGOS.md](../../docs/INTEGRACION_PAGOS.md), [AI_CONTEXT.md](../../docs/AI_CONTEXT.md)

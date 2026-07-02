@@ -30,4 +30,4 @@ npm install helmet
 
 ## Resources
 
-- **Documentation**: See [references/docs.md](references/docs.md) for local security guidance.
+- **Documentation**: [PENDIENTE_SEGURIDAD.md](../../docs/PENDIENTE_SEGURIDAD.md), [DEPLOY_AZURE.md](../../docs/DEPLOY_AZURE.md)

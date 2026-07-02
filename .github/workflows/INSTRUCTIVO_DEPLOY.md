@@ -379,7 +379,7 @@ jobs:
 |----------|-------------|-------------------|
 | `PORT` | Puerto (Azure lo asigna automáticamente) | `3000` |
 | `TASA_INTERES_ANUAL` | Tasa de mora (%) | `40` |
-| `PAYMENT_GATEWAY` | Pasarela de pago | `mercadopago` |
+| `PAYMENT_GATEWAY` | Pasarela de pago | `siro` |
 
 ### Cómo configurar en Azure
 

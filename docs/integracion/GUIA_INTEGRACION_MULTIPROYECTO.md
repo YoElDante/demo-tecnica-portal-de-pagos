@@ -34,7 +34,7 @@ Cuando dos aplicaciones se comunican entre sí mediante HTTP (APIs REST), necesi
 | Comunicación | Protocolo | Descripción |
 |--------------|-----------|-------------|
 | Portal → API de Pagos | **REST API** | HTTP POST con JSON |
-| API → Pasarela SIRA | **Payment Gateway Protocol** | Redirect con firma HMAC |
+| API → Pasarela SIRO | **Payment Gateway Protocol** | Redirect con firma HMAC |
 | Pasarela → API (resultado) | **Webhook/IPN** | Notificación server-to-server |
 | API → Portal (retorno) | **Redirect + Callback** | URL con parámetros de estado |
 
@@ -75,7 +75,7 @@ Cuando dos aplicaciones se comunican entre sí mediante HTTP (APIs REST), necesi
 │           │                            │ 3. Arma request firmado            │
 │           │                            ▼                                    │
 │           │                   ┌──────────────────┐                          │
-│           │                   │  PASARELA SIRA   │                          │
+│           │                   │  PASARELA SIRO   │                          │
 │           │                   │  (Banco Roela)   │                          │
 │           │                   └────────┬─────────┘                          │
 │           │                            │                                    │
@@ -96,7 +96,7 @@ Cuando dos aplicaciones se comunican entre sí mediante HTTP (APIs REST), necesi
 | Proyecto | Carpeta | Responsabilidad |
 |----------|---------|-----------------|
 | **Portal Web** | `demo-portal-de-pago/` | UI, consulta deudas, muestra resultados |
-| **API Gateway de Pagos** | `api-gateway-mp/` | Procesa pagos, comunica con SIRA |
+| **API Gateway de Pagos** | `api-gateway-mp/` | Procesa pagos, comunica con SIRO |
 
 ---
 
@@ -380,7 +380,7 @@ Cuando le pidas a la IA que integre los proyectos, debe poder responder:
 ### Explorando la API (Proyecto 2)
 
 1. ¿Qué endpoints existen actualmente?
-2. ¿Cómo se conecta con SIRA/Banco Roela?
+2. ¿Cómo se conecta con SIRO/Banco Roela?
 3. ¿Qué validaciones tiene?
 4. ¿Cómo notifica el resultado del pago?
 

@@ -33,4 +33,4 @@ az webapp create --name <app> --resource-group <rg> --plan <plan> --runtime "NOD
 
 ## Resources
 
-- **Documentation**: See [references/docs.md](references/docs.md) for local Azure deployment guidance.
+- **Documentation**: [DEPLOY_AZURE.md](../../docs/DEPLOY_AZURE.md), [GUIA_NUEVO_MUNICIPIO.md](../../docs/GUIA_NUEVO_MUNICIPIO.md), [README.md](../../README.md)

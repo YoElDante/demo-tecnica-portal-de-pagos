@@ -31,4 +31,4 @@ git status
 
 ## Resources
 
-- **Documentation**: See [references/docs.md](references/docs.md) for local multi-project workflow guidance.
+- **Documentation**: [GUIA_INTEGRACION_MULTIPROYECTO.md](../../docs/integracion/GUIA_INTEGRACION_MULTIPROYECTO.md), [GUIA_RAMAS.md](../../docs/GUIA_RAMAS.md), [CONTRACT-PORTAL-GATEWAY.md](../../docs/CONTRACT-PORTAL-GATEWAY.md)
