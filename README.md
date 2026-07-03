@@ -118,7 +118,7 @@ TASA_INTERES_ANUAL=40            # Tasa de interés anual (%)
 
 # === PASARELA DE PAGOS ===
 PAYMENT_GATEWAY=siro             # Activa hoy: SIRO (Banco Roela)
-API_GATEWAY_URL=https://api-gateway.azurewebsites.net
+API_GATEWAY_URL=https://gateway.alcaldia.com.ar/
 FRONTEND_PUBLIC_URL=http://localhost:4000
 
 # === SEGURIDAD ===
