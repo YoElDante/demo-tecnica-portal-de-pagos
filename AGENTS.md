@@ -6,6 +6,28 @@
 
 ---
 
+## Protocolo de Memoria Persistente (Engram) — OBLIGATORIO
+
+Toda decisión, bug fix, descubrimiento técnico, o cambio de arquitectura DEBE guardarse
+en Engram INMEDIATAMENTE después de ocurrir, no al final de la sesión.
+
+**Auto-check después de CADA acción:** "¿Descubrí un bug, arreglé algo, tomé una decisión
+de diseño, o aprendí algo no obvio?" → `mem_save` AHORA.
+
+**Casos concretos que requieren save:**
+- Un `require()` falla silenciosamente y causa comportamiento incorrecto
+- Se encuentra una diferencia entre el código documentado y el real
+- Se arregla un archivo para que el pipeline de producción funcione
+- Se descubre una tabla sin PK que rompe Sequelize
+- Se modifica un archivo de configuración o arquitectura
+- Se completa una fase SDD (explore, propose, spec, design, tasks, apply, archive)
+
+**Al final de cada sesión:** `mem_session_summary` con el formato Goal/Instructions/Discoveries/Accomplished/Next Steps/RelevantFiles.
+
+**No esperar al final. Cada hallazgo se guarda en el momento.**
+
+---
+
 ## Entrada Rapida Para Orquestador Multi-Repo
 
 Si este repositorio se analiza desde un agente de nivel superior que coordina Portal + Gateway, usar esta ruta minima antes de explorar el resto del proyecto.
