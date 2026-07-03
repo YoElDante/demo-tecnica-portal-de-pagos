@@ -6,20 +6,21 @@
  *   DatosGenerales (BD) → municipio config → process.env
  */
 
-const { DatosGenerales } = require('../models/model.index');
+const { DatosGenerales, sequelize } = require('../models/model.index');
 
 /**
  * Obtiene la configuración de intereses desde la tabla DatosGenerales.
+ * Usa SQL raw porque la tabla no tiene columna 'id' (requerida por Sequelize findOne).
  * 
  * @returns {Promise<Object|null>} Configuración o null si falla la consulta
  */
 async function obtenerConfigIntereses() {
   try {
-    const row = await DatosGenerales.findOne({
-      attributes: ['TasaInteres', 'TasaDescuento', 'IndiceFinal', 'FechaDesdeInt'],
-      raw: true,
-    });
+    const [rows] = await sequelize.query(
+      'SELECT TOP 1 TasaInteres, TasaDescuento, IndiceFinal, FechaDesdeInt FROM dbo.DatosGenerales'
+    );
 
+    const row = rows[0];
     if (!row) return null;
 
     return {
