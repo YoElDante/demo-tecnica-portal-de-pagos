@@ -99,21 +99,39 @@ Total = Importe + Interés
 
 ### 4.3 Días de Mora
 
+Los días de mora se calculan usando fechas civiles normalizadas al mediodía para
+evitar desplazamientos por zona horaria (UTC, DST). Las cadenas `"YYYY-MM-DD"` de
+la base de datos **no deben pasarse directamente** a `new Date()`.
+
 ```javascript
-function calcularDiasMora(fechaVencimiento, fechaActual = new Date()) {
-  const vencimiento = new Date(fechaVencimiento);
-  const hoy = new Date(fechaActual);
-  
-  // Normalizar a medianoche
-  vencimiento.setHours(0, 0, 0, 0);
-  hoy.setHours(0, 0, 0, 0);
-  
-  const diferenciaMilisegundos = hoy - vencimiento;
-  const diasMora = Math.floor(diferenciaMilisegundos / (1000 * 60 * 60 * 24));
-  
-  return diasMora > 0 ? diasMora : 0; // No hay mora si no venció
+function parseCivilDate(raw) {
+  if (!raw) return null;
+  if (raw instanceof Date && !isNaN(raw.getTime())) {
+    return new Date(raw.getFullYear(), raw.getMonth(), raw.getDate(), 12, 0, 0);
+  }
+  if (typeof raw === 'string') {
+    const m = raw.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (m) return new Date(+m[1], +m[2] - 1, +m[3], 12, 0, 0);
+  }
+  return null;
+}
+
+function calcularDiasMora(fechaVto, fechaHoy = null) {
+  const vto = parseCivilDate(fechaVto);
+  if (!vto) return 0;
+
+  const hoy = fechaHoy ? parseCivilDate(fechaHoy) : parseCivilDate(new Date());
+  if (!hoy) return 0;
+
+  const diff = hoy - vto;
+  const dias = Math.floor(diff / (1000 * 60 * 60 * 24));
+  return dias > 0 ? dias : 0;
 }
 ```
+
+- **Modo A (coeficiente)**: `Saldo × (IndiceFinal / CoeficienteCuota)` — no usa días de mora.
+- **Modo B (interés simple)**: `Saldo × (tasa / 365 / 100) × dias` — aplica solo si `dias > 0`.
+- La comparación de cutoff usa `<` estricto: `FechaVto < FechaDesdeInt` para Modo A.
 
 ### 4.4 Para Modificar la Tasa de Interés
 

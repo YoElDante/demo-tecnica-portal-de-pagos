@@ -1,27 +1,6 @@
-# Spec - Calculo de Intereses
+# Delta for Interest-Calculation
 
-## Objetivo
-
-Definir la regla de mora municipal para que sea consistente, verificable y configurable.
-
-## Requisitos
-
-### Requirement: CodMovim filter in debt query
-
-The system MUST filter debt records to include only those where `CodMovim = 'H'` (haber/deuda) when calculating outstanding balances. Records with `CodMovim = 'D'` (debe/cobro) MUST NOT be included in the debt base.
-
-#### Scenario: Query excludes cobro records
-
-- GIVEN a taxpayer has both `CodMovim = 'H'` and `CodMovim = 'D'` records
-- WHEN the system queries outstanding debts
-- THEN only records with `CodMovim = 'H'` are included in the calculation
-- AND records with `CodMovim = 'D'` are excluded
-
-#### Scenario: Empty result when only cobro records exist
-
-- GIVEN a taxpayer has only `CodMovim = 'D'` records
-- WHEN the system queries outstanding debts
-- THEN the result set is empty (no debts to calculate)
+## MODIFIED Requirements
 
 ### Requirement: Formula explicita
 
@@ -40,7 +19,7 @@ El calculo de `dias_mora` MUST usar fechas civiles (calendario local), construid
 
 El TOTAL de la deuda MUST calcularse como `Saldo + Interes`.
 
-(Previously: usaba `Importe` como base; calculaba TOTAL como `Importe + Interes`; usaba `new Date("YYYY-MM-DD")` + `setHours(0,0,0,0)` que desplaza fechas 1 dia atras en UTC-3; comparacion de cutoff usaba `<=` en lugar de `<`)
+(Previously: usaba `new Date("YYYY-MM-DD")` + `setHours(0,0,0,0)` que desplaza fechas 1 dia atras en UTC-3; comparacion de cutoff usaba `<=` en lugar de `<`)
 
 #### Scenario: Deuda vencida con modo B (interes diario)
 
@@ -85,8 +64,6 @@ La tasa anual para el Modo B MUST obtenerse de la tabla `DatosGenerales`. La tas
 
 Cada municipio SHOULD poder configurar su tasa independientemente.
 
-(Previously: tasa configurable solo mencionada genericamente, sin distincion de modos)
-
 #### Scenario: Municipio con tasa distinta (Modo B)
 
 - **GIVEN** un municipio con tasa configurada en `DatosGenerales`
@@ -98,6 +75,8 @@ Cada municipio SHOULD poder configurar su tasa independientemente.
 - **GIVEN** una deuda en Modo A con `CoeficienteCuota` definido
 - **WHEN** el sistema calcula el total
 - **THEN** usa el coeficiente y NO la tasa de `DatosGenerales`
+
+## ADDED Requirements
 
 ### Requirement: Civil-date construction for day calculation
 
@@ -199,7 +178,9 @@ Los DNIs canonicos son: 17720479 (PLAINO), 12212197 (OLMOS), 16856346 (MISERENDI
 - **WHEN** todas las deudas son calculadas
 - **THEN** cada fila de interes coincide con el software de escritorio dentro de +-0.01
 
-## Fuentes
+## REMOVED Requirements
 
-- `docs/bd/LOGICA_DEUDAS_PAGOS.md`
-- `docs/AI_CONTEXT.md`
+### Requirement: Inclusive cutoff comparison (<=)
+
+(Reason: El operador `<=` causaba que deudas con `FechaVto == FechaDesdeInt` aplicaran Modo A incorrectamente, divergiendo de la formula Python del contador que usa `<` estricto)
+(Migration: Actualizar tests que asuman `<=` para usar `<` estricto; actualizar scenario de `dias_mora` que menciona comparacion inclusive)

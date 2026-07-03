@@ -3,29 +3,20 @@
  * Contiene toda la lógica de negocio relacionada con deudas y pagos
  * 
  * @author Dante Marcos Delprato
- * @version 1.1
- * @date 2025-11-19
+ * @version 2.0
+ * @date 2026-07-02 — integración con intereses.service.js (fórmula del contador)
  */
 
 const { ClientesCtaCte, sequelize } = require('../models/model.index');
 const { Op } = require('sequelize');
+const { calcularMovimiento } = require('./intereses.service');
+const { obtenerConfigIntereses } = require('./datos-generales.service');
 
 // ============================================
-// CONFIGURACIÓN DE TASA DE INTERÉS
+// CONFIGURACIÓN DE TASA DE INTERÉS (fallback)
 // ============================================
-// La tasa se lee de variables de entorno y es obligatoria para evitar
-// decisiones de negocio hardcodeadas por omisión de configuración.
-const tasaInteresAnualRaw = process.env.TASA_INTERES_ANUAL;
-if (!tasaInteresAnualRaw) {
-  throw new Error('TASA_INTERES_ANUAL no configurada en el entorno');
-}
-
-const TASA_INTERES_ANUAL = Number.parseFloat(tasaInteresAnualRaw);
-if (Number.isNaN(TASA_INTERES_ANUAL) || TASA_INTERES_ANUAL < 0) {
-  throw new Error('TASA_INTERES_ANUAL inválida; debe ser un número mayor o igual a 0');
-}
-const DIAS_POR_ANIO = 365;
-const TASA_DIARIA = TASA_INTERES_ANUAL / 100 / DIAS_POR_ANIO;
+// Capa 3: process.env — último recurso si DatosGenerales y municipio config fallan
+const TASA_INTERES_ANUAL = Number(process.env.TASA_INTERES_ANUAL) || 0;
 
 
 // ============================================
@@ -68,6 +59,64 @@ const TIPO_ICONOS = {
   RRTR: '🔁',
   FAPP: '🧮'
 };
+
+// ============================================
+// ATRIBUTOS BASE PARA QUERIES
+// ============================================
+const QUERY_ATTRIBUTES = [
+  'IdTrans',
+  [sequelize.fn('CONVERT', sequelize.literal('VARCHAR(10)'), sequelize.col('Fecha'), 120), 'Fecha'],
+  [sequelize.fn('CONVERT', sequelize.literal('VARCHAR(10)'), sequelize.col('FechaVto'), 120), 'FechaVto'],
+  'Detalle',
+  'Dominio',
+  'NRO_CUOTA',
+  'ANO_CUOTA',
+  'TIPO_BIEN',
+  'ID_BIEN',
+  'Importe',
+  'Saldo',
+  // ── Columnas necesarias para el motor de fórmula ──
+  'CoeficienteCuota',
+  'TipoMovim',
+  'TIPO_PLAN',
+  'ACTUALIZACION_COBRADO',
+  'RecIntereses',
+];
+
+// Cache de configuración por request (se resuelve una vez por consulta)
+let _configCache = null;
+let _configCacheTime = 0;
+const CONFIG_CACHE_TTL = 60000; // 1 minuto
+
+async function obtenerConfig() {
+  const now = Date.now();
+  if (_configCache && (now - _configCacheTime) < CONFIG_CACHE_TTL) {
+    return _configCache;
+  }
+
+  // Capa 1: DatosGenerales (BD)
+  const dbConfig = await obtenerConfigIntereses();
+
+  // Capa 2: municipio config (tasaInteresAnual desde config municipal)
+  let municipioConfig = {};
+  try {
+    const munConfig = require('../config/municipalidad.config.elmanzano');
+    municipioConfig = { tasaInteres: munConfig.tasaInteresAnual || null };
+  } catch (_) { /* no disponible */ }
+
+  // Capa 3: process.env
+  const envTasa = TASA_INTERES_ANUAL || null;
+
+  // Resolución: primer valor no-null
+  _configCache = {
+    tasaInteres: dbConfig?.tasaInteres ?? municipioConfig.tasaInteres ?? envTasa ?? 40,
+    tasaDescuento: dbConfig?.tasaDescuento ?? 0,
+    indiceFinal: dbConfig?.indiceFinal ?? null,
+    fechaDesdeIntereses: dbConfig?.fechaDesdeIntereses ?? null,
+  };
+  _configCacheTime = now;
+  return _configCache;
+}
 
 /**
  * Calcula los días de mora entre dos fechas
@@ -156,26 +205,16 @@ exports.obtenerDeudasPorCodigo = async (codigo) => {
   const deudasRaw = await ClientesCtaCte.findAll({
     where: {
       Codigo: codigo.trim(),
+      CodMovim: 'H',
       Saldo: { [Op.ne]: 0 }
     },
-    attributes: [
-      'IdTrans',
-      [sequelize.fn('CONVERT', sequelize.literal('VARCHAR(10)'), sequelize.col('Fecha'), 120), 'Fecha'],
-      [sequelize.fn('CONVERT', sequelize.literal('VARCHAR(10)'), sequelize.col('FechaVto'), 120), 'FechaVto'],
-      'Detalle',
-      'Dominio',
-      'NRO_CUOTA',
-      'ANO_CUOTA',
-      'TIPO_BIEN',
-      'ID_BIEN',
-      'Importe',
-      'Saldo'
-    ],
+    attributes: QUERY_ATTRIBUTES,
     order: [['Fecha', 'DESC']],
     raw: true
   });
 
-  return deudasRaw.map(d => this.formatearDeuda(d));
+  const config = await obtenerConfig();
+  return deudasRaw.map(d => exports.formatearDeuda(d, config));
 };
 
 /**
@@ -228,49 +267,39 @@ exports.obtenerDeudasPorCodigoODni = async (codigo) => {
     throw new Error('Formato de código inválido');
   }
 
+  whereCondition.CodMovim = 'H';
   whereCondition.Saldo = { [Op.ne]: 0 };
 
   const deudas = await ClientesCtaCte.findAll({
     where: whereCondition,
-    attributes: [
-      'IdTrans',
-      [sequelize.fn('CONVERT', sequelize.literal('VARCHAR(10)'), sequelize.col('Fecha'), 120), 'Fecha'],
-      [sequelize.fn('CONVERT', sequelize.literal('VARCHAR(10)'), sequelize.col('FechaVto'), 120), 'FechaVto'],
-      'Detalle',
-      'Dominio',
-      'NRO_CUOTA',
-      'ANO_CUOTA',
-      'TIPO_BIEN',
-      'ID_BIEN',
-      'Importe',
-      'Saldo'
-    ],
+    attributes: QUERY_ATTRIBUTES,
     order: [['Fecha', 'DESC']],
     raw: true
   });
 
+  const config = await obtenerConfig();
+
   return {
     cliente: clienteInfo,
-    deudas: deudas.map(d => this.formatearDeuda(d))
+    deudas: deudas.map(d => exports.formatearDeuda(d, config))
   };
 };
 
 /**
- * Formatea una deuda individual
+ * Formatea una deuda individual usando el motor de fórmula del contador
  * @param {Object} deuda - Deuda sin formatear
+ * @param {Object} config - Configuración de tasas (opcional, usa defaults si no se provee)
  * @returns {Object} Deuda formateada
  */
-exports.formatearDeuda = (deuda) => {
+exports.formatearDeuda = (deuda, config = {}) => {
   const importe = Number(deuda.Importe) || 0;
+  const saldo = Number(deuda.Saldo) || 0;
 
-  // Calcular días de mora
-  const diasMora = calcularDiasMora(deuda.FechaVto);
+  // Usar el motor de fórmula del contador
+  const resultado = calcularMovimiento(deuda, config);
 
-  // Calcular interés
-  const interes = calcularInteres(importe, diasMora);
-
-  // Total = Importe + Interés
-  const total = Number((importe + interes).toFixed(2));
+  // Total = Saldo + Interés (o descuento)
+  const total = Number((saldo + resultado.interes).toFixed(2));
 
   return {
     IdTrans: deuda.IdTrans,
@@ -285,9 +314,12 @@ exports.formatearDeuda = (deuda) => {
     TipoDescripcion: TIPO_DESCRIPCIONES[deuda.TIPO_BIEN] || deuda.TIPO_BIEN || '',
     TipoIcono: TIPO_ICONOS[deuda.TIPO_BIEN] || '❓',
     Importe: importe,
-    DiasMora: diasMora,
-    Interes: interes,
-    Total: total
+    Saldo: saldo,
+    DiasMora: resultado.dias,
+    Interes: resultado.interes,
+    TipoCalculo: resultado.tipo,    // C=coeficiente, T=tasa, D=descuento, A=actualizacion
+    DisplayFormula: resultado.display,
+    Total: total,
   };
 };
 
@@ -314,29 +346,23 @@ exports.obtenerDeudasPorIds = async (ids) => {
     where: {
       IdTrans: { [Op.in]: ids }
     },
-    attributes: [
-      'IdTrans',
-      [sequelize.fn('CONVERT', sequelize.literal('VARCHAR(10)'), sequelize.col('Fecha'), 120), 'Fecha'],
-      [sequelize.fn('CONVERT', sequelize.literal('VARCHAR(10)'), sequelize.col('FechaVto'), 120), 'FechaVto'],
-      'Detalle',
-      'Dominio',
-      'NRO_CUOTA',
-      'ANO_CUOTA',
-      'TIPO_BIEN',
-      'ID_BIEN',
-      'Importe',
-      'Saldo'
-    ],
+    attributes: QUERY_ATTRIBUTES,
     raw: true
   });
 
-  return deudas.map(d => this.formatearDeuda(d));
+  const config = await obtenerConfig();
+  return deudas.map(d => exports.formatearDeuda(d, config));
 };
 
-// Exportar funciones auxiliares para testing
+// Exportar funciones auxiliares para testing (compatibilidad hacia atrás)
 exports.calcularDiasMora = calcularDiasMora;
-exports.calcularInteres = calcularInteres;
-exports.TASA_DIARIA = TASA_DIARIA;
+exports.calcularInteres = (importe, diasMora) => {
+  // wrapper legacy — usa la tasa de entorno como fallback
+  if (diasMora <= 0 || importe <= 0) return 0;
+  const tasa = Number(process.env.TASA_INTERES_ANUAL) || 40;
+  return Number((importe * (tasa / 36500) * diasMora).toFixed(2));
+};
+exports.TASA_DIARIA = TASA_INTERES_ANUAL / 100 / 365;
 
 // Exportar diccionarios
 exports.TIPO_DESCRIPCIONES = TIPO_DESCRIPCIONES;
