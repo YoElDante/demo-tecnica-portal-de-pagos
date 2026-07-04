@@ -62,8 +62,21 @@ phases:
     required: true
     command: "npm run testDB"
     notes: "Validar conectividad y revisar manualmente los criterios del proposal/spec."
+  document-code:
+    required: true
+    depends_on: [verify]
+    output: "openspec/changes/<nombre>/code-audit.md"
+    notes: "Audita headers y section markers en archivos del tracking register. Aplica file-header-manifest y section-marker-manifest."
+    language: "es"
+  document-docs:
+    required: true
+    depends_on: [document-code]
+    output: "openspec/changes/<nombre>/document-report.md"
+    notes: "5 checks obligatorios sobre /docs/. Actualiza README.md, ai-context.md, adr.md. Crea/actualiza docs segun doc-conventions skill."
+    language: "es"
   archive:
     required: true
+    depends_on: [document-docs]
     destination: "openspec/changes/archive/<YYYY-MM-DD>-<nombre>/"
     syncs: "delta specs a openspec/specs/"
 
