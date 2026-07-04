@@ -40,8 +40,8 @@ Si este repositorio se analiza desde un agente de nivel superior que coordina Po
 
 ### Ruta Minima de Lectura (orden obligatorio)
 
-1. `docs/integracion/CHECKLIST_APPSETTINGS_Y_ORQUESTADOR_TICKETS.md`
-2. `docs/CONTRACT-PORTAL-GATEWAY.md`
+1. `docs/integration/checklist-appsettings.md`
+2. `docs/integration/contract-portal-gateway.md`
 3. `openspec/changes/ticket-payment-tracking/proposal.md`
 4. `openspec/changes/ticket-payment-tracking/design.md`
 5. `openspec/changes/ticket-payment-tracking/tasks.md`
@@ -140,35 +140,40 @@ npm run testDB
 
 Antes de tocar codigo, leer en este orden:
 
-1. **`docs/AI_CONTEXT.md`** — contexto compacto (stack, arquitectura, riesgos, quick-start)
+1. **`docs/ai-context.md`** — contexto compacto (stack, arquitectura, riesgos, quick-start)
 2. **`docs/GLOSSARY.md`** — terminos de dominio (CodMovim, TIPO_BIEN, estados, seguridad)
 3. **Skill relevante** segun la tarea (ver [Skills Disponibles](#skills-disponibles))
 4. **OpenSpec spec** del area afectada (`openspec/specs/{area}/spec.md`)
 
 ### Documentos clave por area
 
+> Antes de crear o modificar documentacion, consultar `docs/AGENTS.md` para convenciones de nombres, carpetas y proceso.
+
 | Area | Documento principal |
 |------|---------------------|
-| Onboarding general | `docs/AI_CONTEXT.md` |
+| Onboarding general | `docs/ai-context.md` |
 | Glosario de dominio | `docs/GLOSSARY.md` |
-| Contrato portal↔gateway | `docs/CONTRACT-PORTAL-GATEWAY.md` |
-| Logica de deuda y pagos | `docs/bd/LOGICA_DEUDAS_PAGOS.md` |
-| Alta de municipio | `docs/GUIA_NUEVO_MUNICIPIO.md` |
-| Despliegue Azure | `docs/DEPLOY_AZURE.md` |
-| Runbook / troubleshooting | `docs/GUIDES/RUNBOOK.md` |
-| Decisiones de arquitectura | `docs/ADR.md` |
-| Ramas y flujo git | `docs/GUIA_RAMAS.md` |
-| Seguridad / hardening | `docs/PENDIENTE_SEGURIDAD.md` |
+| Contrato portal↔gateway | `docs/integration/contract-portal-gateway.md` |
+| Logica de deuda y pagos | `docs/domain/logica-deudas-pagos.md` |
+| Alta de municipio | `docs/guides/nuevo-municipio.md` |
+| Despliegue Azure | `docs/guides/deploy-azure.md` |
+| Runbook / troubleshooting | `docs/guides/runbook.md` |
+| Decisiones de arquitectura | `docs/architecture/adr.md` |
+| Ramas y flujo git | `docs/guides/guia-ramas.md` |
+| Seguridad / hardening | `docs/architecture/security-pending.md` |
 | Indice maestro completo | `docs/README.md` |
+| Convenciones de documentacion | `docs/AGENTS.md` |
 
 ### Archivo historico
 
-Documentacion obsoleta en `docs/_archive/`. No usar como referencia operativa. Ver `docs/_archive/README.md`.
+Documentacion obsoleta en `docs/_archive/`. No usar como referencia operativa.
+Estructura espeja la de `docs/`: `_archive/architecture/`, `_archive/domain/`, `_archive/guides/`, `_archive/integration/`.
 
 ## Skills Disponibles
 
 | Skill | Uso | Ruta |
 | --- | --- | --- |
+| `doc-conventions` | Crear, mover o archivar documentacion en `/docs` | `skills/doc-conventions/SKILL.md` |
 | `municipio-onboarding` | Alta de un nuevo municipio | `skills/municipio-onboarding/SKILL.md` |
 | `azure-multiappservice-payment` | Despliegue por municipio en Azure | `skills/azure-multiappservice-payment/SKILL.md` |
 | `payment-gateway-webhook` | Redirect seguro, webhook e idempotencia | `skills/payment-gateway-webhook/SKILL.md` |
@@ -178,12 +183,6 @@ Documentacion obsoleta en `docs/_archive/`. No usar como referencia operativa. V
 
 ## Flujo SDD Recomendado
 
-1. Revisar el PRD y la spec relevante en `openspec/specs`.
-2. Si el cambio no existe, crear un nuevo directorio en `openspec/changes/<nombre-del-cambio>/`.
-3. Definir `proposal.md`, `design.md` y `tasks.md` antes de implementar.
-4. Implementar en `develop` respetando las reglas globales y las skills aplicables.
-5. Validar en demo antes de asumir que produccion esta correcta.
-6. Mergear a `main` para deploy a producción.
-7. Actualizar la documentacion de producto si cambia comportamiento funcional.
+El proyecto usa SDD (Spec-Driven Development) con 9 fases automatizadas. Para cambios nuevos usar `/sdd-new <nombre>`.
 
-Ver flujo completo en `docs/GUIA_RAMAS.md`.
+Ver guía completa en [`docs/guides/guia-sdd.md`](docs/guides/guia-sdd.md) y política de documentación en [`docs/architecture/politica-documentacion.md`](docs/architecture/politica-documentacion.md).
