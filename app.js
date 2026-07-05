@@ -16,7 +16,6 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
-const { body, validationResult } = require('express-validator');
 const { helmetConfig } = require('./middlewares/helmet.config');
 const { csrfProtection } = require('./middlewares/csrf');
 const { apiLimiter } = require('./middlewares/rateLimiter');
@@ -68,23 +67,32 @@ if (SECURITY_HELMET_ENABLED) {
 app.use(express.json({ limit: '100kb' }));
 app.use(express.urlencoded({ limit: '100kb', extended: false }));
 
-// Sanitización global de entrada: trim + escape en body y query
-const handleSanitizeErrors = (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({
-      success: false,
-      message: 'Solicitud con parámetros no válidos',
-      errors: errors.array()
-    });
+// Sanitización global de entrada: trim + escape en valores string (respeta objetos anidados)
+app.use((req, res, next) => {
+  function sanitizeValue(value) {
+    if (typeof value === 'string') {
+      return value.trim().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
+    }
+    if (Array.isArray(value)) {
+      return value.map(sanitizeValue);
+    }
+    if (value !== null && typeof value === 'object') {
+      const result = {};
+      for (const [key, val] of Object.entries(value)) {
+        result[key] = sanitizeValue(val);
+      }
+      return result;
+    }
+    return value;
+  }
+  if (req.body && typeof req.body === 'object') {
+    req.body = sanitizeValue(req.body);
+  }
+  if (req.query && typeof req.query === 'object') {
+    req.query = sanitizeValue(req.query);
   }
   next();
-};
-
-app.use([
-  body('*').trim().escape(),
-  handleSanitizeErrors
-]);
+});
 
 app.use(cookieParser(COOKIE_SECRET));
 
