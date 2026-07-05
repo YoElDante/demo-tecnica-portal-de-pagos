@@ -1,3 +1,15 @@
+<%#
+  Portal de Pagos Municipal — Vista Principal (Búsqueda de Deudas)
+  @description Renderiza el portal de búsqueda de DNI, resultados de deuda, ticket de pago y comprobante PDF.
+
+  Expected Locals:
+    title (string) — Título de la página.
+    municipalidad (object) — Configuración del municipio activo (nombre, logos, URLs).
+    codigo (string) — Código interno del contribuyente, expuesto como data-codigo en el body para fetch PII.
+
+  Renders:
+    Página SPA con búsqueda de DNI, lista de deudas, generación de ticket y descarga de comprobante.
+%>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -302,6 +314,13 @@
     <p class="footer__text">&copy; Power by Alcald+IA. Todos los derechos reservados.</p>
     <p>🌐 <a href="https://www.alcaldia.com.ar" target="_blank">www.alcaldia.com.ar</a></p>
   </footer>
+
+  <%# PII inline — fallback cuando COOKIE_SECRET no está configurado (no se puede usar la API segura) %>
+  <% if (locals.contribuyenteDataInline) { %>
+  <script>
+    var contribuyenteData = <%- JSON.stringify(contribuyenteDataInline) %>;
+  </script>
+  <% } %>
 
 </body>
 

@@ -112,6 +112,13 @@ exports.buscarPorDni = async (req, res) => {
     // Cookie firmada para proteger el endpoint de datos personales (PII)
     // Solo se activa si COOKIE_SECRET está configurado (requerido por cookie-parser para signed cookies)
     const hasCookieSecret = Boolean(process.env.COOKIE_SECRET);
+    const contribuyenteDataInline = hasCookieSecret ? null : {
+      codigo: cliente.Codigo?.trim() || '',
+      dni: cliente.DOCUMENTO?.trim() || '',
+      nombre: cliente.Nombre?.trim() || '',
+      apellido: cliente.Apellido?.trim() || '',
+      email: cliente.Email?.trim() || ''
+    };
     if (hasCookieSecret) {
       res.cookie('ccodigo', cliente.Codigo, {
         signed: true,
@@ -134,7 +141,8 @@ exports.buscarPorDni = async (req, res) => {
       totalGeneral,
       clienteNoEncontrado: false,
       mensaje: null,
-      sugerenciasDemo
+      sugerenciasDemo,
+      contribuyenteDataInline
     });
 
   } catch (error) {

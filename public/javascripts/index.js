@@ -1,9 +1,23 @@
+/**
+ * Portal de Pagos Municipal — JavaScript Cliente (Portal Principal)
+ * @description Controla el flujo de pago en el frontend: carga PII vía API, inicia pagos, maneja UI del ticket.
+ *
+ * Key Variables:
+ *   contribuyenteData — Datos del contribuyente cargados asíncronamente desde /api/contribuyente/:codigo.
+ *
+ * Exports: None — todos los bindings son globales para uso desde EJS.
+ */
+
 'use strict';
 
 /* ============================================
-   PII — Carga asíncrona de datos del contribuyente
+   PII — Carga asíncrona de datos del contribuyente (SDD: resolver-auditoria-03072026)
+   Si COOKIE_SECRET no está configurado, los datos ya vienen inline vía EJS.
    ============================================ */
 document.addEventListener('DOMContentLoaded', async () => {
+  // Si los datos ya fueron cargados inline (fallback sin COOKIE_SECRET), no hacer fetch
+  if (contribuyenteData) return;
+
   const body = document.body;
   const codigo = body?.dataset?.codigo;
 
