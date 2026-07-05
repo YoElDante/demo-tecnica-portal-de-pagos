@@ -1,7 +1,7 @@
 # Documentación del Portal de Pagos Municipal
 
 > **Índice maestro** — todos los documentos del proyecto, clasificados por categoría.
-> **Última actualización**: 2026-07-04
+> **Última actualización**: 2026-07-04 (cambio `resolver-auditoria-03072026` archivado)
 >
 > Antes de crear o modificar documentación, leer [`AGENTS.md`](AGENTS.md).
 
@@ -22,8 +22,8 @@ Si es tu primera vez en el proyecto:
 | Documento | Estado | Descripción |
 |-----------|--------|-------------|
 | [architecture/adr.md](architecture/adr.md) | ✅ Fresco | Registro de decisiones de arquitectura (7 ADRs) |
-| [architecture/security-pending.md](architecture/security-pending.md) | ✅ Fresco | Checklist de hardening HTTP (helmet, CSP, HTTPS) |
-| [architecture/politica-documentacion.md](architecture/politica-documentacion.md) | ✅ Nuevo | Política oficial de documentación automatizada |
+| [architecture/security-pending.md](architecture/security-pending.md) | ✅ Completado | Checklist de hardening HTTP, CSRF y PII — implementado |
+| [architecture/seguridad.md](architecture/seguridad.md) | ✅ Nuevo | Documento completo de seguridad: capas, CSRF, PII, safeLog, CSP, configuración |
 
 ## domain/ — Conocimiento del negocio
 
@@ -93,9 +93,9 @@ Si es tu primera vez en el proyecto:
 | Cambio | Documento |
 |--------|-----------|
 | `ticket-payment-tracking` | [`../openspec/changes/ticket-payment-tracking/`](../openspec/changes/ticket-payment-tracking/) |
-| `security-hardening` | [`../openspec/changes/security-hardening/`](../openspec/changes/security-hardening/) |
+| `security-hardening` | [`../openspec/changes/security-hardening/`](../openspec/changes/security-hardening/) (⚠️ superseded por `resolver-auditoria-03072026` — pendiente de archivo) |
 | `email-payment-receipts` | [`../openspec/changes/email-payment-receipts/`](../openspec/changes/email-payment-receipts/) |
-| `configurable-interest-rate` | [`../openspec/changes/configurable-interest-rate/`](../openspec/changes/configurable-interest-rate/) |
+| `configurable-interest-rate` | [`../openspec/changes/_absorbed/configurable-interest-rate/`](../openspec/changes/_absorbed/configurable-interest-rate/) |
 
 ---
 

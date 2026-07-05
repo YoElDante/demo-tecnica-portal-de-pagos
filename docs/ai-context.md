@@ -39,7 +39,7 @@ El redirect del usuario no confirma pagos. La fuente de verdad es el webhook ser
 | Configuración multi-municipio | ✅ |
 | Tracking formal de tickets | 🔲 |
 | Tasa configurable end-to-end | 🔲 Parcial |
-| Hardening HTTP | 🔲 |
+| Hardening HTTP | ✅ |
 | Comprobantes por email | 🔲 |
 
 ## Reglas de dominio
@@ -69,7 +69,7 @@ WEBHOOK_SECRET=...
 
 - Falta una tabla o entidad formal para tickets pagados.
 - La tasa de interés todavía no está cerrada de punta a punta como configuración única.
-- El hardening HTTP sigue pendiente.
+- El hardening HTTP (helmet, CSP, CSRF, PII) fue resuelto en SDD `resolver-auditoria-03072026`.
 - Hay webhooks que pueden llegar después de la expiración operativa del ticket.
 
 ## Arranque rápido
@@ -94,7 +94,7 @@ npm run dev:sanjose
 - Deuda e intereses: `docs/bd/LOGICA_DEUDAS_PAGOS.md`
 - Multi-municipio: `docs/PLAN_CONFIGURACION_MULTIAMBIENTE.md` y `docs/GUIA_NUEVO_MUNICIPIO.md`
 - Azure: `docs/DEPLOY_AZURE.md`
-- Integración entre repos: `docs/integracion/GUIA_INTEGRACION_MULTIPROYECTO.md`
+- Seguridad: `docs/architecture/seguridad.md` (capas, CSRF, CSP, PII, safeLog, feature flags)
 
 ## Próximos cambios naturales
 
