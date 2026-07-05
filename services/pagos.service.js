@@ -9,6 +9,7 @@
 
 const { ClientesCtaCte, sequelize } = require('../models/model.index');
 const { Op } = require('sequelize');
+const { safeLog } = require('../utils/safeLog');
 
 /**
  * Verifica si una operación ya fue procesada contablemente (idempotencia)
@@ -266,7 +267,10 @@ const confirmarPago = async (datosPago) => {
         detalle: generarDetallePago(deuda)
       });
 
-      console.log(`[Pagos] Deuda ${idTrans} marcada como pagada - ${generarDetallePago(deuda)}`);
+      console.log(`[Pagos] Deuda ${idTrans} marcada como pagada - ${generarDetallePago(deuda)}`, safeLog({
+        IdTrans: idTrans,
+        payment_id: contextoPago.payment_id
+      }));
     }
 
     await transaction.commit();

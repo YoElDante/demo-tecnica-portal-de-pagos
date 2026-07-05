@@ -14,6 +14,7 @@ const clientesService = require('../services/clientes.service');
 const gatewayTokenService = require('../services/gatewayToken.service');
 const ticketService = require('../services/ticket.service');
 const deudasService = require('../services/deudas.service');
+const { safeLog } = require('../utils/safeLog');
 // Configuración centralizada - cambiar municipio en .env (MUNICIPIO=xxx)
 const { municipalidad } = require('../config');
 
@@ -111,7 +112,7 @@ async function validarRedirectSeguro(req) {
       throw error;
     }
 
-    console.log('🔐 [redirect-exchange] Resultado validacion code', {
+    console.log('🔐 [redirect-exchange] Resultado validacion code', safeLog({
       ref_query: refRecibida,
       ref_exchange: normalizarCadena(exchanged.external_reference),
       estado: normalizarEstado(exchanged.estado),
@@ -119,7 +120,7 @@ async function validarRedirectSeguro(req) {
       issued_at: exchanged.issued_at || null,
       id_operacion: exchanged.id_operacion || null,
       importe: exchanged.importe ?? null
-    });
+    }));
 
     if (exchanged?.municipio_id && MUNICIPIO_ID && exchanged.municipio_id.toUpperCase() !== MUNICIPIO_ID.toUpperCase()) {
       throw new Error('El redirect code pertenece a otro municipio');
@@ -329,7 +330,7 @@ async function iniciarPago(req, res) {
       }
     });
 
-    console.log('🎫 Ticket creado en BD:', { ticketNumber, ticketId: ticket.ticketId });
+    console.log('🎫 Ticket creado en BD:', safeLog({ ticketNumber, ticketId: ticket.ticketId }));
 
     if (isDemoSimulado) {
       const externalRef = `DEMO-SIM-${ticketNumber}`;

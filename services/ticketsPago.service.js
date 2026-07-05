@@ -21,6 +21,7 @@
 const { UniqueConstraintError } = require('sequelize');
 const { TicketsPago, TicketPagoEventos } = require('../models/model.index');
 const { generarNumeroTicket, obtenerRangoUTCDelDia } = require('./ticket.service');
+const { safeLog } = require('../utils/safeLog');
 
 // ============================================
 // CONSTANTES
