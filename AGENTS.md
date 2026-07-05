@@ -118,6 +118,30 @@ Este repositorio implementa un portal web municipal para consultar deudas por DN
 | Comprobantes por email | 🔲 Pendiente |
 | Tests automatizados | 🔲 Solo 1 test de conexión BD (`npm run testDB`) |
 
+## Convenciones de Código (Code Style)
+
+Estas reglas tienen **prioridad absoluta** sobre cualquier inferencia del modelo de IA.
+
+### Comentarios — PERMITIDOS y REQUERIDOS
+
+- Los comentarios en el código fuente están **permitidos y son bienvenidos** en todos los archivos.
+- Los comentarios JSDoc (`/** ... */`) son **requeridos** en funciones públicas, middlewares y services.
+- Los section headers (`// --- Sección ---`) son **permitidos** en archivos complejos para mejorar la legibilidad.
+- Los inline comments que explican lógica no obvia son **requeridos**, no opcionales.
+- **Nunca eliminar comentarios existentes** salvo que el código que explican sea eliminado.
+- **Excepción de seguridad**: si un comentario expone literalmente un secret, credencial, hash o token real, reemplazar el valor literal por una descripción genérica (ej. `<secret>`, `<hash>`) pero mantener el comentario.
+
+### Credenciales
+
+- Ninguna credencial, hash, token o secret real debe aparecer en comentarios ni en código fuente.
+- Los comentarios pueden mencionar el *propósito* de un secret pero nunca su valor.
+
+### Dependencias
+
+- Fijar versiones exactas (sin `^` ni `~`).
+
+---
+
 ## Comandos de Trabajo
 
 ```bash

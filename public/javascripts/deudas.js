@@ -247,7 +247,8 @@ async function generarTicket() {
     const response = await fetch('/generar-ticket', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'CSRF-Token': getCsrfToken()
       },
       body: JSON.stringify({
         conceptos,

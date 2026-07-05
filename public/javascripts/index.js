@@ -77,14 +77,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 let contribuyenteData = null;
 
 /* ============================================
-   CSRF Token helper
-   ============================================ */
-function getCsrfToken() {
-  const input = document.querySelector('input[name="_csrf"]');
-  return input ? input.value : '';
-}
-
-/* ============================================
    CONTRIBUYENTE — Selección rápida (demo)
    ============================================ */
 function seleccionarContribuyente(dni) {

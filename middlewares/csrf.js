@@ -20,18 +20,25 @@ const { doubleCsrf } = require('csrf-csrf');
 // Configuration
 // ---------------------------------------------------------------------------
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
-const CSRF_SECRET = process.env.CSRF_SECRET || process.env.COOKIE_SECRET || process.env.GATEWAY_WEBHOOK_SECRET || process.env.WEBHOOK_SECRET || '';
+// Secreto dedicado exclusivamente a CSRF; no reutilizar con cookie ni webhook secrets.
+const CSRF_SECRET = process.env.CSRF_SECRET || '';
 
+if (IS_PRODUCTION && !CSRF_SECRET) {
+  throw new Error('CSRF_SECRET env var is required in production');
+}
+
+// Si la var no está definida, se activa automáticamente en producción; en dev queda desactivado por defecto.
 const SECURITY_CSRF_ENABLED = process.env.SECURITY_CSRF_ENABLED === 'true'
   || (process.env.SECURITY_CSRF_ENABLED === undefined && IS_PRODUCTION);
 
+// En entornos no-productivos se exime por defecto salvo que se fuerce explícitamente con 'false'.
 const SECURITY_CSRF_DEMO_EXEMPT = process.env.SECURITY_CSRF_DEMO_EXEMPT === 'true'
   || (!IS_PRODUCTION && process.env.SECURITY_CSRF_DEMO_EXEMPT !== 'false');
 
 const EXEMPT_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 const EXEMPT_PATHS = ['/api/tickets/estado'];
 
-const DEMO_PATHS_PREFIXES = ['/demo/', '/pagos/demo'];
+const DEMO_PATHS_PREFIXES = (process.env.CSRF_DEMO_EXEMPT_PATHS || '/demo/').split(',').map((p) => p.trim()).filter(Boolean);
 
 // ---------------------------------------------------------------------------
 // CSRF Setup
@@ -54,8 +61,8 @@ const {
   ignoredMethods: ['GET', 'HEAD', 'OPTIONS'],
   getTokenFromRequest: (req) => {
     // Prioriza header usado por fetch() y luego body/form para EJS.
-    if (req.headers['x-csrf-token']) {
-      return req.headers['x-csrf-token'];
+    if (req.headers['csrf-token']) {
+      return req.headers['csrf-token'];
     }
 
     if (req.body && typeof req.body === 'object') {
@@ -87,8 +94,18 @@ function isExemptPath(path) {
 // ---------------------------------------------------------------------------
 // Middleware
 // ---------------------------------------------------------------------------
+/**
+ * Middleware de protección CSRF para Express.
+ * Inyecta el token en res.locals.csrfToken para vistas EJS y fetch().
+ * Valida el token en métodos mutantes (POST, PUT, DELETE, PATCH) salvo rutas exentas.
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 function csrfProtection(req, res, next) {
-  // Inyectar siempre el token generado para las vistas y fetch
+  // El token se inyecta siempre para que las vistas puedan usarlo incluso en GETs.
+  // Si generateToken falla (ej. cookie corrupta), se pone '' y se continúa; la
+  // validación posterior rechazará el request mutante si el token es inválido.
   try {
     res.locals.csrfToken = generateToken(req, res);
   } catch {

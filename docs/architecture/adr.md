@@ -2,7 +2,7 @@
 
 > **Propósito**: Registro cronológico de decisiones de arquitectura significativas.
 > **Formato**: [ADR simplificado](https://adr.github.io/) — contexto, decisión, consecuencias.
-> **Última actualización**: 2026-07-02
+> **Última actualización**: 2026-07-04
 
 ---
 
@@ -195,6 +195,94 @@ La clave efectiva de firma/cifrado es `WEBHOOK_SECRET` + `YYYY-MM-DD`. Esto prod
 ### Archivos relacionados
 
 - `docs/CONTRACT-PORTAL-GATEWAY.md` (sección "Secretos compartidos")
+
+---
+
+## ADR-008: csrf-csrf como biblioteca CSRF (double-submit cookie)
+
+**Fecha**: 2026-07-04
+**Estado**: ✅ Aceptado  
+**SDD Change**: `resolver-auditoria-03072026`
+
+### Contexto
+
+El portal no tenía protección CSRF en formularios POST. La biblioteca tradicional `csurf` está deprecada y requiere `express-session` para almacenar el secreto CSRF, lo que introduce una dependencia stateful en una arquitectura actualmente stateless.
+
+### Decisión
+
+Usar `csrf-csrf` con patrón **double-submit cookie**. El token CSRF se envía como cookie `httpOnly` + `sameSite: strict` y el cliente lo devuelve en header `CSRF-Token` (fetch) o campo `_csrf` (form EJS). El servidor compara ambos — no necesita session store.
+
+### Consecuencias
+
+- ✅ Sin dependencia de session-store (compatible con stateless actual)
+- ✅ Funciona tanto con `<form>` POST como con `fetch()`
+- ✅ Feature flag `SECURITY_CSRF_ENABLED` para hot-disable
+- ❌ Requiere que el cliente envíe el token explícitamente
+- ❌ La cookie no usa prefijo `__Host-` (rompería desarrollo local sin HTTPS)
+
+### Archivos relacionados
+
+- `middlewares/csrf.js`
+- `openspec/changes/resolver-auditoria-03072026/design.md`
+
+---
+
+## ADR-009: Signed cookies para sesión de PII
+
+**Fecha**: 2026-07-04  
+**Estado**: ✅ Aceptado  
+**SDD Change**: `resolver-auditoria-03072026`
+
+### Contexto
+
+La auditoría detectó PII del contribuyente (`codigo`, `DNI`, `nombre`, `email`) embebida en un `<script>` inline en `views/index.ejs`. Para eliminarla, se necesita un mecanismo que permita al frontend obtener esos datos vía API pero solo para el contribuyente autenticado.
+
+### Decisión
+
+Usar **signed cookies** (`cookie-parser` con `COOKIE_SECRET`) en lugar de `express-session`. El controller `buscarPorDni` setea `res.cookie('ccodigo', codigo, { signed: true, httpOnly: true, sameSite: 'strict' })`. El endpoint `GET /api/contribuyente/:codigo` valida que `req.signedCookies.ccodigo === :codigo` antes de retornar datos.
+
+### Consecuencias
+
+- ✅ Sin session-store — el único dato de sesión es `codigo`
+- ✅ La cookie es `httpOnly` (no legible desde JS) y `signed` (no falsificable)
+- ✅ El frontend lee el código desde `<body data-codigo="...">` (atributo DOM, no cookie)
+- ❌ Si el secreto se compromete, las cookies firmadas son falsificables
+
+### Archivos relacionados
+
+- `controllers/web.controller.js`
+- `controllers/api/contribuyente.controller.js`
+- `openspec/changes/resolver-auditoria-03072026/design.md`
+
+---
+
+## ADR-010: jsPDF como bundle local
+
+**Fecha**: 2026-07-04  
+**Estado**: ✅ Aceptado  
+**SDD Change**: `resolver-auditoria-03072026`
+
+### Contexto
+
+`views/index.ejs` cargaba jsPDF desde CDN sin atributo `integrity` (SRI). Agregar SRI a un CDN externo es frágil: al actualizar la versión de la librería, el hash cambia y rompe la carga hasta que se actualice manualmente.
+
+### Decisión
+
+Descargar jsPDF 2.5.1 UMD y servirlo como **bundle local** en `public/javascripts/vendor/jspdf.umd.min.js`. Esto elimina la dependencia del CDN, simplifica la política CSP (todo es `'self'`), y hace el SRI innecesario (el archivo es local).
+
+### Consecuencias**
+
+- ✅ Sin dependencia externa de CDN para funcionalidad core (generación de PDF)
+- ✅ CSP más simple: `script-src 'self'` alcanza
+- ✅ El hash del archivo no cambia con actualizaciones externas
+- ❌ ~400 KB adicionales en el repo (vendor)
+- ❌ Actualizar jsPDF requiere commit manual del nuevo bundle
+
+### Archivos relacionados
+
+- `public/javascripts/vendor/jspdf.umd.min.js`
+- `views/index.ejs`
+- `openspec/changes/resolver-auditoria-03072026/design.md`
 
 ---
 
