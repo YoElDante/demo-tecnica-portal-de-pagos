@@ -20,7 +20,7 @@ const { doubleCsrf } = require('csrf-csrf');
 // Configuration
 // ---------------------------------------------------------------------------
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
-const CSRF_SECRET = process.env.CSRF_SECRET || process.env.COOKIE_SECRET || process.env.GATEWAY_WEBHOOK_SECRET || '';
+const CSRF_SECRET = process.env.CSRF_SECRET || process.env.COOKIE_SECRET || process.env.GATEWAY_WEBHOOK_SECRET || process.env.WEBHOOK_SECRET || '';
 
 const SECURITY_CSRF_ENABLED = process.env.SECURITY_CSRF_ENABLED === 'true'
   || (process.env.SECURITY_CSRF_ENABLED === undefined && IS_PRODUCTION);

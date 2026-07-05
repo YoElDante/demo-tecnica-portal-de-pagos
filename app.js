@@ -8,6 +8,9 @@
  *
  */
 
+// ---------------------------------------------------------------------------
+// Dependencies
+// ---------------------------------------------------------------------------
 const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
@@ -28,7 +31,7 @@ const apiRouter = require('./routes/api/index'); // API
 const paymentRouter = require('./routes/payment.routes'); // Pagos y redirects del gateway
 const app = express();
 
-const COOKIE_SECRET = process.env.COOKIE_SECRET || process.env.GATEWAY_WEBHOOK_SECRET || '';
+const COOKIE_SECRET = process.env.COOKIE_SECRET || process.env.GATEWAY_WEBHOOK_SECRET || process.env.WEBHOOK_SECRET || '';
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const SECURITY_HELMET_ENABLED = process.env.SECURITY_HELMET_ENABLED === 'true' || IS_PRODUCTION;
 
@@ -51,6 +54,10 @@ console.info('🧭 Logger inicializado', {
   env: process.env.NODE_ENV || 'development',
   logLevel: LOG_LEVEL
 });
+
+// ---------------------------------------------------------------------------
+// Security Hardening (SDD: resolver-auditoria-03072026)
+// ---------------------------------------------------------------------------
 
 // Helmet: headers de seguridad HTTP (feature flag)
 if (SECURITY_HELMET_ENABLED) {
