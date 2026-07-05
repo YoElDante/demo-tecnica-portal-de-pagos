@@ -110,13 +110,17 @@ exports.buscarPorDni = async (req, res) => {
     const totalGeneral = DeudasService.calcularTotal(deudas);
 
     // Cookie firmada para proteger el endpoint de datos personales (PII)
-    res.cookie('ccodigo', cliente.Codigo, {
-      signed: true,
-      httpOnly: true,
-      sameSite: 'strict',
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 1000 // 1 hora
-    });
+    // Solo se activa si COOKIE_SECRET está configurado (requerido por cookie-parser para signed cookies)
+    const hasCookieSecret = Boolean(process.env.COOKIE_SECRET);
+    if (hasCookieSecret) {
+      res.cookie('ccodigo', cliente.Codigo, {
+        signed: true,
+        httpOnly: true,
+        sameSite: 'strict',
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 60 * 1000 // 1 hora
+      });
+    }
 
     return res.render('index', {
       ...BASE_RENDER,
