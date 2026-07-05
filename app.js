@@ -15,6 +15,7 @@ const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
 const { body, validationResult } = require('express-validator');
 const { helmetConfig } = require('./middlewares/helmet.config');
+const { csrfProtection } = require('./middlewares/csrf');
 const { apiLimiter } = require('./middlewares/rateLimiter');
 const { requestLogger, responseLogger, errorLogger, LOG_LEVEL } = require('./middlewares/logger');
 const { startTicketsMaintenance } = require('./services/ticketsMaintenance.service');
@@ -79,6 +80,10 @@ app.use([
 ]);
 
 app.use(cookieParser(COOKIE_SECRET));
+
+// Protección CSRF (double-submit cookie)
+app.use(csrfProtection);
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Logger personalizado (respeta NODE_ENV y LOG_LEVEL)

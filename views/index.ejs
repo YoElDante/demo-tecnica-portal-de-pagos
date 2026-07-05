@@ -100,6 +100,7 @@
       <h2 class="form__subtitle">Datos del Contribuyente</h2>
 
       <form action="/buscar" method="POST" class="form__content" id="form-buscar">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <div class="form__group">
           <label for="dni" class="form__label">DNI (7-10 dígitos)</label>
           <div class="form__input-wrapper">

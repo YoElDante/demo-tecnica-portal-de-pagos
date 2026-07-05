@@ -34,6 +34,14 @@
 })();
 
 /* ============================================
+   CSRF Token helper
+   ============================================ */
+function getCsrfToken() {
+  const input = document.querySelector('input[name="_csrf"]');
+  return input ? input.value : '';
+}
+
+/* ============================================
    CONTRIBUYENTE — Selección rápida (demo)
    ============================================ */
 function seleccionarContribuyente(dni) {
@@ -150,7 +158,10 @@ async function iniciarPago() {
   try {
     const response = await fetch('/pago/iniciar', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'CSRF-Token': getCsrfToken()
+      },
       body: JSON.stringify({
         contribuyente: contribuyenteData,
         conceptos,
