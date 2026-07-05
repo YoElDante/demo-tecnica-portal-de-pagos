@@ -7,9 +7,9 @@
   <link rel="icon" type="image/x-icon" href="<%= municipalidad.logos.favicon %>">
 
   <!-- Fuentes Google (consistentes con sitio oficial ALCALD+IA) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin="anonymous">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet" crossorigin="anonymous">
 
   <!-- Estilos principales del portal -->
   <link rel="stylesheet" href="/stylesheets/styles.css">
@@ -17,14 +17,15 @@
   <link rel="stylesheet" href="/stylesheets/ticket.css">
 
   <!-- Librería para generación de PDF vectorial -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- jsPDF bundle local para evitar dependencia de CDN y simplificar CSP/SRI -->
+  <script src="/javascripts/vendor/jspdf.umd.min.js" defer></script>
 
   <script src="/javascripts/deudas.js" defer></script>
   <script src="/javascripts/index.js" defer></script>
   <title><%= title %> - <%= municipalidad.nombre %></title>
 </head>
 
-<body>
+<body data-codigo="<%= cliente ? cliente.Codigo : '' %>">
   <!-- ============================================
        HEADER
        ============================================ -->
@@ -293,16 +294,6 @@
   </main>
 
   <%- include('partials/whatsapp-button') %>
-
-  <script>
-    const contribuyenteData = {
-      codigo: '<%= cliente ? cliente.Codigo : "" %>',
-      dni: '<%= cliente ? (cliente.DOCUMENTO || "").trim() : "" %>',
-      nombre: '<%= cliente ? (cliente.Nombre + " " + cliente.Apellido).trim() : "" %>',
-      email: '<%= cliente ? (cliente.Email || "") : "" %>'
-    };
-  </script>
-
 
   <!-- ============================================
        FOOTER

@@ -43,7 +43,7 @@ const {
   doubleCsrfProtection
 } = doubleCsrf({
   getSecret: () => CSRF_SECRET,
-  cookieName: '__Host-csrf-token',
+  cookieName: 'csrf-token',
   cookieOptions: {
     httpOnly: true,
     sameSite: 'strict',

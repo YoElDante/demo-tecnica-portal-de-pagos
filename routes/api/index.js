@@ -14,6 +14,7 @@ const { municipalidad } = require('../../config');
 
 // Importar rutas específicas
 const clientesRoutes = require('./clientes.routes');
+const contribuyenteRoutes = require('./contribuyente.routes');
 const paymentController = require('../../controllers/payment.controller');
 
 // Documentación de la API
@@ -84,6 +85,7 @@ router.get('/', (req, res) => {
 
 // Montar rutas
 router.use('/clientes', clientesRoutes);
+router.use('/contribuyente', contribuyenteRoutes);
 
 // Ruta canónica para recibir confirmaciones de pago del API Gateway
 router.post('/webhook/pago', webhookLimiter, paymentController.confirmacion);

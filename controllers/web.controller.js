@@ -109,6 +109,15 @@ exports.buscarPorDni = async (req, res) => {
     const tipoIconos = DeudasService.TIPO_ICONOS;
     const totalGeneral = DeudasService.calcularTotal(deudas);
 
+    // Cookie firmada para proteger el endpoint de datos personales (PII)
+    res.cookie('ccodigo', cliente.Codigo, {
+      signed: true,
+      httpOnly: true,
+      sameSite: 'strict',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 1000 // 1 hora
+    });
+
     return res.render('index', {
       ...BASE_RENDER,
       title: 'Portal de Pagos',

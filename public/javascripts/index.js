@@ -1,6 +1,32 @@
 'use strict';
 
 /* ============================================
+   PII — Carga asíncrona de datos del contribuyente
+   ============================================ */
+document.addEventListener('DOMContentLoaded', async () => {
+  const body = document.body;
+  const codigo = body?.dataset?.codigo;
+
+  if (codigo) {
+    try {
+      const response = await fetch(`/api/contribuyente/${codigo}`, {
+        headers: {
+          'CSRF-Token': getCsrfToken()
+        }
+      });
+
+      if (response.ok) {
+        contribuyenteData = await response.json();
+      } else {
+        console.warn('No se pudieron obtener los datos del contribuyente');
+      }
+    } catch (error) {
+      console.error('Error cargando datos del contribuyente:', error);
+    }
+  }
+});
+
+/* ============================================
    DEMO INFO CARD — Toggle colapsable
    ============================================ */
 (function () {
@@ -32,6 +58,9 @@
     aplicarEstado(!ahora);
   });
 })();
+
+// Datos personales del contribuyente cargados asincrónicamente desde /api/contribuyente/:codigo
+let contribuyenteData = null;
 
 /* ============================================
    CSRF Token helper
