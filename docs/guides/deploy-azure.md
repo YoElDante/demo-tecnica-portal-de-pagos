@@ -205,12 +205,11 @@ En los logs deberías ver:
 1. App Service → **Escalar horizontalmente**
 2. Configurar reglas basadas en CPU o memoria
 
-### Nota sobre `develop` y `.env`
+### Nota sobre `.env`
 
-- `develop` se usa para demo/staging.
 - El archivo `.env` local no se versiona porque está ignorado en git.
 - `envs/` tampoco se versiona; la configuración real de demo y producción vive en App Service.
-- Mergear cambios entre `main` y `develop` no debería tocar secretos ni configuración sensible si estos permanecen fuera del repositorio.
+- La configuración se define por entorno, no por rama.
 
 ---
 

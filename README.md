@@ -287,7 +287,6 @@ La integración activa hoy es SIRO del Banco Roela. Otras pasarelas quedan como 
 |-----------|-------------|
 | [docs/README.md](docs/README.md) | Índice maestro de documentación |
 | [AI_CONTEXT.md](docs/AI_CONTEXT.md) | Contexto compacto para desarrolladores y agentes IA |
-| [GUIA_RAMAS.md](docs/GUIA_RAMAS.md) | Estrategia de ramas y flujo de trabajo git |
 | [DEPLOY_AZURE.md](docs/DEPLOY_AZURE.md) | Despliegue en Azure App Service |
 | [CONTRACT-PORTAL-GATEWAY.md](docs/CONTRACT-PORTAL-GATEWAY.md) | Contrato portal ↔ gateway de pagos |
 | [INTEGRACION_PAGOS.md](docs/INTEGRACION_PAGOS.md) | Flujo activo de integración con SIRO |
@@ -330,13 +329,10 @@ npm run testDB
 
 ## 👥 Contribuir
 
-Ver [docs/GUIA_RAMAS.md](docs/GUIA_RAMAS.md) para el flujo completo.
-
-Resumen:
-1. Todo trabajo nuevo parte desde `develop`, nunca desde `main`
-2. Cambios funcionales relevantes requieren un change en `openspec/changes/` antes de la rama
-3. Validar en `demo.alcaldia.com.ar` antes de mergear a `main`
-4. `main` = producción — solo recibe merges aprobados desde `develop`
+1. Todo trabajo se implementa directamente en `main`
+2. Cambios funcionales relevantes requieren un change en `openspec/changes/`
+3. Validar en el entorno demo antes de deployar a producción
+4. La configuración de entorno (demo/producción) se define por variables, no por rama
 5. `.env` y `envs/` no viajan en git; la configuración del demo vive fuera del repositorio
 
 ### Política de dependencias

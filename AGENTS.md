@@ -78,8 +78,8 @@ Este repositorio implementa un portal web municipal para consultar deudas por DN
 8. Los tickets tienen validez limitada porque los intereses cambian diariamente.
 9. Todo cambio nuevo debe respetar el modelo multi-municipio y no hardcodear nombres, logos o URLs.
 10. Antes de implementar una feature relevante, revisar `openspec/specs` y trabajar con `openspec/changes`.
-11. La rama principal de trabajo es `develop`. La rama `main` es producción y solo recibe merges aprobados desde `develop`.
-12. `.env` y `envs/` no se versionan ni se usan como mecanismo de promocion entre ramas; demo y produccion se configuran por entorno.
+11. `main` es la unica rama del proyecto. Todo cambio se implementa y despliega desde `main`.
+12. `.env` y `envs/` no se versionan; demo y produccion se configuran por entorno.
 13. Las dependencias npm se declaran con version exacta (sin `^` ni `~`) para evitar actualizaciones no controladas.
 14. No actualizar dependencias en repositorios estables salvo necesidad de seguridad o correccion critica, y siempre con validacion explicita.
 
@@ -183,7 +183,6 @@ Antes de tocar codigo, leer en este orden:
 | Despliegue Azure | `docs/guides/deploy-azure.md` |
 | Runbook / troubleshooting | `docs/guides/runbook.md` |
 | Decisiones de arquitectura | `docs/architecture/adr.md` |
-| Ramas y flujo git | `docs/guides/guia-ramas.md` |
 | Seguridad / hardening | `docs/architecture/security-pending.md` |
 | Indice maestro completo | `docs/README.md` |
 | Convenciones de documentacion | `docs/AGENTS.md` |

@@ -491,5 +491,4 @@ Si el municipio todavía no tiene su portal productivo pero querés mostrarlo en
 - [CONTRACT-PORTAL-GATEWAY.md](./CONTRACT-PORTAL-GATEWAY.md) — Contrato de integración portal↔gateway
 - [MUNICIPIO_CONFIG.md](../config/MUNICIPIO_CONFIG.md) — Configuración de municipios
 - [DEPLOY_AZURE.md](./DEPLOY_AZURE.md) — Guía de despliegue en Azure
-- [GUIA_RAMAS.md](./GUIA_RAMAS.md) — Estrategia de ramas
 - [README.md](../README.md) — README principal del proyecto

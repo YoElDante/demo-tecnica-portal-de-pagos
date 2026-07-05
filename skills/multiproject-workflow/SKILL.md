@@ -31,4 +31,4 @@ git status
 
 ## Resources
 
-- **Documentation**: [GUIA_INTEGRACION_MULTIPROYECTO.md](../../docs/integracion/GUIA_INTEGRACION_MULTIPROYECTO.md), [GUIA_RAMAS.md](../../docs/GUIA_RAMAS.md), [CONTRACT-PORTAL-GATEWAY.md](../../docs/CONTRACT-PORTAL-GATEWAY.md)
+- **Documentation**: [guia-multiproyecto.md](../../docs/integration/guia-multiproyecto.md), [contract-portal-gateway.md](../../docs/integration/contract-portal-gateway.md)

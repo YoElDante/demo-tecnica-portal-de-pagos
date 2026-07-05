@@ -179,7 +179,7 @@ Si hay error de conexión, verificar en Azure SQL → **Redes**:
 
 ### Deploy vía GitHub Actions
 
-Push a `develop` o `main` dispara el workflow automáticamente. Verificar en la pestaña **Actions** del repositorio.
+Push a `main` dispara el workflow automáticamente. Verificar en la pestaña **Actions** del repositorio.
 
 ### Deploy manual vía Azure CLI
 
@@ -257,4 +257,4 @@ Esto carga el branding visual del municipio destino sin cambiar las credenciales
 - [CONTRACT-PORTAL-GATEWAY.md](CONTRACT-PORTAL-GATEWAY.md) — Contrato de integración
 - [DIAGNOSTICO_TICKET_VACIO.md](DIAGNOSTICO_TICKET_VACIO.md) — Diagnóstico detallado de tickets
 - [DEPLOY_AZURE.md](DEPLOY_AZURE.md) — Guía de despliegue en Azure
-- [GUIA_RAMAS.md](GUIA_RAMAS.md) — Estrategia de ramas
+- [guia-ramas.md](../_archive/guides/guia-ramas.md) — Estrategia de ramas (archivada)

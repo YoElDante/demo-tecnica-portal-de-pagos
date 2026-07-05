@@ -27,21 +27,22 @@
 │                 github.com/YoElDante/demo-tecnica-portal-de-pagos            │
 ├──────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
-│   RAMA: main                              RAMA: develop                      │
-│   (producción)                            (desarrollo/staging)               │
-│        │                                        │                            │
-│        │ push                                   │ push                       │
-│        ▼                                        ▼                            │
-│   ┌─────────────────────┐              ┌─────────────────────┐               │
-│   │ deploy-elmanzano.yml│              │  deploy-demo.yml    │               │
-│   │ deploy-tinoco.yml   │              │                     │               │
-│   │ deploy-sanjose.yml  │              │                     │               │
-│   │ (futuros)           │              │                     │               │
-│   └─────────┬───────────┘              └──────────┬──────────┘               │
-│             │                                     │                          │
-└─────────────┼─────────────────────────────────────┼──────────────────────────┘
-              │                                     │
-              ▼                                     ▼
+│   RAMA: main                                                                 │
+│   (única rama — desarrollo, demo y producción)                               │
+│        │                                                                     │
+│        │ push                                                                │
+│        ▼                                                                     │
+│   ┌─────────────────────┐                                                    │
+│   │ deploy-elmanzano.yml│                                                    │
+│   │ deploy-tinoco.yml   │                                                    │
+│   │ deploy-sanjose.yml  │                                                    │
+│   │ deploy-demo.yml     │                                                    │
+│   │ (futuros)           │                                                    │
+│   └─────────┬───────────┘                                                    │
+│             │                                                                │
+└─────────────┼────────────────────────────────────────────────────────────────┘
+              │
+              ▼
 ┌─────────────────────────┐          ┌─────────────────────────┐
 │   AZURE - El Manzano    │          │   AZURE - Demo          │
 │   ─────────────────     │          │   ─────────────────     │
@@ -53,59 +54,40 @@
 └─────────────────────────┘          └─────────────────────────┘
 ```
 
-**Concepto clave**: 
-- Rama `main` → Producción (municipios reales)
-- Rama `develop` → Desarrollo/Staging (demo para pruebas)
+**Concepto clave**:
+- Rama `main` → Única rama. Los deploys se diferencian por municipio y configuración de entorno.
 
 ---
 
 ## 🌿 Estrategia de Ramas
 
-### Estructura
+El proyecto usa `main` como única rama. Los deploys se diferencian por municipio y configuración de entorno, no por rama.
 
-```
-main (producción)
-│
-│   ← Solo recibe merges de develop cuando el código está probado
-│   ← Dispara deploy a: elmanzano, tinoco, sanjose (producción)
-│
-└── develop (staging)
-      │
-      │   ← Rama principal de trabajo diario
-      │   ← Dispara deploy a: demo.alcaldia.com.ar
-      │
-      ├── feature/nueva-funcionalidad
-      ├── fix/corregir-bug
-      └── refactor/mejorar-codigo
-```
-
-### Flujo de trabajo simplificado
+### Flujo de trabajo
 
 ```bash
-# 1. Siempre trabajar desde develop
-git checkout develop
-git pull origin develop
+# 1. Trabajar desde main
+git checkout main
+git pull origin main
 
-# 2. Crear feature branch (opcional para cambios pequeños)
-git checkout -b feature/mi-cambio
-
-# 3. Trabajar y commitear
+# 2. Trabajar y commitear
 git add . && git commit -m "feat: descripción"
 
-# 4. Mergear a develop y subir → despliega en demo
-git checkout develop
-git merge feature/mi-cambio
-git push origin develop
-
-# 5. Probar en https://demo.alcaldia.com.ar
-
-# 6. Cuando está listo → pasar a producción
-git checkout main
-git merge develop
-git push origin main  # ⚡ Despliega en producción
+# 3. Push → despliega según el workflow configurado
+git push origin main  # ⚡ Despliega en el entorno correspondiente
 ```
 
-> 📖 Guía completa: [docs/GUIA_RAMAS.md](../../docs/GUIA_RAMAS.md)
+```bash
+# 1. Trabajar desde main
+git checkout main
+git pull origin main
+
+# 2. Trabajar y commitear
+git add . && git commit -m "feat: descripción"
+
+# 3. Push → despliega según el workflow configurado
+git push origin main  # ⚡ Despliega en el entorno correspondiente
+```
 
 ---
 
@@ -114,7 +96,7 @@ git push origin main  # ⚡ Despliega en producción
 | Workflow | Rama | Municipio | App Service | Secret | URL |
 |----------|------|-----------|-------------|--------|-----|
 | `deploy-elmanzano.yml` | `main` | El Manzano | `portal-de-pagos-elmanzano-cba` | `AZURE_PUBLISH_ELMANZANO` | [elmanzano.alcaldia.com.ar](https://elmanzano.alcaldia.com.ar) |
-| `deploy-demo.yml` | `develop` | Demo | `portal-demo-alcaldia` | `AZURE_PUBLISH_DEMO` | [demo.alcaldia.com.ar](https://demo.alcaldia.com.ar) |
+| `deploy-demo.yml` | `main` | Demo | `portal-demo-alcaldia` | `AZURE_PUBLISH_DEMO` | [demo.alcaldia.com.ar](https://demo.alcaldia.com.ar) |
 
 ### Secrets configurados en GitHub
 

@@ -262,13 +262,12 @@ paths:
 
 ## 🌿 Flujo de Trabajo con Git
 
-El flujo de ramas para este proyecto ya está documentado en detalle en `docs/GUIA_RAMAS.md`.
+Ambos proyectos usan `main` como única rama. Todo cambio se implementa directamente en `main`.
 
 ### Regla operativa para trabajo multi-proyecto
 
-- Crear una rama equivalente en cada repositorio involucrado.
 - Mantener el contrato de integración alineado antes de implementar.
-- Validar el flujo cruzado en staging antes de mergear a producción.
+- Validar el flujo cruzado en staging antes de deployar a producción.
 - Revisar `git status` y `git diff` en cada repo por separado.
 
 ### Secuencia mínima recomendada
@@ -276,18 +275,14 @@ El flujo de ramas para este proyecto ya está documentado en detalle en `docs/GU
 ```bash
 # Portal
 cd demo-portal-de-pago
-git checkout develop
-git pull origin develop
-git checkout -b feature/integracion-portal
+git checkout main
+git pull origin main
 
 # Gateway
 cd ../api-gateway-mp
-git checkout develop
-git pull origin develop
-git checkout -b feature/integracion-api
+git checkout main
+git pull origin main
 ```
-
-Para el detalle completo de ramas, merges y emergencias, usar `docs/GUIA_RAMAS.md` como fuente de verdad.
 
 ---
 
@@ -296,8 +291,7 @@ Para el detalle completo de ramas, merges y emergencias, usar `docs/GUIA_RAMAS.m
 ### Antes de empezar la integración
 
 - [ ] Ambos proyectos clonados en la misma carpeta padre
-- [ ] Ambos proyectos en rama `develop` actualizada
-- [ ] Ramas de feature creadas en ambos proyectos
+- [ ] Ambos proyectos en `main` actualizado
 - [ ] VS Code abierto en carpeta padre o como multi-root workspace
 
 ### Durante el desarrollo
@@ -394,19 +388,18 @@ Cuando le pidas a la IA que integre los proyectos, debe poder responder:
 
 ## 📚 Recursos Adicionales
 
-- [GUIA_RAMAS.md](./GUIA_RAMAS.md) - Flujo de trabajo con Git
-- [INTEGRACION_PAGOS.md](./INTEGRACION_PAGOS.md) - Detalles técnicos del flujo de pago
+- [integracion-pagos.md](./integracion-pagos.md) - Detalles técnicos del flujo de pago
 
 ---
 
 ## 🆘 Troubleshooting
 
-### "La IA editó archivos pero no sé en qué rama están"
+### "La IA editó archivos y no sé en qué estado están"
 
 ```bash
-# Ver rama actual de cada proyecto
-cd demo-portal-de-pago && git branch --show-current
-cd ../api-gateway-mp && git branch --show-current
+# Ver estado de cada proyecto
+cd demo-portal-de-pago && git status
+cd ../api-gateway-mp && git status
 ```
 
 ### "Quiero deshacer todos los cambios de la IA"
@@ -428,4 +421,4 @@ git reset --hard HEAD~1
 
 ---
 
-> **Recuerda**: Cada proyecto tiene su propio `.git`. La IA edita archivos, pero TÚ decides cuándo commitear y a qué rama.
+> **Recuerda**: Cada proyecto tiene su propio `.git`. La IA edita archivos, pero TÚ decides cuándo commitear.

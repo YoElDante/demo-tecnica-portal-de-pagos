@@ -7,7 +7,7 @@ context: |
   Stack: Node.js 20+, Express 4, Sequelize 6 + tedious (Azure SQL), EJS 3.
   Multiples municipios diferenciados por MUNICIPIO + DB_* (config/index.js).
   No procesa pagos directos: delega al API Gateway (docs/CONTRACT-PORTAL-GATEWAY.md).
-  Working branch: develop. Production branch: main.
+  Working branch: main. Single branch for dev, demo, and production.
 
 strict_tdd: false
 strict_tdd_reason: "No existe test runner formal (jest/mocha/vitest). Unico script: tests/connection.db.test.js (smoke test de BD)."
@@ -51,7 +51,7 @@ phases:
     format: "checklist"
   apply:
     required: true
-    branch: "develop"
+    branch: "main"
     rules:
       - "Mantener cambios pequenos y orientados a la raiz del problema."
       - "Respetar arquitectura multi-municipio (no hardcodear nombres, logos ni URLs)."

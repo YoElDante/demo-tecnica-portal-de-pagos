@@ -64,7 +64,7 @@ Nunca borrar documentos del repo — siempre archivar. El historial de git no re
 | Informes de estado con fecha | `_archive/status/` |
 | Scripts SQL de setup | `_archive/database/` (no son documentación) |
 | Código fuente de cualquier tipo | En el proyecto, no en `/docs` |
-| Borradores sin terminar | En una rama, con prefijo `draft-` en el nombre |
+| Borradores sin terminar | En `_archive/` con prefijo `draft-` en el nombre |
 
 ---
 
