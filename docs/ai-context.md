@@ -41,6 +41,7 @@ El redirect del usuario no confirma pagos. La fuente de verdad es el webhook ser
 | Tasa configurable end-to-end | 🔲 Parcial |
 | Hardening HTTP | ✅ |
 | Comprobantes por email | 🔲 |
+| Frontend JS modular (ES6) | ✅ | SDD `refactor-frontend-js-modular` — `public/javascripts/modules/` |
 
 ## Reglas de dominio
 
@@ -95,6 +96,7 @@ npm run dev:sanjose
 - Multi-municipio: `docs/PLAN_CONFIGURACION_MULTIAMBIENTE.md` y `docs/GUIA_NUEVO_MUNICIPIO.md`
 - Azure: `docs/DEPLOY_AZURE.md`
 - Seguridad: `docs/architecture/seguridad.md` (capas, CSRF, CSP, PII, safeLog, feature flags)
+- Frontend JS: `public/javascripts/entry.js` (entry único) + `public/javascripts/modules/` (árbol ES6: utils, deuda, ticket, pago, state)
 
 ## Próximos cambios naturales
 

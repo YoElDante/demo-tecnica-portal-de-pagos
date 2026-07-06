@@ -70,3 +70,6 @@ envs/
 
 # Local AI tooling config
 .gga
+
+# CodeGraph local index
+.codegraph/

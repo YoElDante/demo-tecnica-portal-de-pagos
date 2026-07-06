@@ -1,3 +1,20 @@
+<%#
+  Portal de Pagos Municipal — Pago Pendiente
+  @description Vista de pago pendiente con polling automático de estado del ticket.
+
+  Expected Locals:
+    external_reference (string) — Referencia externa del pago para polling.
+    redirect_token (string) — Token de redirect opcional.
+    redirect_code (string) — Código de redirect opcional.
+    municipalidad (object) — Configuración del municipio activo.
+    title (string) — Título de página.
+    ticket_number (string|undefined) — Número de ticket asociado.
+    monto_total (number|string|undefined) — Monto total del pago.
+    conceptos (Array|undefined) — Conceptos incluidos en el pago.
+
+  Renders:
+    Pantalla de pago pendiente con verificación automática cada 15s/30s y redirección al confirmar.
+%>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -391,56 +408,14 @@
 
   <%- include('../partials/whatsapp-button') %>
 
-  <script>
-    // Polling: verifica el estado del ticket cada 30 segundos.
-    // Si cambia a APROBADO o RECHAZADO, redirige a la vista correspondiente.
-    (function() {
-      const ref = '<%= external_reference %>';
-      const token = '<%= redirect_token || "" %>';
-      const code = '<%= redirect_code || "" %>';
-      const INTERVALO_MS = 30000;
-      let intentos = 0;
-      const MAX_INTENTOS = 20; // 10 minutos
+  <script type="module">
+    import { startPolling } from '/javascripts/modules/pago/polling.js';
 
-      function verificarEstado() {
-        if (intentos >= MAX_INTENTOS) {
-          document.getElementById('pollingStatus').textContent =
-            'Verificación automática detenida. Refrescá la página si querés seguir chequeando.';
-          return;
-        }
-
-        intentos++;
-
-        fetch('/api/tickets/estado?ref=' + encodeURIComponent(ref))
-          .then(function(res) {
-            return res.json();
-          })
-          .then(function(data) {
-            if (data.status === 'APROBADO') {
-              const credencial = code ?
-                '&code=' + encodeURIComponent(code) :
-                (token ? '&token=' + encodeURIComponent(token) : '');
-              window.location.href = '/pagos/exitoso?ref=' + encodeURIComponent(ref) +
-                credencial;
-            } else if (data.status === 'RECHAZADO' || data.status === 'EXPIRADO') {
-              const credencial = code ?
-                '&code=' + encodeURIComponent(code) :
-                (token ? '&token=' + encodeURIComponent(token) : '');
-              window.location.href = '/pagos/error?ref=' + encodeURIComponent(ref) +
-                credencial;
-            }
-            // Si sigue PENDIENTE, no hace nada — el intervalo vuelve a disparar
-          })
-          .catch(function() {
-            // Error de red — no interrumpir el polling
-          });
-      }
-
-      // Primera verificación a los 15s (el webhook suele llegar en ese lapso)
-      setTimeout(verificarEstado, 15000);
-      // Luego cada 30s
-      setInterval(verificarEstado, INTERVALO_MS);
-    })();
+    startPolling(
+      '<%= external_reference %>',
+      '<%= redirect_token || "" %>',
+      '<%= redirect_code || "" %>'
+    );
   </script>
 </body>
 

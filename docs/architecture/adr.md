@@ -286,6 +286,37 @@ Descargar jsPDF 2.5.1 UMD y servirlo como **bundle local** en `public/javascript
 
 ---
 
+## ADR-011: Frontend JS Modular sin Build Step
+
+**Fecha**: 2026-07-05  
+**Estado**: ✅ Aceptado  
+**SDD Change**: `refactor-frontend-js-modular`
+
+### Contexto
+
+Frontend JS (~978 líneas, 3 archivos) usaba funciones globales con dependencia en orden de carga de `<script defer>`. `extraerNumero()` definido en `deudas.js` pero llamado desde `index.js` por convención — reordenar tags rompía `iniciarPago()` sin error visible.
+
+### Decisión
+
+ES modules nativos (`<script type="module">`) sin build step. Bridge pattern en 4 fases para migración sin downtime. jsPDF UMD vendor separado. `node:test` como test runner.
+
+### Consecuencias
+
+- ✅ `extraerNumero` es importable — orden de tags irrelevante
+- ✅ Funciones puras testables con `node:test` por primera vez
+- ✅ Sin build step, sin `npm install` nuevo
+- ✅ Rollback independiente por fase (git revert por PR)
+- ❌ jsPDF sigue como UMD global externo al module graph
+- ❌ `pendiente.ejs` y `demo-panel.ejs` requieren `<script type="module">` inline
+
+### Archivos relacionados
+
+- `public/javascripts/entry.js` — entry point modular único
+- `public/javascripts/modules/` — árbol de módulos ES
+- `openspec/changes/refactor-frontend-js-modular/design.md`
+
+---
+
 ## Referencias
 
 - [ADR en GitHub](https://adr.github.io/) — Documentación del formato ADR

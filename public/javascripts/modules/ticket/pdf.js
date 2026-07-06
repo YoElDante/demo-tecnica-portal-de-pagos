@@ -1,310 +1,22 @@
 /**
- * Gestión de selección de deudas y cálculo de totales
- * @author Dante Marcos Delprato
- * @version 2.0
+ * Portal de Pagos Municipal — Module / Ticket PDF
+ * @description Generación y descarga de ticket PDF vectorial usando jsPDF UMD.
+ *
+ * Exports:
+ *   descargarPDF()
  */
 
-// ============================================
-// GESTIÓN DE SELECCIÓN Y TOTALES
-// ============================================
+import { obtenerDatosContribuyente } from './generator.js';
 
-function obtenerCheckboxesConceptos() {
-  return Array.from(document.querySelectorAll('.deudas__checkbox[data-idtrans]'));
-}
-
-function obtenerCheckboxesConceptosMarcados() {
-  return Array.from(document.querySelectorAll('.deudas__checkbox[data-idtrans]:checked'));
-}
-
-function obtenerCreditoAutomaticoVisible() {
-  const filasVisibles = document.querySelectorAll('tbody tr[data-total-deuda]:not([style*="display: none"])');
-  let totalCredito = 0;
-
-  filasVisibles.forEach((fila) => {
-    const totalFila = parseFloat(fila.getAttribute('data-total-deuda') || '0');
-    if (totalFila < 0) {
-      totalCredito += totalFila;
-    }
-  });
-
-  return totalCredito;
-}
-
-function actualizarTotal() {
-  const checkboxes = obtenerCheckboxesConceptosMarcados();
-  let totalPositivosSeleccionados = 0;
-
-  checkboxes.forEach(cb => {
-    // Ignorar filas ocultas
-    if (cb.closest('tr') && cb.closest('tr').style.display === 'none') return;
-
-    const montoConcepto = parseFloat(cb.dataset.total || '0');
-    if (montoConcepto > 0) {
-      totalPositivosSeleccionados += montoConcepto;
-    }
-  });
-
-  const total = totalPositivosSeleccionados + obtenerCreditoAutomaticoVisible();
-
-  const totalElement = document.getElementById('total-final');
-  if (totalElement) {
-    totalElement.textContent = '$ ' + total.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  }
-
-  actualizarCheckboxTodos();
-  actualizarContadores();
-}
-
-function actualizarCheckboxTodos() {
-  const checkboxTodos = document.getElementById('checkbox-todos');
-  if (!checkboxTodos) return;
-  const filasVisibles = document.querySelectorAll('tbody tr[data-tipo]:not([style*="display: none"])');
-  const checkboxesVisibles = Array.from(filasVisibles).map(f => f.querySelector('.deudas__checkbox')).filter(Boolean);
-  const marcadosVisibles = checkboxesVisibles.filter(cb => cb.checked);
-  if (checkboxesVisibles.length > 0) {
-    const todosMarcados = checkboxesVisibles.length === marcadosVisibles.length;
-    const ningunoMarcado = marcadosVisibles.length === 0;
-    checkboxTodos.checked = todosMarcados;
-    checkboxTodos.indeterminate = !todosMarcados && !ningunoMarcado;
-  } else {
-    checkboxTodos.checked = false;
-    checkboxTodos.indeterminate = false;
-  }
-}
-
-function toggleTodos() {
-  const checkboxTodos = document.getElementById('checkbox-todos');
-  const filasVisibles = document.querySelectorAll('tbody tr[data-tipo]:not([style*="display: none"])');
-  filasVisibles.forEach(fila => {
-    const cb = fila.querySelector('.deudas__checkbox');
-    if (cb && !cb.disabled) cb.checked = checkboxTodos.checked;
-  });
-  actualizarTotal();
-}
-
-function actualizarContadores() {
-  const filasVisibles = document.querySelectorAll('tbody tr[data-tipo]:not([style*="display: none"])');
-  const totalVisibles = filasVisibles.length;
-  let seleccionadasVisibles = 0;
-  filasVisibles.forEach(fila => {
-    const cb = fila.querySelector('.deudas__checkbox');
-    if (cb && cb.checked) seleccionadasVisibles++;
-  });
-  const totalEl = document.getElementById('contador-deudas-total');
-  const selEl = document.getElementById('contador-deudas-seleccionadas');
-  if (totalEl) totalEl.textContent = totalVisibles;
-  if (selEl) selEl.textContent = seleccionadasVisibles;
-}
-
-// ============================================
-// GESTIÓN DE TICKETS DE PAGO
-// ============================================
+// ---------------------------------------------------------------------------
+// Generación PDF
+// ---------------------------------------------------------------------------
 
 /**
- * Convierte una fecha en formato dd/mm/yyyy a objeto Date para comparación
- * @param {string} fechaStr - Fecha en formato dd/mm/yyyy
- * @returns {Date} Objeto Date
+ * Descarga el ticket como PDF vectorial (texto seleccionable, tamaño optimizado).
+ * @returns {Promise<void>}
  */
-function parsearFechaParaOrden(fechaStr) {
-  if (!fechaStr) return new Date(0);
-  const partes = fechaStr.split('/');
-  if (partes.length === 3) {
-    // dd/mm/yyyy -> yyyy-mm-dd
-    return new Date(partes[2], partes[1] - 1, partes[0]);
-  }
-  return new Date(fechaStr);
-}
-
-/**
- * Recopila los conceptos seleccionados de la tabla
- * @returns {Array} Array de conceptos seleccionados ordenados por tipo y fecha descendente
- */
-function recopilarConceptosSeleccionados() {
-  const checkboxes = obtenerCheckboxesConceptosMarcados();
-  const conceptos = [];
-
-  checkboxes.forEach(cb => {
-    const fila = cb.closest('tr');
-    if (fila && fila.style.display !== 'none') {
-      const celdas = fila.querySelectorAll('td');
-
-      // Extraer datos de cada celda
-      const concepto = {
-        fechaVto: celdas[1]?.textContent.trim() || '',
-        detalle: extraerTextoDetalle(celdas[2]),
-        idBien: celdas[3]?.textContent.trim() || '-',
-        cuota: celdas[4]?.textContent.trim() || '',
-        anio: celdas[5]?.textContent.trim() || '',
-        importe: extraerNumero(celdas[6]?.textContent || '0'),
-        interes: extraerNumeroConSigno(celdas[7]),
-        total: parseFloat(cb.dataset.total || '0')
-      };
-
-      if (concepto.total > 0) {
-        conceptos.push(concepto);
-      }
-    }
-  });
-
-  // Ordenar por ID_BIEN (ascendente) y luego por fecha descendente
-  conceptos.sort((a, b) => {
-    // Primero por ID_BIEN (si no tiene, al final)
-    const idBienA = (a.idBien || '').toString();
-    const idBienB = (b.idBien || '').toString();
-    const idBienComparacion = idBienA.localeCompare(idBienB);
-    if (idBienComparacion !== 0) return idBienComparacion;
-
-    // Luego por fecha descendente (más reciente primero)
-    const fechaA = parsearFechaParaOrden(a.fechaVto);
-    const fechaB = parsearFechaParaOrden(b.fechaVto);
-    return fechaB - fechaA;
-  });
-
-  return conceptos;
-}
-
-/**
- * Extrae el texto del detalle sin el icono
- * @param {HTMLElement} celda - Celda de la tabla
- * @returns {string} Texto limpio
- */
-function extraerTextoDetalle(celda) {
-  if (!celda) return '';
-  const textoCompleto = celda.textContent.trim();
-  // Remover emoji/icono si existe y tomar solo el texto descriptivo
-  return textoCompleto.replace(/^[^\w\s]+\s*/, '').split(' - ')[0].trim();
-}
-
-/**
- * Extrae un número de un texto con formato de moneda
- * @param {string} texto - Texto con formato "$ 1.234,56"
- * @returns {number} Número extraído
- */
-function extraerNumero(texto) {
-  return parseFloat(
-    texto.replace(/\$/g, '')
-      .replace(/\./g, '')
-      .replace(/,/g, '.')
-      .trim()
-  ) || 0;
-}
-
-/**
- * Extrae un número considerando si es negativo por clase CSS
- * @param {HTMLElement} celda - Celda de la tabla
- * @returns {number} Número con signo correcto
- */
-function extraerNumeroConSigno(celda) {
-  if (!celda) return 0;
-  const valor = extraerNumero(celda.textContent);
-  // Si tiene clase BEM de descuento o contiene signo '-', es negativo (descuento)
-  const esDescuento = celda.classList.contains('deudas__value--discount') ||
-    celda.textContent.includes('-$');
-  return esDescuento ? -valor : valor;
-}
-
-/**
- * Obtiene los datos del contribuyente del formulario
- * @returns {Object} Datos del contribuyente
- */
-function obtenerDatosContribuyente() {
-  const dniInput = document.getElementById('dni');
-  const nombreInput = document.getElementById('nombre');
-
-  return {
-    dni: dniInput?.value.trim() || '',
-    nombreCompleto: nombreInput?.value.trim() || ''
-  };
-}
-
-/**
- * Genera el ticket y lo muestra en el contenedor
- */
-async function generarTicket() {
-  try {
-    // Validar que haya conceptos seleccionados
-    const conceptos = recopilarConceptosSeleccionados();
-    if (conceptos.length === 0) {
-      alert('⚠️ Debe seleccionar al menos un concepto para generar el ticket');
-      return;
-    }
-
-    // Obtener datos del contribuyente
-    const contribuyente = obtenerDatosContribuyente();
-    if (!contribuyente.dni || !contribuyente.nombreCompleto) {
-      alert('⚠️ Faltan datos del contribuyente');
-      return;
-    }
-
-    // Mostrar indicador de carga
-    const container = document.getElementById('ticket-preview-container');
-    if (container) {
-      container.innerHTML = '<div class=\"ticket--loading\">Generando ticket...</div>';
-      container.style.display = 'block';
-    }
-
-    // Hacer petición al backend
-    const response = await fetch('/generar-ticket', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'CSRF-Token': getCsrfToken()
-      },
-      body: JSON.stringify({
-        conceptos,
-        contribuyente
-      })
-    });
-
-    const data = await response.json();
-
-    if (!data.success) {
-      throw new Error(data.message || 'Error al generar el ticket');
-    }
-
-    // Mostrar el HTML del ticket
-    if (container) {
-      container.innerHTML = data.html;
-      container.style.display = 'block';
-
-      // Habilitar botón de descarga PDF (superior)
-      const btnDescargar = document.getElementById('btn-descargar-pdf');
-      if (btnDescargar) {
-        btnDescargar.disabled = false;
-      }
-
-      // Mostrar y habilitar botones inferiores
-      const botonesInferiores = document.getElementById('ticket-actions-bottom');
-      if (botonesInferiores) {
-        botonesInferiores.style.display = 'flex';
-      }
-      const btnDescargarBottom = document.getElementById('btn-descargar-pdf-bottom');
-      if (btnDescargarBottom) {
-        btnDescargarBottom.disabled = false;
-      }
-
-      // Scroll suave al ticket
-      setTimeout(() => {
-        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 100);
-    }
-
-  } catch (error) {
-    console.error('Error al generar ticket:', error);
-    alert('❌ Error al generar el ticket: ' + error.message);
-
-    const container = document.getElementById('ticket-preview-container');
-    if (container) {
-      container.innerHTML = '';
-      container.style.display = 'none';
-    }
-  }
-}
-
-/**
- * Descarga el ticket como PDF vectorial (texto seleccionable, tamaño optimizado)
- */
-async function descargarPDF() {
+export async function descargarPDF() {
   try {
     const container = document.getElementById('ticket-container');
     if (!container) {
@@ -317,7 +29,7 @@ async function descargarPDF() {
     const btnDescargarBottom = document.getElementById('btn-descargar-pdf-bottom');
     const textoOriginal = '💾 Descargar PDF';
 
-    [btnDescargar, btnDescargarBottom].forEach(btn => {
+    [btnDescargar, btnDescargarBottom].forEach((btn) => {
       if (btn) {
         btn.disabled = true;
         btn.textContent = '⏳ Generando PDF...';
@@ -333,7 +45,7 @@ async function descargarPDF() {
     const fecha = `${yyyy}-${mm}-${dd}`;
     const nombreArchivo = `ticket-pago-${contribuyente.dni}-${fecha}.pdf`;
 
-    // Configuración para jsPDF
+    // Configuración para jsPDF (UMD global)
     const { jsPDF } = window.jspdf;
 
     // Crear instancia de jsPDF en formato A4
@@ -437,6 +149,7 @@ async function descargarPDF() {
 
       // Línea separadora
       pdf.line(margin, y, pageWidth - margin, y);
+
       // === DATOS DEL CONTRIBUYENTE (CENTRADOS VERTICALMENTE) ===
       const contribuyenteNombre = pagina.querySelector('.ticket__contribuyente p:first-child')?.textContent?.trim() || '';
       const contribuyenteDni = pagina.querySelector('.ticket__contribuyente p:last-child')?.textContent?.trim() || '';
@@ -504,7 +217,7 @@ async function descargarPDF() {
           const celdas = fila.querySelectorAll('td');
           if (celdas.length === 0) return;
 
-          const rowData = Array.from(celdas).map(td => td.textContent.trim());
+          const rowData = Array.from(celdas).map((td) => td.textContent.trim());
 
           // Calcular altura de fila basada en el detalle (puede requerir wrap)
           const detalleWidth = colWidths[1] - 2;
@@ -652,7 +365,7 @@ async function descargarPDF() {
     pdf.save(nombreArchivo);
 
     // Restaurar botones
-    [btnDescargar, btnDescargarBottom].forEach(btn => {
+    [btnDescargar, btnDescargarBottom].forEach((btn) => {
       if (btn) {
         btn.disabled = false;
         btn.textContent = textoOriginal;
@@ -660,13 +373,12 @@ async function descargarPDF() {
     });
 
     console.log('✅ PDF vectorial descargado correctamente:', nombreArchivo);
-
   } catch (error) {
     console.error('Error al descargar PDF:', error);
-    alert('❌ Error al generar el PDF: ' + error.message);
+    alert(`❌ Error al generar el PDF: ${error.message}`);
 
     // Restaurar botones
-    [document.getElementById('btn-descargar-pdf'), document.getElementById('btn-descargar-pdf-bottom')].forEach(btn => {
+    [document.getElementById('btn-descargar-pdf'), document.getElementById('btn-descargar-pdf-bottom')].forEach((btn) => {
       if (btn) {
         btn.disabled = false;
         btn.textContent = '💾 Descargar PDF';
@@ -674,58 +386,3 @@ async function descargarPDF() {
     });
   }
 }
-
-// ============================================
-// INICIALIZACIÓN
-// ============================================
-
-// Inicializar cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', function () {
-  actualizarTotal();
-
-  // Agregar listeners a los checkboxes de conceptos
-  const checkboxes = obtenerCheckboxesConceptos();
-  checkboxes.forEach(cb => {
-    cb.addEventListener('change', actualizarTotal);
-  });
-
-  // Agregar listener al checkbox "Seleccionar Todo"
-  const checkboxTodos = document.getElementById('checkbox-todos');
-  if (checkboxTodos) {
-    checkboxTodos.addEventListener('change', toggleTodos);
-  }
-
-  // Filtrado por tipo de deuda
-  const filtroSelect = document.getElementById('filtro-tipo');
-  if (filtroSelect) {
-    filtroSelect.addEventListener('change', function () {
-      const valor = this.value;
-      const filas = document.querySelectorAll('tbody tr[data-tipo]');
-      filas.forEach(fila => {
-        const tipo = fila.getAttribute('data-tipo') || '';
-        const visible = !valor || tipo === valor;
-        fila.style.display = visible ? '' : 'none';
-      });
-      // Recalcular total solo con visibles
-      actualizarTotal();
-    });
-  }
-
-  // Botón generar ticket
-  const btnGenerarTicket = document.getElementById('btn-generar-ticket');
-  if (btnGenerarTicket) {
-    btnGenerarTicket.addEventListener('click', generarTicket);
-  }
-
-  // Botón descargar PDF (superior)
-  const btnDescargarPDF = document.getElementById('btn-descargar-pdf');
-  if (btnDescargarPDF) {
-    btnDescargarPDF.addEventListener('click', descargarPDF);
-  }
-
-  // Botón descargar PDF (inferior)
-  const btnDescargarPDFBottom = document.getElementById('btn-descargar-pdf-bottom');
-  if (btnDescargarPDFBottom) {
-    btnDescargarPDFBottom.addEventListener('click', descargarPDF);
-  }
-});

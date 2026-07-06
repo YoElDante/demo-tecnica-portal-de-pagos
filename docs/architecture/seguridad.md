@@ -123,7 +123,7 @@ Page load  →  JS cliente: fetch('/api/contribuyente/' + codigo)
 - `controllers/api/contribuyente.controller.js` — valida cookie y retorna datos
 - `routes/api/contribuyente.routes.js` — `GET /api/contribuyente/:codigo`
 - `views/index.ejs` — sin PII inline, `<body data-codigo="<%= codigo %>">`
-- `public/javascripts/index.js` — fetch asíncrono al endpoint en DOMContentLoaded
+- `public/javascripts/entry.js` — entry modular único; `public/javascripts/modules/state/contribuyente.js` — fetch asíncrono al endpoint en DOMContentLoaded
 
 ### Modo degradado (sin COOKIE_SECRET)
 

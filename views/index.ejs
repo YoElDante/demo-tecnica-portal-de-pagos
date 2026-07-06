@@ -31,10 +31,7 @@
   <!-- Librería para generación de PDF vectorial -->
   <!-- jsPDF bundle local para evitar dependencia de CDN y simplificar CSP/SRI -->
   <script src="/javascripts/vendor/jspdf.umd.min.js" defer></script>
-  <script src="/javascripts/csrf-helper.js" defer></script>
-  <script src="/javascripts/deudas.js" defer></script>
-
-  <script src="/javascripts/index.js" defer></script>
+  <script type="module" src="/javascripts/entry.js"></script>
   <title><%= title %> - <%= municipalidad.nombre %></title>
 </head>
 
@@ -129,7 +126,7 @@
             <span class="demo-sugerencias__label">Contribuyentes de ejemplo:</span>
             <div class="demo-sugerencias__chips">
               <% sugerenciasDemo.forEach(function(s) { %>
-              <button type="button" class="demo-sugerencias__chip" onclick="seleccionarContribuyente('<%= s.dni %>')">
+              <button type="button" class="demo-sugerencias__chip" data-dni-sugerido="<%= s.dni %>">
                 <span class="demo-sugerencias__chip-dni"><%= s.dni %></span>
                 <span class="demo-sugerencias__chip-nombre"><%= s.nombre %></span>
               </button>
@@ -179,12 +176,16 @@
           <% (tiposDeuda || []).forEach(t => { %>
           <option value="<%= t %>"><%= TIPO_ICONOS[t] %> <%= TIPO_DESCRIPCIONES[t] || t %></option>
           <% }) %>
+          <% if (creditosFavor.length > 0) { %>
+          <option value="__credito__">💚 Notas de Crédito</option>
+          <% } %>
         </select>
       </div>
 
       <div id="resumen-deudas" class="deudas__summary">
-        Deudas: <span id="contador-deudas-total"><%= (deudas || []).length %></span> |
-        Seleccionadas: <span id="contador-deudas-seleccionadas"><%= (deudas || []).length %></span>
+        Deudas: <span id="contador-deudas-total"><%= (deudas || []).length - creditosFavor.length %></span> |
+        Notas de Crédito: <span id="contador-creditos-total"><%= creditosFavor.length %></span> |
+        Conceptos Seleccionados: <span id="contador-deudas-seleccionadas"><%= (deudas || []).length - creditosFavor.length %></span>
       </div>
 
       <div class="deudas__wrapper">
@@ -223,7 +224,7 @@
             <% const esCreditoFavor = Number(deuda.Total || 0) < 0; %>
             <tr data-tipo="<%= deuda.Tipo %>" data-idtrans="<%= deuda.IdTrans %>" data-total-deuda="<%= deuda.Total %>" class="<%= esCreditoFavor ? 'deudas__row--credito' : '' %>">
               <td style="text-align: center;">
-                <input type="checkbox" class="deudas__checkbox" data-total="<%= deuda.Total %>" data-idtrans="<%= deuda.IdTrans %>" <%= esCreditoFavor ? 'disabled' : 'checked' %>>
+               <input type="checkbox" class="deudas__checkbox" data-total="<%= deuda.Total %>" data-idtrans="<%= deuda.IdTrans %>" <%= esCreditoFavor ? '' : 'checked' %>>
               </td>
               <td><%= deuda.FechaVtoDisplay || '-' %></td>
               <td>
@@ -269,7 +270,7 @@
       <button class="btn btn--ticket btn--download" id="btn-descargar-pdf" disabled>
         💾 Descargar PDF
       </button>
-      <button class="btn btn--qr" id="btn-ir-a-pagar" onclick="iniciarPago()">
+      <button class="btn btn--qr" id="btn-ir-a-pagar">
         💳 Ir a Pagar
       </button>
     </section>
@@ -284,10 +285,10 @@
       <button class="btn btn--ticket btn--download" id="btn-descargar-pdf-bottom">
         💾 Descargar PDF
       </button>
-      <button class="btn btn--qr" id="btn-ir-a-pagar-bottom" onclick="iniciarPago()">
+      <button class="btn btn--qr" id="btn-ir-a-pagar-bottom">
         💳 Ir a Pagar
       </button>
-      <button class="btn btn--ticket btn--back" id="btn-volver-arriba" onclick="volverArriba()">
+      <button class="btn btn--ticket btn--back" id="btn-volver-arriba">
         ⬆️ Volver Arriba
       </button>
     </section>
@@ -298,12 +299,6 @@
       <p id="pago-loading" class="qr__loading">⏳ Procesando pago, por favor espere...</p>
     </div>
 
-    <!-- Botón Generar QR (se oculta después de generarlo) -->
-    <% if (deudas && deudas.length > 0 && false) { %>
-    <section class="actions">
-      <button class="btn btn--qr" id="generate-qr-old" onclick="mostrarQR()">Generar QR</button>
-    </section>
-    <% } %>
   </main>
 
   <%- include('partials/whatsapp-button') %>
@@ -318,9 +313,7 @@
 
   <%# PII inline — fallback cuando COOKIE_SECRET no está configurado (no se puede usar la API segura) %>
   <% if (locals.contribuyenteDataInline) { %>
-  <script>
-    var contribuyenteData = <%- JSON.stringify(contribuyenteDataInline) %>;
-  </script>
+  <script id="contribuyente-data-inline" type="application/json"><%- JSON.stringify(contribuyenteDataInline) %></script>
   <% } %>
 
 </body>
