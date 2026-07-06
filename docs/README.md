@@ -1,7 +1,7 @@
 # Documentación del Portal de Pagos Municipal
 
 > **Índice maestro** — todos los documentos del proyecto, clasificados por categoría.
-> **Última actualización**: 2026-07-04 (cambio `resolver-auditoria-03072026` archivado)
+> **Última actualización**: 2026-07-06 (cambio `payment-redirect-modal` aplicado)
 >
 > Antes de crear o modificar documentación, leer [`AGENTS.md`](AGENTS.md).
 
@@ -92,6 +92,7 @@ Si es tu primera vez en el proyecto:
 
 | Cambio | Documento |
 |--------|-----------|
+| `payment-redirect-modal` | [`../openspec/changes/payment-redirect-modal/`](../openspec/changes/payment-redirect-modal/) |
 | `ticket-payment-tracking` | [`../openspec/changes/ticket-payment-tracking/`](../openspec/changes/ticket-payment-tracking/) |
 | `security-hardening` | [`../openspec/changes/security-hardening/`](../openspec/changes/security-hardening/) (⚠️ superseded por `resolver-auditoria-03072026` — pendiente de archivo) |
 | `email-payment-receipts` | [`../openspec/changes/email-payment-receipts/`](../openspec/changes/email-payment-receipts/) |

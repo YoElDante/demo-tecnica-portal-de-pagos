@@ -8,7 +8,7 @@
     codigo (string) — Código interno del contribuyente, expuesto como data-codigo en el body para fetch PII.
 
   Renders:
-    Página SPA con búsqueda de DNI, lista de deudas, generación de ticket y descarga de comprobante.
+    Pagina SPA con busqueda de DNI, lista de deudas, generacion de ticket, overlay de redireccion al pago y descarga de comprobante.
 %>
 <!DOCTYPE html>
 <html lang="es">
@@ -315,6 +315,16 @@
   <% if (locals.contribuyenteDataInline) { %>
   <script id="contribuyente-data-inline" type="application/json"><%- JSON.stringify(contribuyenteDataInline) %></script>
   <% } %>
+
+  <!-- Overlay de redirección al pago -->
+  <div class="overlay" id="overlay-pago" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="overlay-msg">
+    <div class="overlay__backdrop"></div>
+    <div class="overlay__contenido" aria-live="polite">
+      <div class="overlay__spinner"></div>
+      <h2 class="overlay__mensaje" id="overlay-msg" tabindex="-1">Espere un momento, será redireccionado a la plataforma de pago</h2>
+      <p class="overlay__test-aviso">⚠️ La pasarela de pago es de pruebas</p>
+    </div>
+  </div>
 
 </body>
 

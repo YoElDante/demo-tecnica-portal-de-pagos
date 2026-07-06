@@ -1,6 +1,6 @@
 /**
  * Portal de Pagos Municipal — Module / Pago Init
- * @description Inicio del flujo de pago desde ticket/deudas, sin cambios de comportamiento.
+ * @description Inicio del flujo de pago desde ticket/deudas con overlay de redireccion y timeout de respaldo.
  *
  * Exports:
  *   setContribuyenteData(data)
@@ -41,17 +41,88 @@ export function getContribuyenteData() {
 }
 
 // ---------------------------------------------------------------------------
+// Overlay de redirección
+// ---------------------------------------------------------------------------
+
+let overlayPrevFocus = null;
+
+/**
+ * Abre el overlay de redirección al pago con focus trap.
+ * @returns {void}
+ */
+function abrirOverlay() {
+  const overlay = document.getElementById('overlay-pago');
+  const mensaje = document.getElementById('overlay-msg');
+  if (!overlay) return;
+
+  overlayPrevFocus = document.activeElement;
+  overlay.style.display = 'flex';
+  if (mensaje) mensaje.focus();
+
+  document.addEventListener('keydown', focusTrapOverlay);
+}
+
+/**
+ * Cierra el overlay y restaura el foco al elemento previo.
+ * @returns {void}
+ */
+function cerrarOverlay() {
+  const overlay = document.getElementById('overlay-pago');
+  if (overlay) overlay.style.display = 'none';
+
+  document.removeEventListener('keydown', focusTrapOverlay);
+
+  if (overlayPrevFocus && typeof overlayPrevFocus.focus === 'function') {
+    overlayPrevFocus.focus();
+    overlayPrevFocus = null;
+  }
+}
+
+/**
+ * Focus trap: mantiene Tab/Shift+Tab dentro del overlay.
+ * @param {KeyboardEvent} event
+ * @returns {void}
+ */
+function focusTrapOverlay(event) {
+  if (event.key !== 'Tab') return;
+
+  const overlay = document.getElementById('overlay-pago');
+  if (!overlay || overlay.style.display === 'none') return;
+
+  const focusables = overlay.querySelectorAll(
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+  );
+  if (focusables.length === 0) {
+    event.preventDefault();
+    return;
+  }
+
+  const first = focusables[0];
+  const last = focusables[focusables.length - 1];
+
+  if (event.shiftKey) {
+    if (document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    }
+  } else {
+    if (document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Flujo de pago
 // ---------------------------------------------------------------------------
 
 /**
- * Inicia el pago contra backend preservando el flujo legacy.
+ * Inicia el pago contra backend con overlay de redirección y timeout.
  * @returns {Promise<void>}
  */
 export async function iniciarPago() {
   const botonesIds = ['btn-ir-a-pagar', 'btn-ir-a-pagar-bottom'];
-  const loadingContainer = document.getElementById('qr-container');
-  const loadingMsg = document.getElementById('pago-loading');
 
   const conceptosIds = recopilarIdTransSeleccionados();
   if (conceptosIds.length === 0) {
@@ -84,33 +155,30 @@ export async function iniciarPago() {
     }
   });
 
-  if (loadingContainer) {
-    loadingContainer.style.display = 'flex';
-    setTimeout(() => loadingContainer.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
-  }
-  if (loadingMsg) {
-    loadingMsg.style.display = 'block';
-  }
+  abrirOverlay();
 
   const demoResultado = (window.DEMO_PANEL && window.DEMO_PANEL.resultado) || 'real';
   const isDemoMode = window.DEMO_PANEL ? !window.DEMO_PANEL.modificaBD : false;
 
   try {
-    const response = await fetch('/pago/iniciar', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'CSRF-Token': getCsrfToken()
-      },
-      body: JSON.stringify({
-        contribuyente: contribuyenteData,
-        conceptos,
-        montoTotal,
-        creditosAplicados,
-        is_demo: isDemoMode,
-        demo_resultado: demoResultado
-      })
-    });
+    const response = await Promise.race([
+      fetch('/pago/iniciar', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'CSRF-Token': getCsrfToken()
+        },
+        body: JSON.stringify({
+          contribuyente: contribuyenteData,
+          conceptos,
+          montoTotal,
+          creditosAplicados,
+          is_demo: isDemoMode,
+          demo_resultado: demoResultado
+        })
+      }),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), 30000))
+    ]);
 
     const data = await response.json();
 
@@ -122,7 +190,12 @@ export async function iniciarPago() {
     throw new Error(data.message || 'Error al iniciar el pago');
   } catch (error) {
     console.error('Error al iniciar pago:', error);
-    alert(`Error al procesar el pago: ${error.message}`);
+    const mensaje = error.message === 'TIMEOUT'
+      ? 'El servidor está demorando más de lo esperado. Intente nuevamente.'
+      : `Error al procesar el pago: ${error.message}`;
+    alert(mensaje);
+
+    cerrarOverlay();
 
     botonesIds.forEach((id) => {
       const btn = document.getElementById(id);
@@ -131,10 +204,6 @@ export async function iniciarPago() {
         btn.innerHTML = '💳 Ir a Pagar';
       }
     });
-
-    if (loadingContainer) {
-      loadingContainer.style.display = 'none';
-    }
   }
 }
 

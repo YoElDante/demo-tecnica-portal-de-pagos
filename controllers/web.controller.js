@@ -14,8 +14,9 @@ const DeudasService = require('../services/deudas.service');
 const { municipalidad, MUNICIPIO } = require('../config');
 
 const demoModoHabilitado = String(MUNICIPIO || '').toUpperCase() === 'DEMO';
+const esPruebas = demoModoHabilitado || process.env.NODE_ENV !== 'production';
 
-const BASE_RENDER = { municipalidad, demoModoHabilitado };
+const BASE_RENDER = { municipalidad, demoModoHabilitado, esPruebas };
 
 // Cache simple de sugerencias — se refresca cada 5 minutos
 let _sugerenciasCache = { data: null, ts: 0 };

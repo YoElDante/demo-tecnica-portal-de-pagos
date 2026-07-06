@@ -49,6 +49,12 @@
     --transicion: all 0.3s ease;
     --border-radius: 12px;
     --border-radius-btn: 50px;
+
+    /* Overlay de redirección al pago */
+    --overlay-backdrop: rgba(0, 0, 0, 0.55);
+    --overlay-bg: #ffffff;
+    --overlay-radius: 16px;
+    --overlay-spinner-color: #00A8B5;
 }
 
 /* ============================================
@@ -1677,4 +1683,81 @@ footer {
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 160px;
+}
+
+/* ============================================
+   BLOQUE: .overlay
+   Modal de redirección al pago con backdrop y spinner
+   ============================================ */
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.overlay__backdrop {
+    position: absolute;
+    inset: 0;
+    background: var(--overlay-backdrop);
+}
+
+.overlay__contenido {
+    position: relative;
+    z-index: 1;
+    background: var(--overlay-bg);
+    border-radius: var(--overlay-radius);
+    padding: 2.5rem 2rem;
+    max-width: 420px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: overlay-fade-in 0.3s ease;
+}
+
+@keyframes overlay-fade-in {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.overlay__spinner {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 1.5rem;
+    border: 4px solid #e0e0e0;
+    border-top-color: var(--overlay-spinner-color);
+    border-radius: 50%;
+    animation: overlay-spin 0.8s linear infinite;
+}
+
+@keyframes overlay-spin {
+    to { transform: rotate(360deg); }
+}
+
+.overlay__mensaje {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-text-dark);
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
+}
+
+.overlay__test-aviso {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #856404;
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    margin-top: 0.75rem;
 }

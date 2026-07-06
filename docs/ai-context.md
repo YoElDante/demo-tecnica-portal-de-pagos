@@ -36,6 +36,7 @@ El redirect del usuario no confirma pagos. La fuente de verdad es el webhook ser
 | Visualización de deudas | ✅ |
 | Generación de ticket | ✅ |
 | Integración de pago | ✅ |
+| Overlay de redirección al pago | ✅ | SDD `payment-redirect-modal` — modal con spinner y aviso de pruebas |
 | Configuración multi-municipio | ✅ |
 | Tracking formal de tickets | 🔲 |
 | Tasa configurable end-to-end | 🔲 Parcial |
