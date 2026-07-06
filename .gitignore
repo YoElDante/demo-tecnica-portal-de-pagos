@@ -73,3 +73,6 @@ envs/
 
 # CodeGraph local index
 .codegraph/
+
+# Mermaids locals
+.mermaid/
